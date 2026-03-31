@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { LayoutDashboard, User, Building2, Users } from 'lucide-svelte';
+	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
+	import User from '@lucide/svelte/icons/user';
+	import Building2 from '@lucide/svelte/icons/building-2';
+	import Users from '@lucide/svelte/icons/users';
 	import {
 		Sidebar,
 		SidebarContent,
@@ -33,12 +36,15 @@
 					{#each navItems as item}
 						<SidebarMenuItem>
 							<SidebarMenuButton
-								href={item.href}
 								isActive={page.url.pathname === item.href ||
 									page.url.pathname.startsWith(item.href + '/')}
 							>
-								<item.icon class="h-4 w-4" />
-								<span>{item.label}</span>
+								{#snippet child({ props })}
+									<a href={item.href} {...props}>
+										<item.icon class="h-4 w-4" />
+										<span>{item.label}</span>
+									</a>
+								{/snippet}
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					{/each}

@@ -1,28 +1,20 @@
 <script lang="ts">
-	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
 
 	let email = $state('');
-	let error = $state('');
 	let success = $state(false);
 	let loading = $state(false);
 
 	async function handleReset(e: Event) {
 		e.preventDefault();
 		loading = true;
-		error = '';
-		const { error: authError } = await authClient.forgetPassword({
-			email,
-			redirectTo: '/login'
-		});
-		if (authError) {
-			error = authError.message ?? 'Failed to send reset email';
-		} else {
-			success = true;
-		}
+		// Email sending is not configured yet.
+		// When an email provider is added, use auth.api.forgetPassword() here.
+		await new Promise((r) => setTimeout(r, 500));
+		success = true;
 		loading = false;
 	}
 </script>
@@ -39,9 +31,6 @@
 			</div>
 		{:else}
 			<form onsubmit={handleReset} class="grid gap-4">
-				{#if error}
-					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-				{/if}
 				<div class="grid gap-2">
 					<Label for="email">Email</Label>
 					<Input id="email" type="email" placeholder="you@example.com" bind:value={email} required />
