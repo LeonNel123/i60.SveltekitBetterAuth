@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { authClient } from '$lib/auth-client';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -13,26 +12,8 @@
 		CardFooter
 	} from '$lib/components/ui/card';
 
-	let email = $state('');
-	let password = $state('');
-	let error = $state('');
-	let loading = $state(false);
-
-	async function handleLogin(e: Event) {
-		e.preventDefault();
-		loading = true;
-		error = '';
-		const { error: authError } = await authClient.signIn.email({
-			email,
-			password
-		});
-		if (authError) {
-			error = authError.message ?? 'Failed to sign in';
-			loading = false;
-		} else {
-			await goto('/dashboard');
-		}
-	}
+	let { form } = $props();
+	let submitting = $state(false);
 </script>
 
 <Card>
@@ -41,13 +22,32 @@
 		<CardDescription>Enter your credentials to access your account</CardDescription>
 	</CardHeader>
 	<CardContent>
-		<form onsubmit={handleLogin} class="grid gap-4">
-			{#if error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+		<form
+			method="POST"
+			use:enhance={() => {
+				submitting = true;
+				return async ({ update }) => {
+					submitting = false;
+					await update();
+				};
+			}}
+			class="grid gap-4"
+		>
+			{#if form?.error}
+				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					{form.error}
+				</div>
 			{/if}
 			<div class="grid gap-2">
 				<Label for="email">Email</Label>
-				<Input id="email" type="email" placeholder="you@example.com" bind:value={email} required />
+				<Input
+					id="email"
+					name="email"
+					type="email"
+					placeholder="you@example.com"
+					value={form?.email ?? ''}
+					required
+				/>
 			</div>
 			<div class="grid gap-2">
 				<div class="flex items-center justify-between">
@@ -56,10 +56,10 @@
 						Forgot password?
 					</a>
 				</div>
-				<Input id="password" type="password" bind:value={password} required />
+				<Input id="password" name="password" type="password" required />
 			</div>
-			<Button type="submit" class="w-full" disabled={loading}>
-				{loading ? 'Signing in...' : 'Sign in'}
+			<Button type="submit" class="w-full" disabled={submitting}>
+				{submitting ? 'Signing in...' : 'Sign in'}
 			</Button>
 		</form>
 	</CardContent>
