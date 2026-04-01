@@ -2,6 +2,8 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization, admin, twoFactor } from 'better-auth/plugins';
 import { createAccessControl } from 'better-auth/plugins/access';
+import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { getRequestEvent } from '$app/server';
 import { BETTER_AUTH_URL, BETTER_AUTH_SECRET } from '$env/static/private';
 import { db } from './db';
 
@@ -44,6 +46,7 @@ export const auth = betterAuth({
 		autoSignIn: true
 	},
 	plugins: [
+		sveltekitCookies(getRequestEvent),
 		organization({
 			ac,
 			roles: {

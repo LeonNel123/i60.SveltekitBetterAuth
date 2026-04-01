@@ -71,7 +71,7 @@
 			</Button>
 		</form>
 	</CardContent>
-	<CardFooter class="justify-center">
+	<CardFooter class="flex-col gap-2">
 		<button
 			type="button"
 			class="text-sm text-muted-foreground hover:underline"
@@ -83,5 +83,8 @@
 		>
 			{useBackupCode ? 'Use authenticator app instead' : 'Use a backup code instead'}
 		</button>
+		<a href="/login" class="text-sm text-muted-foreground hover:underline">
+			Cancel and return to sign in
+		</a>
 	</CardFooter>
 </Card>
