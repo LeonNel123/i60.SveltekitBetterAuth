@@ -18,11 +18,18 @@ B2B SaaS skeleton built with SvelteKit 2, Svelte 5, PostgreSQL 17, Better Auth, 
 ## Architecture
 
 - Single SvelteKit monolith with Node adapter
-- Better Auth for authentication (organization plugin for multi-tenancy)
+- Better Auth for authentication (organization, admin, 2FA plugins)
 - Drizzle ORM with postgres-js driver for database access
+- Pluggable email provider (Resend, SendGrid, or SMTP) via `EMAIL_PROVIDER` env var
 - Route groups: `(marketing)` public, `(auth)` login/register, `(app)` authenticated
 - Auth guard in `(app)/+layout.server.ts`
 - Session populated in `hooks.server.ts` and available via `event.locals`
+
+## Email Provider
+
+Set `EMAIL_PROVIDER` in `.env` to one of: `resend`, `sendgrid`, `smtp`, or `console` (default).
+Configure only the section for your chosen provider — see `.env.example` for all options.
+Email abstraction is in `src/lib/server/email.ts`.
 
 ## Conventions
 

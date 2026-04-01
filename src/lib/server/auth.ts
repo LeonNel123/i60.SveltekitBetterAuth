@@ -6,6 +6,7 @@ import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
 import { BETTER_AUTH_URL, BETTER_AUTH_SECRET } from '$env/static/private';
 import { db } from './db';
+import { sendEmail } from './email';
 
 const statement = {
 	organization: ['update', 'delete'],
@@ -45,14 +46,22 @@ export const auth = betterAuth({
 		maxPasswordLength: 128,
 		autoSignIn: true,
 		async sendResetPassword({ user, url }) {
-			// TODO: Replace with real email provider (Resend, Postmark, etc.)
-			console.log(`[DEV] Password reset for ${user.email}: ${url}`);
+			await sendEmail({
+				to: user.email,
+				subject: 'Reset your password — Bokeros',
+				html: `<p>Click the link below to reset your password:</p><p><a href="${url}">Reset password</a></p><p>If you didn't request this, you can safely ignore this email.</p>`,
+				text: `Reset your password: ${url}`
+			});
 		}
 	},
 	emailVerification: {
 		sendVerificationEmail: async ({ user, url }) => {
-			// TODO: Replace with real email provider
-			console.log(`[DEV] Email verification for ${user.email}: ${url}`);
+			await sendEmail({
+				to: user.email,
+				subject: 'Verify your email — Bokeros',
+				html: `<p>Click the link below to verify your email address:</p><p><a href="${url}">Verify email</a></p>`,
+				text: `Verify your email: ${url}`
+			});
 		}
 	},
 	plugins: [
@@ -70,7 +79,13 @@ export const auth = betterAuth({
 			membershipLimit: 50,
 			invitationExpiresIn: 60 * 60 * 48,
 			async sendInvitationEmail(data) {
-				console.log(`[DEV] Invitation email for ${data.email}: /accept-invitation/${data.id}`);
+				const inviteUrl = `${BETTER_AUTH_URL}/accept-invitation/${data.id}`;
+				await sendEmail({
+					to: data.email,
+					subject: `You've been invited to join an organization — Bokeros`,
+					html: `<p>You've been invited to join an organization on Bokeros.</p><p><a href="${inviteUrl}">Accept invitation</a></p>`,
+					text: `Accept invitation: ${inviteUrl}`
+				});
 			}
 		}),
 		admin({
