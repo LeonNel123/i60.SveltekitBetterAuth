@@ -1,9 +1,11 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization } from 'better-auth/plugins';
+import { BETTER_AUTH_URL } from '$env/static/private';
 import { db } from './db';
 
 export const auth = betterAuth({
+	baseURL: BETTER_AUTH_URL,
 	database: drizzleAdapter(db, {
 		provider: 'pg'
 	}),
