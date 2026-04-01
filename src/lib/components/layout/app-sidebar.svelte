@@ -33,7 +33,7 @@
 			<SidebarGroupLabel>Navigation</SidebarGroupLabel>
 			<SidebarGroupContent>
 				<SidebarMenu>
-					{#each navItems as item}
+					{#each navItems as item (item.href)}
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								isActive={page.url.pathname === item.href ||

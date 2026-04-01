@@ -28,7 +28,7 @@
 
 	async function handleSignOut() {
 		await authClient.signOut();
-		goto('/login');
+		await goto('/login');
 	}
 </script>
 

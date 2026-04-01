@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
-	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+		CardDescription
+	} from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 
 	let { data } = $props();
 
@@ -36,25 +44,13 @@
 			<CardDescription>Your current organization details.</CardDescription>
 		</CardHeader>
 		<CardContent class="space-y-4">
-			<div class="space-y-2">
-				<label for="org-name" class="text-sm font-medium">Name</label>
-				<input
-					id="org-name"
-					type="text"
-					value={data.organization.name}
-					disabled
-					class="flex h-9 w-full rounded-md border border-input bg-muted px-3 py-1 text-sm text-muted-foreground shadow-sm"
-				/>
+			<div class="grid gap-2">
+				<Label for="org-name">Name</Label>
+				<Input id="org-name" value={data.organization.name} disabled />
 			</div>
-			<div class="space-y-2">
-				<label for="org-slug" class="text-sm font-medium">Slug</label>
-				<input
-					id="org-slug"
-					type="text"
-					value={data.organization.slug}
-					disabled
-					class="flex h-9 w-full rounded-md border border-input bg-muted px-3 py-1 text-sm text-muted-foreground shadow-sm"
-				/>
+			<div class="grid gap-2">
+				<Label for="org-slug">Slug</Label>
+				<Input id="org-slug" value={data.organization.slug} disabled />
 			</div>
 		</CardContent>
 	</Card>
@@ -62,37 +58,27 @@
 	<Card class="max-w-lg">
 		<CardHeader>
 			<CardTitle>Create Organization</CardTitle>
-			<CardDescription>You don't have an organization yet. Create one to get started.</CardDescription>
+			<CardDescription
+				>You don't have an organization yet. Create one to get started.</CardDescription
+			>
 		</CardHeader>
 		<CardContent>
 			<form onsubmit={handleCreate} class="space-y-4">
 				{#if createError}
-					<p class="text-sm text-destructive">{createError}</p>
+					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+						{createError}
+					</div>
 				{/if}
-
-				<div class="space-y-2">
-					<label for="new-org-name" class="text-sm font-medium">Organization name</label>
-					<input
-						id="new-org-name"
-						type="text"
-						bind:value={orgName}
-						required
-						placeholder="My Organization"
-						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-					/>
+				<div class="grid gap-2">
+					<Label for="new-org-name">Organization name</Label>
+					<Input id="new-org-name" bind:value={orgName} required placeholder="My Organization" />
 				</div>
-
-				<div class="space-y-2">
-					<label for="new-org-slug" class="text-sm font-medium">Slug <span class="text-muted-foreground">(optional)</span></label>
-					<input
-						id="new-org-slug"
-						type="text"
-						bind:value={orgSlug}
-						placeholder="my-organization"
-						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-					/>
+				<div class="grid gap-2">
+					<Label for="new-org-slug"
+						>Slug <span class="text-muted-foreground">(optional)</span></Label
+					>
+					<Input id="new-org-slug" bind:value={orgSlug} placeholder="my-organization" />
 				</div>
-
 				<Button type="submit" disabled={creating}>
 					{creating ? 'Creating…' : 'Create organization'}
 				</Button>

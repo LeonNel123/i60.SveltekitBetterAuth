@@ -4,7 +4,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
+	import {
+		Card,
+		CardHeader,
+		CardTitle,
+		CardDescription,
+		CardContent,
+		CardFooter
+	} from '$lib/components/ui/card';
 
 	let name = $state('');
 	let email = $state('');
@@ -25,17 +32,17 @@
 			error = authError.message ?? 'Failed to create account';
 			loading = false;
 		} else {
-			goto('/dashboard');
+			await goto('/dashboard');
 		}
 	}
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title class="text-2xl">Create account</Card.Title>
-		<Card.Description>Enter your details to get started</Card.Description>
-	</Card.Header>
-	<Card.Content>
+<Card>
+	<CardHeader>
+		<CardTitle class="text-2xl">Create account</CardTitle>
+		<CardDescription>Enter your details to get started</CardDescription>
+	</CardHeader>
+	<CardContent>
 		<form onsubmit={handleRegister} class="grid gap-4">
 			{#if error}
 				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
@@ -50,16 +57,24 @@
 			</div>
 			<div class="grid gap-2">
 				<Label for="password">Password</Label>
-				<Input id="password" type="password" placeholder="Min 8 characters" bind:value={password} required minlength={8} />
+				<Input
+					id="password"
+					type="password"
+					placeholder="Min 8 characters"
+					bind:value={password}
+					required
+					minlength={8}
+				/>
 			</div>
 			<Button type="submit" class="w-full" disabled={loading}>
 				{loading ? 'Creating account...' : 'Create account'}
 			</Button>
 		</form>
-	</Card.Content>
-	<Card.Footer class="justify-center">
+	</CardContent>
+	<CardFooter class="justify-center">
 		<p class="text-sm text-muted-foreground">
-			Already have an account? <a href="/login" class="text-primary hover:underline">Sign in</a>
+			Already have an account?
+			<a href="/login" class="text-primary hover:underline">Sign in</a>
 		</p>
-	</Card.Footer>
-</Card.Root>
+	</CardFooter>
+</Card>

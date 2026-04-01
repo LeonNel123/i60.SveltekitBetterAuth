@@ -4,7 +4,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
+	import {
+		Card,
+		CardHeader,
+		CardTitle,
+		CardDescription,
+		CardContent,
+		CardFooter
+	} from '$lib/components/ui/card';
 
 	let email = $state('');
 	let password = $state('');
@@ -23,17 +30,17 @@
 			error = authError.message ?? 'Failed to sign in';
 			loading = false;
 		} else {
-			goto('/dashboard');
+			await goto('/dashboard');
 		}
 	}
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title class="text-2xl">Sign in</Card.Title>
-		<Card.Description>Enter your credentials to access your account</Card.Description>
-	</Card.Header>
-	<Card.Content>
+<Card>
+	<CardHeader>
+		<CardTitle class="text-2xl">Sign in</CardTitle>
+		<CardDescription>Enter your credentials to access your account</CardDescription>
+	</CardHeader>
+	<CardContent>
 		<form onsubmit={handleLogin} class="grid gap-4">
 			{#if error}
 				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
@@ -55,10 +62,11 @@
 				{loading ? 'Signing in...' : 'Sign in'}
 			</Button>
 		</form>
-	</Card.Content>
-	<Card.Footer class="justify-center">
+	</CardContent>
+	<CardFooter class="justify-center">
 		<p class="text-sm text-muted-foreground">
-			Don't have an account? <a href="/register" class="text-primary hover:underline">Sign up</a>
+			Don't have an account?
+			<a href="/register" class="text-primary hover:underline">Sign up</a>
 		</p>
-	</Card.Footer>
-</Card.Root>
+	</CardFooter>
+</Card>

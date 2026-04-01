@@ -76,6 +76,7 @@ bokeros/
 ### Task 1: Scaffold SvelteKit Project
 
 **Files:**
+
 - Create: `package.json`, `svelte.config.js`, `vite.config.ts`, `tsconfig.json`, `src/app.html`, `src/routes/+page.svelte`
 
 - [ ] **Step 1: Create SvelteKit project**
@@ -138,6 +139,7 @@ git commit -m "chore: scaffold SvelteKit project with TypeScript, ESLint, Pretti
 ### Task 2: Set Up Tailwind CSS v4 + shadcn-svelte
 
 **Files:**
+
 - Create: `src/app.css`, `components.json`, `src/lib/utils.ts`
 - Modify: `vite.config.ts`, `src/routes/+layout.svelte`
 
@@ -227,6 +229,7 @@ git commit -m "feat: add Tailwind CSS v4 and shadcn-svelte with initial componen
 ### Task 3: Set Up PostgreSQL + Docker Compose + Drizzle ORM
 
 **Files:**
+
 - Create: `docker-compose.yml`, `.env`, `.env.example`, `drizzle.config.ts`, `src/lib/server/db/index.ts`
 - Modify: `.gitignore`
 
@@ -366,6 +369,7 @@ git commit -m "feat: add PostgreSQL via Docker Compose and Drizzle ORM configura
 ### Task 4: Configure Better Auth
 
 **Files:**
+
 - Create: `src/lib/server/auth.ts`, `src/lib/auth-client.ts`, `src/hooks.server.ts`, `src/app.d.ts`
 - Modify: `src/lib/server/db/schema.ts`
 
@@ -605,6 +609,7 @@ git commit -m "feat: configure Better Auth with organization plugin and Drizzle 
 ### Task 5: Root Layout + Session Passing
 
 **Files:**
+
 - Create: `src/routes/+layout.server.ts`
 - Modify: `src/routes/+layout.svelte`
 
@@ -651,6 +656,7 @@ git commit -m "feat: add root layout with session data passing"
 ### Task 6: Auth Pages (Login, Register, Forgot Password)
 
 **Files:**
+
 - Create: `src/routes/(auth)/+layout.svelte`, `src/routes/(auth)/+layout.server.ts`, `src/routes/(auth)/login/+page.svelte`, `src/routes/(auth)/register/+page.svelte`, `src/routes/(auth)/forgot-password/+page.svelte`
 
 - [ ] **Step 1: Create auth layout server — redirect if logged in**
@@ -810,7 +816,14 @@ Create `src/routes/(auth)/register/+page.svelte`:
 			</div>
 			<div class="grid gap-2">
 				<Label for="password">Password</Label>
-				<Input id="password" type="password" placeholder="Min 8 characters" bind:value={password} required minlength={8} />
+				<Input
+					id="password"
+					type="password"
+					placeholder="Min 8 characters"
+					bind:value={password}
+					required
+					minlength={8}
+				/>
 			</div>
 			<Button type="submit" class="w-full" disabled={loading}>
 				{loading ? 'Creating account...' : 'Create account'}
@@ -875,7 +888,13 @@ Create `src/routes/(auth)/forgot-password/+page.svelte`:
 				{/if}
 				<div class="grid gap-2">
 					<Label for="email">Email</Label>
-					<Input id="email" type="email" placeholder="you@example.com" bind:value={email} required />
+					<Input
+						id="email"
+						type="email"
+						placeholder="you@example.com"
+						bind:value={email}
+						required
+					/>
 				</div>
 				<Button type="submit" class="w-full" disabled={loading}>
 					{loading ? 'Sending...' : 'Send reset link'}
@@ -913,6 +932,7 @@ git commit -m "feat: add auth pages — login, register, forgot password"
 ### Task 7: App Shell (Auth Guard, Sidebar, Header)
 
 **Files:**
+
 - Create: `src/routes/(app)/+layout.server.ts`, `src/routes/(app)/+layout.svelte`, `src/lib/components/layout/app-sidebar.svelte`, `src/lib/components/layout/app-header.svelte`, `src/lib/components/layout/user-menu.svelte`
 
 - [ ] **Step 1: Create app layout auth guard**
@@ -1016,10 +1036,7 @@ Create `src/lib/components/layout/app-sidebar.svelte`:
 				<Sidebar.Menu>
 					{#each navItems as item}
 						<Sidebar.MenuItem>
-							<Sidebar.MenuButton
-								href={item.href}
-								isActive={page.url.pathname === item.href}
-							>
+							<Sidebar.MenuButton href={item.href} isActive={page.url.pathname === item.href}>
 								<item.icon class="h-4 w-4" />
 								<span>{item.label}</span>
 							</Sidebar.MenuButton>
@@ -1133,6 +1150,7 @@ git commit -m "feat: add app shell with sidebar, header, auth guard, and dashboa
 ### Task 8: Settings Pages
 
 **Files:**
+
 - Create: `src/routes/(app)/settings/+layout.svelte`, `src/routes/(app)/settings/profile/+page.svelte`, `src/routes/(app)/settings/profile/+page.server.ts`, `src/routes/(app)/settings/organization/+page.svelte`, `src/routes/(app)/settings/organization/+page.server.ts`, `src/routes/(app)/settings/members/+page.svelte`, `src/routes/(app)/settings/members/+page.server.ts`
 
 - [ ] **Step 1: Create settings layout with sub-nav**
@@ -1322,7 +1340,9 @@ Create `src/routes/(app)/settings/organization/+page.svelte`:
 				{#if error}
 					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
 				{/if}
-				<p class="text-sm text-muted-foreground">You don't have an organization yet. Create one to get started.</p>
+				<p class="text-sm text-muted-foreground">
+					You don't have an organization yet. Create one to get started.
+				</p>
 				<div class="grid gap-2">
 					<Label for="orgName">Organization name</Label>
 					<Input id="orgName" bind:value={orgName} required />
@@ -1442,11 +1462,19 @@ Create `src/routes/(app)/settings/members/+page.svelte`:
 			<Card.Content>
 				<form onsubmit={handleInvite} class="flex gap-4 items-end max-w-lg">
 					{#if error}
-						<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive w-full">{error}</div>
+						<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive w-full">
+							{error}
+						</div>
 					{/if}
 					<div class="grid gap-2 flex-1">
 						<Label for="inviteEmail">Email</Label>
-						<Input id="inviteEmail" type="email" bind:value={inviteEmail} placeholder="colleague@company.com" required />
+						<Input
+							id="inviteEmail"
+							type="email"
+							bind:value={inviteEmail}
+							placeholder="colleague@company.com"
+							required
+						/>
 					</div>
 					<Button type="submit" disabled={loading}>
 						{loading ? 'Sending...' : 'Send invite'}
@@ -1480,6 +1508,7 @@ git commit -m "feat: add settings pages — profile, organization, members"
 ### Task 9: Marketing Landing Page
 
 **Files:**
+
 - Create: `src/routes/(marketing)/+layout.svelte`, `src/routes/(marketing)/+page.svelte`
 - Remove: `src/routes/+page.svelte` (the default SvelteKit page)
 
@@ -1540,7 +1569,8 @@ Create `src/routes/(marketing)/+page.svelte`:
 		Build your business<br />with <span class="text-primary">Bokeros</span>
 	</h1>
 	<p class="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-		The modern B2B platform that helps teams collaborate, manage organizations, and scale their operations.
+		The modern B2B platform that helps teams collaborate, manage organizations, and scale their
+		operations.
 	</p>
 	<div class="mt-10 flex justify-center gap-4">
 		<Button href="/register" size="lg">Get started free</Button>
@@ -1552,15 +1582,21 @@ Create `src/routes/(marketing)/+page.svelte`:
 	<div class="container mx-auto grid gap-8 px-4 md:grid-cols-3">
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Team Management</h3>
-			<p class="text-muted-foreground">Invite members, assign roles, and manage your organization with ease.</p>
+			<p class="text-muted-foreground">
+				Invite members, assign roles, and manage your organization with ease.
+			</p>
 		</div>
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Secure by Default</h3>
-			<p class="text-muted-foreground">Enterprise-grade authentication with session management and role-based access.</p>
+			<p class="text-muted-foreground">
+				Enterprise-grade authentication with session management and role-based access.
+			</p>
 		</div>
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Built to Scale</h3>
-			<p class="text-muted-foreground">Multi-tenant architecture designed for growing teams and organizations.</p>
+			<p class="text-muted-foreground">
+				Multi-tenant architecture designed for growing teams and organizations.
+			</p>
 		</div>
 	</div>
 </section>
@@ -1588,6 +1624,7 @@ git commit -m "feat: add marketing landing page with header and footer"
 ### Task 10: Final Wiring + Cleanup
 
 **Files:**
+
 - Create: `.env.example` (verify), `CLAUDE.md`
 - Modify: `package.json` (add scripts)
 
@@ -1665,6 +1702,7 @@ pnpm dev
 ```
 
 Test the following flow:
+
 1. Visit `http://localhost:5173/` — see landing page
 2. Click "Get started" — go to register page
 3. Register a new account — redirected to dashboard

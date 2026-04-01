@@ -1,15 +1,18 @@
 import { auth } from '$lib/server/auth';
-import type { PageServerLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, request }) => {
 	if (!locals.session?.activeOrganizationId) {
-		return { members: [], invitations: [] };
+		return { organization: null, members: [], invitations: [] };
 	}
+
 	const org = await auth.api.getFullOrganization({
-		headers: new Headers(),
+		headers: request.headers,
 		query: { organizationId: locals.session.activeOrganizationId }
 	});
+
 	return {
+		organization: org,
 		members: org?.members ?? [],
 		invitations: org?.invitations ?? []
 	};

@@ -21,17 +21,17 @@ Organization-based. Every user belongs to one or more organizations. All tenant-
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Framework | SvelteKit | 2.x (latest) |
-| UI Framework | Svelte | 5.x (latest, runes) |
-| Database | PostgreSQL | 17 |
-| ORM | Drizzle ORM | latest |
-| Auth | Better Auth | latest |
-| Styling | Tailwind CSS | v4 |
-| Components | shadcn-svelte | latest (Svelte 5 compatible) |
-| Runtime | Node.js | 20+ |
-| Package Manager | pnpm | latest |
+| Layer           | Technology    | Version                      |
+| --------------- | ------------- | ---------------------------- |
+| Framework       | SvelteKit     | 2.x (latest)                 |
+| UI Framework    | Svelte        | 5.x (latest, runes)          |
+| Database        | PostgreSQL    | 17                           |
+| ORM             | Drizzle ORM   | latest                       |
+| Auth            | Better Auth   | latest                       |
+| Styling         | Tailwind CSS  | v4                           |
+| Components      | shadcn-svelte | latest (Svelte 5 compatible) |
+| Runtime         | Node.js       | 20+                          |
+| Package Manager | pnpm          | latest                       |
 
 ## Route Structure
 
@@ -70,6 +70,7 @@ src/routes/
 ### Better Auth managed tables
 
 Better Auth with the organization plugin manages these tables automatically:
+
 - `user` — id, name, email, emailVerified, image, createdAt, updatedAt
 - `session` — id, userId, token, expiresAt, ipAddress, userAgent
 - `account` — id, userId, providerId, accountId, accessToken, refreshToken, etc.
@@ -159,7 +160,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 

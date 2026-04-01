@@ -20,7 +20,7 @@
 	</header>
 
 	<main class="flex-1">
-		{@render children?.()}
+		{@render children()}
 	</main>
 
 	<footer class="border-t py-8">

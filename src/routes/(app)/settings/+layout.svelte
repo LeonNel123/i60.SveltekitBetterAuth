@@ -14,7 +14,7 @@
 	<h1 class="text-3xl font-bold tracking-tight">Settings</h1>
 
 	<nav class="flex gap-1 border-b">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.href)}
 			<a
 				href={tab.href}
 				class="px-4 py-2 text-sm font-medium transition-colors -mb-px border-b-2
