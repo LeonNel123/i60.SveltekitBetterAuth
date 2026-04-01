@@ -43,7 +43,17 @@ export const auth = betterAuth({
 		enabled: true,
 		minPasswordLength: 8,
 		maxPasswordLength: 128,
-		autoSignIn: true
+		autoSignIn: true,
+		async sendResetPassword({ user, url }) {
+			// TODO: Replace with real email provider (Resend, Postmark, etc.)
+			console.log(`[DEV] Password reset for ${user.email}: ${url}`);
+		}
+	},
+	emailVerification: {
+		sendVerificationEmail: async ({ user, url }) => {
+			// TODO: Replace with real email provider
+			console.log(`[DEV] Email verification for ${user.email}: ${url}`);
+		}
 	},
 	plugins: [
 		sveltekitCookies(getRequestEvent),
@@ -85,7 +95,7 @@ export const auth = betterAuth({
 		customRules: {
 			'/sign-in/email': { window: 60, max: 5 },
 			'/sign-up/email': { window: 60, max: 3 },
-			'/forget-password': { window: 60, max: 3 },
+			'/request-password-reset': { window: 60, max: 3 },
 			'/two-factor/*': { window: 60, max: 5 }
 		}
 	}
