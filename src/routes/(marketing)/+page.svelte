@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import { APP_NAME, APP_DESCRIPTION } from '$lib/config';
 </script>
 
 <section class="container mx-auto px-4 py-24 text-center">
 	<h1 class="text-5xl font-bold tracking-tight sm:text-6xl">
-		Build your business<br />with <span class="text-primary">Bokeros</span>
+		Welcome to <span class="text-primary">{APP_NAME}</span>
 	</h1>
 	<p class="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-		The modern B2B platform that helps teams collaborate, manage organizations, and scale their
-		operations.
+		{APP_DESCRIPTION}
 	</p>
 	<div class="mt-10 flex justify-center gap-4">
 		<Button href="/register" size="lg">Get started free</Button>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import { APP_NAME } from '$lib/config';
 
 	let { data, children } = $props();
 </script>
@@ -7,7 +8,7 @@
 <div class="flex min-h-screen flex-col">
 	<header class="border-b">
 		<div class="container mx-auto flex h-16 items-center justify-between px-4">
-			<a href="/" class="text-xl font-bold">Bokeros</a>
+			<a href="/" class="text-xl font-bold">{APP_NAME}</a>
 			<nav class="flex items-center gap-4">
 				{#if data.user}
 					<Button href="/dashboard" variant="default">Dashboard</Button>
@@ -23,9 +24,17 @@
 		{@render children()}
 	</main>
 
-	<footer class="border-t py-8">
-		<div class="container mx-auto px-4 text-center text-sm text-muted-foreground">
-			&copy; {new Date().getFullYear()} Bokeros. All rights reserved.
+	<footer class="border-t py-6">
+		<div class="container mx-auto flex flex-col items-center gap-2 px-4">
+			<p class="text-sm text-muted-foreground">
+				&copy; {new Date().getFullYear()}
+				{APP_NAME}. All rights reserved.
+			</p>
+			<p class="text-xs text-muted-foreground/60">
+				Built with <a href="https://i60.co" target="_blank" rel="noopener" class="hover:underline"
+					>i60.co</a
+				> SvelteKit template
+			</p>
 		</div>
 	</footer>
 </div>

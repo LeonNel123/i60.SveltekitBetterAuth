@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { APP_NAME } from '$lib/config';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import User from '@lucide/svelte/icons/user';
 	import Building2 from '@lucide/svelte/icons/building-2';
@@ -26,7 +27,7 @@
 
 <Sidebar>
 	<SidebarHeader class="px-4 py-3">
-		<span class="text-lg font-bold tracking-tight">Bokeros</span>
+		<span class="text-lg font-bold tracking-tight">{APP_NAME}</span>
 	</SidebarHeader>
 	<SidebarContent>
 		<SidebarGroup>

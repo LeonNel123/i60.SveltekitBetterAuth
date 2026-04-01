@@ -7,6 +7,7 @@ import { getRequestEvent } from '$app/server';
 import { BETTER_AUTH_URL, BETTER_AUTH_SECRET } from '$env/static/private';
 import { db } from './db';
 import { sendEmail } from './email';
+import { APP_NAME } from '$lib/config';
 
 const statement = {
 	organization: ['update', 'delete'],
@@ -48,7 +49,7 @@ export const auth = betterAuth({
 		async sendResetPassword({ user, url }) {
 			await sendEmail({
 				to: user.email,
-				subject: 'Reset your password — Bokeros',
+				subject: `Reset your password — ${APP_NAME}`,
 				html: `<p>Click the link below to reset your password:</p><p><a href="${url}">Reset password</a></p><p>If you didn't request this, you can safely ignore this email.</p>`,
 				text: `Reset your password: ${url}`
 			});
@@ -58,7 +59,7 @@ export const auth = betterAuth({
 		sendVerificationEmail: async ({ user, url }) => {
 			await sendEmail({
 				to: user.email,
-				subject: 'Verify your email — Bokeros',
+				subject: `Verify your email — ${APP_NAME}`,
 				html: `<p>Click the link below to verify your email address:</p><p><a href="${url}">Verify email</a></p>`,
 				text: `Verify your email: ${url}`
 			});
@@ -82,8 +83,8 @@ export const auth = betterAuth({
 				const inviteUrl = `${BETTER_AUTH_URL}/accept-invitation/${data.id}`;
 				await sendEmail({
 					to: data.email,
-					subject: `You've been invited to join an organization — Bokeros`,
-					html: `<p>You've been invited to join an organization on Bokeros.</p><p><a href="${inviteUrl}">Accept invitation</a></p>`,
+					subject: `You've been invited to join an organization — ${APP_NAME}`,
+					html: `<p>You've been invited to join an organization on ${APP_NAME}.</p><p><a href="${inviteUrl}">Accept invitation</a></p>`,
 					text: `Accept invitation: ${inviteUrl}`
 				});
 			}
@@ -93,7 +94,7 @@ export const auth = betterAuth({
 			adminRoles: ['admin']
 		}),
 		twoFactor({
-			issuer: 'Bokeros'
+			issuer: APP_NAME
 		})
 	],
 	session: {
