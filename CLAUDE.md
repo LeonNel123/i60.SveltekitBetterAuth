@@ -10,10 +10,10 @@ B2B SaaS skeleton built with SvelteKit 2, Svelte 5, PostgreSQL 17, Better Auth, 
 - `pnpm lint` — lint and format check
 - `pnpm format` — auto-format
 - `pnpm test` — run tests
-- `pnpm db:push` — push schema to database
 - `pnpm db:generate` — generate migrations
-- `pnpm db:migrate` — run migrations
-- `docker compose up -d` — start PostgreSQL
+- `pnpm db:apply` — generate + apply migrations (recommended on Windows)
+- `pnpm db:push` — push schema directly (may hang on Windows — use db:apply instead)
+- `docker compose up -d` — start PostgreSQL (port 5433, avoids conflict with local Postgres)
 
 ## Architecture
 
