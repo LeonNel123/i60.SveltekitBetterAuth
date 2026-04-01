@@ -23,7 +23,11 @@ export const actions: Actions = {
 				body: { name, email, password }
 			});
 		} catch {
-			return fail(400, { name, email, error: 'Could not create account. Email may already be in use.' });
+			return fail(400, {
+				name,
+				email,
+				error: 'Could not create account. Email may already be in use.'
+			});
 		}
 
 		throw redirect(303, '/dashboard');

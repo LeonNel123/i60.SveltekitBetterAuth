@@ -26,9 +26,7 @@
 					{form.error}
 				</div>
 			{:else}
-				<p class="text-sm text-muted-foreground">
-					Would you like to accept this invitation?
-				</p>
+				<p class="text-sm text-muted-foreground">Would you like to accept this invitation?</p>
 			{/if}
 		</CardContent>
 		<CardFooter class="flex gap-2">

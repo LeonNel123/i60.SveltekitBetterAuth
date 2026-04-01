@@ -193,7 +193,9 @@
 		</CardHeader>
 		<CardContent>
 			<p class="text-sm text-muted-foreground">
-				Use the <a href="/forgot-password" class="text-primary hover:underline">password reset flow</a> to change your password.
+				Use the <a href="/forgot-password" class="text-primary hover:underline"
+					>password reset flow</a
+				> to change your password.
 			</p>
 		</CardContent>
 	</Card>

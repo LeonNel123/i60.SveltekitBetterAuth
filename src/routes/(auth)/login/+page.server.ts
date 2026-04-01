@@ -18,10 +18,12 @@ export const actions: Actions = {
 				body: { email, password }
 			});
 
-			if (result.twoFactorRedirect) {
+			// 2FA redirect: when twoFactor plugin is active, a 2FA-required response has no token
+			if (result && 'twoFactorRedirect' in result) {
 				throw redirect(303, '/two-factor');
 			}
 		} catch (e) {
+			// Re-throw SvelteKit redirects
 			if (e && typeof e === 'object' && 'status' in e) throw e;
 			return fail(400, { email, error: 'Invalid email or password' });
 		}

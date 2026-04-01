@@ -40,7 +40,14 @@
 			{/if}
 			<div class="grid gap-2">
 				<Label for="name">Name</Label>
-				<Input id="name" name="name" type="text" placeholder="Your name" value={form?.name ?? ''} required />
+				<Input
+					id="name"
+					name="name"
+					type="text"
+					placeholder="Your name"
+					value={form?.name ?? ''}
+					required
+				/>
 			</div>
 			<div class="grid gap-2">
 				<Label for="email">Email</Label>

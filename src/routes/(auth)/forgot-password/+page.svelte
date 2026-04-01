@@ -40,13 +40,7 @@
 			>
 				<div class="grid gap-2">
 					<Label for="email">Email</Label>
-					<Input
-						id="email"
-						name="email"
-						type="email"
-						placeholder="you@example.com"
-						required
-					/>
+					<Input id="email" name="email" type="email" placeholder="you@example.com" required />
 				</div>
 				<Button type="submit" class="w-full" disabled={submitting}>
 					{submitting ? 'Sending...' : 'Send reset link'}
