@@ -84,7 +84,7 @@
 				{/snippet}
 			</EmptyState>
 		{:else}
-			<div class="rounded-md border">
+			<div class="overflow-x-auto rounded-md border">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -97,7 +97,13 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.clients as c (c.id)}
-							<TableRow class="cursor-pointer hover:bg-muted/50" onclick={() => goto(`/clients/${c.id}`)}>
+							<TableRow
+								class="cursor-pointer hover:bg-muted/50"
+								onclick={() => goto(`/clients/${c.id}`)}
+								onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/clients/${c.id}`); }}
+								role="button"
+								tabindex={0}
+							>
 								<TableCell class="font-medium">{c.name}</TableCell>
 								<TableCell>
 									<Badge variant="outline">

@@ -92,7 +92,7 @@
 					: 'Documents uploaded from client pages will appear here.'}
 			/>
 		{:else}
-			<div class="rounded-md border">
+			<div class="overflow-x-auto rounded-md border">
 				<Table>
 					<TableHeader>
 						<TableRow>

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
@@ -35,6 +36,7 @@
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let createDialogOpen = $state(false);
 	let createPriority = $state('medium');
+	let createLoading = $state(false);
 
 	// Keep searchValue in sync if the page is navigated to with a different search param
 	$effect(() => {
@@ -154,7 +156,7 @@
 				{/snippet}
 			</EmptyState>
 		{:else}
-			<div class="rounded-md border">
+			<div class="overflow-x-auto rounded-md border">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -167,7 +169,13 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.tasks as t (t.id)}
-							<TableRow class="cursor-pointer hover:bg-muted/50" onclick={() => goto(`/tasks/${t.id}`)}>
+							<TableRow
+								class="cursor-pointer hover:bg-muted/50"
+								onclick={() => goto(`/tasks/${t.id}`)}
+								onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
+								role="button"
+								tabindex={0}
+							>
 								<TableCell class="font-medium">{t.title}</TableCell>
 								<TableCell>
 									<TaskStatusBadge status={t.status as TaskStatus} />
@@ -209,9 +217,14 @@
 				method="POST"
 				action="?/create"
 				use:enhance={() => {
+					createLoading = true;
 					return async ({ result, update }) => {
+						createLoading = false;
 						await update();
-						if (result.type === 'success') createDialogOpen = false;
+						if (result.type === 'success') {
+							createDialogOpen = false;
+							toast.success('Task created successfully');
+						}
 					};
 				}}
 				class="space-y-4"
@@ -260,7 +273,9 @@
 					<Button variant="outline" type="button" onclick={() => (createDialogOpen = false)}>
 						Cancel
 					</Button>
-					<Button type="submit">Create Task</Button>
+					<Button type="submit" disabled={createLoading}>
+						{createLoading ? 'Creating...' : 'Create Task'}
+					</Button>
 				</Dialog.Footer>
 			</form>
 		</Dialog.Content>

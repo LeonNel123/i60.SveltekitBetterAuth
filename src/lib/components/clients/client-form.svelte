@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
@@ -27,9 +28,23 @@
 	} = $props();
 
 	let clientType = $state(client?.type ?? 'individual');
+	let loading = $state(false);
 </script>
 
-<form method="POST" use:enhance class="space-y-4">
+<form
+	method="POST"
+	use:enhance={() => {
+		loading = true;
+		return async ({ result, update }) => {
+			loading = false;
+			await update();
+			if (result.type === 'success' && client) {
+				toast.success('Client saved successfully');
+			}
+		};
+	}}
+	class="space-y-4"
+>
 	{#if formResult?.error}
 		<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 			{formResult.error}
@@ -84,7 +99,9 @@
 	</div>
 
 	<div class="flex gap-2">
-		<Button type="submit">{submitLabel}</Button>
+		<Button type="submit" disabled={loading}>
+			{loading ? 'Saving...' : submitLabel}
+		</Button>
 		<Button variant="outline" href="/clients">Cancel</Button>
 	</div>
 </form>

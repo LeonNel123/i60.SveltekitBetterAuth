@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -202,6 +203,7 @@
 				{#if data.recentTasks.length === 0}
 					<p class="py-8 text-center text-sm text-muted-foreground">No recent tasks.</p>
 				{:else}
+					<div class="overflow-x-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>
@@ -216,7 +218,10 @@
 							{#each data.recentTasks as t (t.id)}
 								<TableRow
 									class="cursor-pointer hover:bg-muted/50"
-									onclick={() => { window.location.href = `/tasks/${t.id}`; }}
+									onclick={() => goto(`/tasks/${t.id}`)}
+									onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
+									role="button"
+									tabindex={0}
 								>
 									<TableCell class="font-medium">{t.title}</TableCell>
 									<TableCell>
@@ -231,6 +236,7 @@
 							{/each}
 						</TableBody>
 					</Table>
+					</div>
 				{/if}
 			</CardContent>
 		</Card>

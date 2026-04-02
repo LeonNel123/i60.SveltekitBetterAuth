@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -48,6 +49,13 @@
 	let claimDialogOpen = $state(false);
 	let taskDialogOpen = $state(false);
 	let docDialogOpen = $state(false);
+
+	// Loading states
+	let noteLoading = $state(false);
+	let policyLoading = $state(false);
+	let claimLoading = $state(false);
+	let taskLoading = $state(false);
+	let docLoading = $state(false);
 
 	// Select states for form submission
 	let policyType = $state('other');
@@ -323,7 +331,7 @@
 							description="Add a policy to start tracking coverage."
 						/>
 					{:else}
-						<div class="rounded-md border">
+						<div class="overflow-x-auto rounded-md border">
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -384,7 +392,7 @@
 							description="No claims have been filed for this client."
 						/>
 					{:else}
-						<div class="rounded-md border">
+						<div class="overflow-x-auto rounded-md border">
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -443,7 +451,7 @@
 							description="Create a task to track work for this client."
 						/>
 					{:else}
-						<div class="rounded-md border">
+						<div class="overflow-x-auto rounded-md border">
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -458,6 +466,9 @@
 										<TableRow
 											class="cursor-pointer hover:bg-muted/50"
 											onclick={() => goto(`/tasks/${t.id}`)}
+											onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
+											role="button"
+											tabindex={0}
 										>
 											<TableCell class="font-medium">{t.title}</TableCell>
 											<TableCell>
@@ -495,7 +506,7 @@
 							description="Upload documents for this client."
 						/>
 					{:else}
-						<div class="rounded-md border">
+						<div class="overflow-x-auto rounded-md border">
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -552,8 +563,13 @@
 								method="POST"
 								action="?/addNote"
 								use:enhance={() => {
+									noteLoading = true;
 									return async ({ result, update }) => {
+										noteLoading = false;
 										await update();
+										if (result.type === 'success') {
+											toast.success('Note added');
+										}
 									};
 								}}
 								class="space-y-3"
@@ -565,7 +581,9 @@
 									required
 								/>
 								<div class="flex justify-end">
-									<Button type="submit" size="sm">Add Note</Button>
+									<Button type="submit" size="sm" disabled={noteLoading}>
+										{noteLoading ? 'Adding...' : 'Add Note'}
+									</Button>
 								</div>
 							</form>
 						</CardContent>
@@ -636,9 +654,14 @@
 				method="POST"
 				action="?/addPolicy"
 				use:enhance={() => {
+					policyLoading = true;
 					return async ({ result, update }) => {
+						policyLoading = false;
 						await update();
-						if (result.type === 'success') policyDialogOpen = false;
+						if (result.type === 'success') {
+							policyDialogOpen = false;
+							toast.success('Policy added successfully');
+						}
 					};
 				}}
 				class="space-y-4"
@@ -703,7 +726,9 @@
 					<Button variant="outline" type="button" onclick={() => (policyDialogOpen = false)}>
 						Cancel
 					</Button>
-					<Button type="submit">Add Policy</Button>
+					<Button type="submit" disabled={policyLoading}>
+						{policyLoading ? 'Adding...' : 'Add Policy'}
+					</Button>
 				</Dialog.Footer>
 			</form>
 		</Dialog.Content>
@@ -727,9 +752,14 @@
 				method="POST"
 				action="?/addClaim"
 				use:enhance={() => {
+					claimLoading = true;
 					return async ({ result, update }) => {
+						claimLoading = false;
 						await update();
-						if (result.type === 'success') claimDialogOpen = false;
+						if (result.type === 'success') {
+							claimDialogOpen = false;
+							toast.success('Claim added successfully');
+						}
 					};
 				}}
 				class="space-y-4"
@@ -794,7 +824,9 @@
 					<Button variant="outline" type="button" onclick={() => (claimDialogOpen = false)}>
 						Cancel
 					</Button>
-					<Button type="submit">Add Claim</Button>
+					<Button type="submit" disabled={claimLoading}>
+						{claimLoading ? 'Adding...' : 'Add Claim'}
+					</Button>
 				</Dialog.Footer>
 			</form>
 		</Dialog.Content>
@@ -818,9 +850,14 @@
 				method="POST"
 				action="?/addTask"
 				use:enhance={() => {
+					taskLoading = true;
 					return async ({ result, update }) => {
+						taskLoading = false;
 						await update();
-						if (result.type === 'success') taskDialogOpen = false;
+						if (result.type === 'success') {
+							taskDialogOpen = false;
+							toast.success('Task created successfully');
+						}
 					};
 				}}
 				class="space-y-4"
@@ -859,7 +896,9 @@
 					<Button variant="outline" type="button" onclick={() => (taskDialogOpen = false)}>
 						Cancel
 					</Button>
-					<Button type="submit">Add Task</Button>
+					<Button type="submit" disabled={taskLoading}>
+						{taskLoading ? 'Adding...' : 'Add Task'}
+					</Button>
 				</Dialog.Footer>
 			</form>
 		</Dialog.Content>
@@ -884,9 +923,14 @@
 				action="?/uploadDocument"
 				enctype="multipart/form-data"
 				use:enhance={() => {
+					docLoading = true;
 					return async ({ result, update }) => {
+						docLoading = false;
 						await update();
-						if (result.type === 'success') docDialogOpen = false;
+						if (result.type === 'success') {
+							docDialogOpen = false;
+							toast.success('Document uploaded successfully');
+						}
 					};
 				}}
 				class="space-y-4"
@@ -919,7 +963,9 @@
 					<Button variant="outline" type="button" onclick={() => (docDialogOpen = false)}>
 						Cancel
 					</Button>
-					<Button type="submit">Upload</Button>
+					<Button type="submit" disabled={docLoading}>
+						{docLoading ? 'Uploading...' : 'Upload'}
+					</Button>
 				</Dialog.Footer>
 			</form>
 		</Dialog.Content>

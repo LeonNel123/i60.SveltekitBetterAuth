@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -22,6 +23,7 @@
 
 	let editMode = $state(false);
 	let editPriority = $state('medium');
+	let editLoading = $state(false);
 
 	// Sync edit priority from data
 	$effect(() => {
@@ -91,8 +93,11 @@
 						method="POST"
 						action="?/updateStatus"
 						use:enhance={() => {
-							return async ({ update }) => {
+							return async ({ result, update }) => {
 								await update();
+								if (result.type === 'success') {
+									toast.success(`Status updated to ${s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}`);
+								}
 							};
 						}}
 					>
@@ -130,9 +135,14 @@
 								method="POST"
 								action="?/update"
 								use:enhance={() => {
+									editLoading = true;
 									return async ({ result, update }) => {
+										editLoading = false;
 										await update();
-										if (result.type === 'success') editMode = false;
+										if (result.type === 'success') {
+											editMode = false;
+											toast.success('Task updated successfully');
+										}
 									};
 								}}
 								class="space-y-4"
@@ -191,7 +201,9 @@
 								</div>
 
 								<div class="flex gap-2">
-									<Button type="submit">Save Changes</Button>
+									<Button type="submit" disabled={editLoading}>
+										{editLoading ? 'Saving...' : 'Save Changes'}
+									</Button>
 									<Button type="button" variant="outline" onclick={() => (editMode = false)}>
 										Cancel
 									</Button>
