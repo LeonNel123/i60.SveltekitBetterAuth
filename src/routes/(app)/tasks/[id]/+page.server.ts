@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { task, client } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
 import { eq, and } from 'drizzle-orm';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -59,6 +59,7 @@ export const actions: Actions = {
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
 		const dueDate = (fd.get('dueDate') as string) || null;
+		const assignedToId = (fd.get('assignedToId') as string)?.trim() || null;
 
 		await db
 			.update(task)
@@ -66,10 +67,51 @@ export const actions: Actions = {
 				title,
 				description,
 				priority,
+				assignedToId,
 				dueDate: dueDate ? new Date(dueDate) : null,
 				updatedAt: new Date()
 			})
 			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
 		return { success: true };
+	},
+
+	assign: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
+
+		const fd = await request.formData();
+		const assignedToId = (fd.get('assignedToId') as string) || null;
+
+		await db
+			.update(task)
+			.set({ assignedToId, updatedAt: new Date() })
+			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+
+		return { success: true };
+	},
+
+	delete: async ({ locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
+
+		const [existing] = await db
+			.select({ title: task.title, clientId: task.clientId })
+			.from(task)
+			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+		if (!existing) return fail(404, { error: 'Task not found.' });
+
+		await db.delete(task).where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: existing.clientId,
+			entityType: 'task',
+			entityId: params.id,
+			action: 'deleted',
+			description: `Deleted task "${existing.title}"`,
+			performedById: locals.user.id
+		});
+
+		throw redirect(303, '/tasks');
 	}
 };

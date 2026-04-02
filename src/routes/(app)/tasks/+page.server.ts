@@ -55,6 +55,7 @@ export const actions: Actions = {
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
 		const dueDate = (fd.get('dueDate') as string) || null;
+		const assignedToId = (fd.get('assignedToId') as string) || locals.user.id;
 
 		await db.insert(task).values({
 			organizationId: orgId,
@@ -63,7 +64,7 @@ export const actions: Actions = {
 			priority,
 			dueDate: dueDate ? new Date(dueDate) : null,
 			createdById: locals.user.id,
-			assignedToId: locals.user.id
+			assignedToId
 		});
 		return { success: true };
 	}

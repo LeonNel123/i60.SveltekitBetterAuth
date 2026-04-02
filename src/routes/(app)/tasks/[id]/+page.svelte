@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
@@ -8,6 +9,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Select from '$lib/components/ui/select';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import PageHeader from '$lib/components/shared/page-header.svelte';
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';
 	import TaskStatusBadge from '$lib/components/tasks/task-status-badge.svelte';
@@ -16,6 +18,7 @@
 	import type { TaskStatus, TaskPriority } from '$lib/types';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import Pencil from '@lucide/svelte/icons/pencil';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import X from '@lucide/svelte/icons/x';
 	import type { PageProps } from './$types';
 
@@ -24,6 +27,13 @@
 	let editMode = $state(false);
 	let editPriority = $state('medium');
 	let editLoading = $state(false);
+	let deleteDialogOpen = $state(false);
+	let deleteLoading = $state(false);
+
+	let members = $derived(page.data.members ?? []);
+	let assigneeName = $derived(
+		members.find((m: { userId: string }) => m.userId === data.task.assignedToId)?.user?.name ?? 'Unassigned'
+	);
 
 	// Sync edit priority from data
 	$effect(() => {
@@ -73,6 +83,10 @@
 						<Button variant="outline" onclick={() => (editMode = true)}>
 							<Pencil class="mr-2 h-4 w-4" />
 							Edit
+						</Button>
+						<Button variant="destructive" onclick={() => (deleteDialogOpen = true)}>
+							<Trash2 class="mr-2 h-4 w-4" />
+							Delete
 						</Button>
 					{:else}
 						<Button variant="ghost" onclick={() => (editMode = false)}>
@@ -259,6 +273,51 @@
 
 						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+								Assigned To
+							</p>
+							<p class="mb-1 text-sm font-medium">{assigneeName}</p>
+							{#if members.length > 0}
+								<form
+									id="assign-form"
+									method="POST"
+									action="?/assign"
+									use:enhance={() => {
+										return async ({ result, update }) => {
+											await update();
+											if (result.type === 'success') {
+												toast.success('Task reassigned');
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="assignedToId" value={data.task.assignedToId ?? ''} />
+									<Select.Root
+										type="single"
+										value={data.task.assignedToId ?? ''}
+										onValueChange={(v) => {
+											const assignForm = document.getElementById('assign-form') as HTMLFormElement;
+											const hidden = assignForm?.querySelector('input[name="assignedToId"]') as HTMLInputElement;
+											if (hidden) hidden.value = v;
+											assignForm?.requestSubmit();
+										}}
+									>
+										<Select.Trigger class="w-full text-xs">
+											Reassign...
+										</Select.Trigger>
+										<Select.Content>
+											{#each members as m (m.userId)}
+												<Select.Item value={m.userId}>
+													{m.user.name}
+												</Select.Item>
+											{/each}
+										</Select.Content>
+									</Select.Root>
+								</form>
+							{/if}
+						</div>
+
+						<div class="grid gap-1 py-3">
+							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Client
 							</p>
 							{#if data.task.clientId && data.task.clientName}
@@ -293,4 +352,34 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Delete Confirmation Dialog -->
+	<AlertDialog.Root bind:open={deleteDialogOpen}>
+		<AlertDialog.Content>
+			<AlertDialog.Header>
+				<AlertDialog.Title>Delete Task</AlertDialog.Title>
+				<AlertDialog.Description>
+					Are you sure you want to delete "{data.task.title}"? This action cannot be undone.
+				</AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+				<form
+					method="POST"
+					action="?/delete"
+					use:enhance={() => {
+						deleteLoading = true;
+						return async ({ update }) => {
+							deleteLoading = false;
+							await update();
+						};
+					}}
+				>
+					<AlertDialog.Action type="submit" class="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={deleteLoading}>
+						{deleteLoading ? 'Deleting...' : 'Delete'}
+					</AlertDialog.Action>
+				</form>
+			</AlertDialog.Footer>
+		</AlertDialog.Content>
+	</AlertDialog.Root>
 </OrgGuard>

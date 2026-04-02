@@ -36,7 +36,10 @@
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let createDialogOpen = $state(false);
 	let createPriority = $state('medium');
+	let createAssignee = $state('');
 	let createLoading = $state(false);
+
+	let members = $derived(page.data.members ?? []);
 
 	// Keep searchValue in sync with server data (initial load + navigation)
 	$effect(() => {
@@ -223,6 +226,7 @@
 						await update();
 						if (result.type === 'success') {
 							createDialogOpen = false;
+							createAssignee = '';
 							toast.success('Task created successfully');
 						}
 					};
@@ -268,6 +272,33 @@
 						<Input id="dueDate" name="dueDate" type="date" />
 					</div>
 				</div>
+
+				{#if members.length > 0}
+					<div class="grid gap-2">
+						<Label>Assign To</Label>
+						<Select.Root
+							type="single"
+							name="assignedToId"
+							value={createAssignee}
+							onValueChange={(v) => (createAssignee = v)}
+						>
+							<Select.Trigger class="w-full">
+								{#if createAssignee}
+									{members.find((m: { userId: string }) => m.userId === createAssignee)?.user?.name ?? 'Select member...'}
+								{:else}
+									Me (default)
+								{/if}
+							</Select.Trigger>
+							<Select.Content>
+								{#each members as m (m.userId)}
+									<Select.Item value={m.userId}>
+										{m.user.name}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
+				{/if}
 
 				<Dialog.Footer>
 					<Button variant="outline" type="button" onclick={() => (createDialogOpen = false)}>
