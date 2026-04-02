@@ -534,7 +534,7 @@
 												<Button
 													variant="ghost"
 													size="sm"
-													href="/api/documents/{d.id}/download"
+													href="/api/documents/{d.id}"
 												>
 													<Download class="h-4 w-4" />
 												</Button>

@@ -18,8 +18,13 @@
 
 	let { data }: PageProps = $props();
 
-	let searchValue = $state(data.search ?? '');
+	let searchValue = $state('');
 	let searchTimeout: ReturnType<typeof setTimeout>;
+
+	// Keep searchValue in sync with server data (initial load + navigation)
+	$effect(() => {
+		searchValue = data.search ?? '';
+	});
 
 	function handleSearch() {
 		clearTimeout(searchTimeout);

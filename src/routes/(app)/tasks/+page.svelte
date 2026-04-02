@@ -32,13 +32,13 @@
 
 	let { data, form }: PageProps = $props();
 
-	let searchValue = $state(data.search ?? '');
+	let searchValue = $state('');
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let createDialogOpen = $state(false);
 	let createPriority = $state('medium');
 	let createLoading = $state(false);
 
-	// Keep searchValue in sync if the page is navigated to with a different search param
+	// Keep searchValue in sync with server data (initial load + navigation)
 	$effect(() => {
 		searchValue = data.search ?? '';
 	});

@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db';
 import { client } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -45,7 +45,7 @@ export const actions: Actions = {
 
 			throw redirect(303, `/clients/${created.id}`);
 		} catch (e) {
-			if (e instanceof Response || (e as any)?.status === 303) throw e;
+			if (isRedirect(e)) throw e;
 			return fail(500, { error: 'Failed to create client.' });
 		}
 	}

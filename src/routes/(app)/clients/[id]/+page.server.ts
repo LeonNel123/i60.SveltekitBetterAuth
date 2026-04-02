@@ -30,32 +30,37 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		db
 			.select()
 			.from(policy)
-			.where(eq(policy.clientId, params.id))
-			.orderBy(desc(policy.createdAt)),
+			.where(and(eq(policy.clientId, params.id), eq(policy.organizationId, orgId)))
+			.orderBy(desc(policy.createdAt))
+			.limit(100),
 		db
 			.select()
 			.from(claim)
-			.where(eq(claim.clientId, params.id))
-			.orderBy(desc(claim.createdAt)),
+			.where(and(eq(claim.clientId, params.id), eq(claim.organizationId, orgId)))
+			.orderBy(desc(claim.createdAt))
+			.limit(100),
 		db
 			.select()
 			.from(task)
-			.where(eq(task.clientId, params.id))
-			.orderBy(desc(task.createdAt)),
+			.where(and(eq(task.clientId, params.id), eq(task.organizationId, orgId)))
+			.orderBy(desc(task.createdAt))
+			.limit(100),
 		db
 			.select()
 			.from(document)
-			.where(eq(document.clientId, params.id))
-			.orderBy(desc(document.createdAt)),
+			.where(and(eq(document.clientId, params.id), eq(document.organizationId, orgId)))
+			.orderBy(desc(document.createdAt))
+			.limit(100),
 		db
 			.select()
 			.from(note)
-			.where(eq(note.clientId, params.id))
-			.orderBy(desc(note.createdAt)),
+			.where(and(eq(note.clientId, params.id), eq(note.organizationId, orgId)))
+			.orderBy(desc(note.createdAt))
+			.limit(100),
 		db
 			.select()
 			.from(activity)
-			.where(eq(activity.clientId, params.id))
+			.where(and(eq(activity.clientId, params.id), eq(activity.organizationId, orgId)))
 			.orderBy(desc(activity.createdAt))
 			.limit(50),
 		db

@@ -27,8 +27,13 @@
 		submitLabel?: string;
 	} = $props();
 
-	let clientType = $state(client?.type ?? 'individual');
+	let clientType = $state('individual');
 	let loading = $state(false);
+
+	// Sync clientType with client prop (initial load + prop change)
+	$effect(() => {
+		clientType = client?.type ?? 'individual';
+	});
 </script>
 
 <form

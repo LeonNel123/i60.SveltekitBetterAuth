@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { client } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
 import { eq, and } from 'drizzle-orm';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -59,7 +59,7 @@ export const actions: Actions = {
 			});
 			throw redirect(303, `/clients/${params.id}`);
 		} catch (e) {
-			if (e instanceof Response || (e as any)?.status === 303) throw e;
+			if (isRedirect(e)) throw e;
 			return fail(500, { error: 'Failed to update client.' });
 		}
 	}
