@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { APP_NAME } from '$lib/config';
 	import type { LayoutProps } from './$types';
+	import { Toaster } from '$lib/components/ui/sonner';
 
 	let { children }: LayoutProps = $props();
 </script>
@@ -13,3 +14,4 @@
 </svelte:head>
 
 {@render children()}
+<Toaster />
