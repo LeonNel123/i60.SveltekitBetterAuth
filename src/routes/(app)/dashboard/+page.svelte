@@ -19,15 +19,12 @@
 	import AlertTriangle from '@lucide/svelte/icons/alert-triangle';
 	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
 	import CheckCircle from '@lucide/svelte/icons/check-circle';
+	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
 	import type { PageProps } from './$types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
+	import { formatDate } from '$lib/utils/format';
 
 	let { data }: PageProps = $props();
-
-	function formatDate(d: string | Date | null | undefined): string {
-		if (!d) return '—';
-		return new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
-	}
 
 	function isOverdue(dueDate: string | Date | null | undefined, status: string): boolean {
 		if (!dueDate || status === 'done') return false;
@@ -42,6 +39,27 @@
 	});
 
 	const attentionCount = $derived(data.stats.pendingTasks + data.overdueTasks.length);
+
+	function daysUntil(endDate: string | Date | null | undefined): number {
+		if (!endDate) return Infinity;
+		const end = new Date(endDate);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		end.setHours(0, 0, 0, 0);
+		return Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+	}
+
+	function renewalUrgencyClass(days: number): string {
+		if (days <= 7) return 'text-destructive font-semibold';
+		if (days <= 14) return 'text-orange-600 dark:text-orange-400 font-medium';
+		return 'text-yellow-600 dark:text-yellow-400';
+	}
+
+	function renewalRowClass(days: number): string {
+		if (days <= 7) return 'border-destructive/20 bg-destructive/5 hover:bg-destructive/10';
+		if (days <= 14) return 'border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10';
+		return 'border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10';
+	}
 </script>
 
 <svelte:head>
@@ -193,6 +211,52 @@
 				</CardContent>
 			</Card>
 		</div>
+
+		<!-- Renewing Soon -->
+		<Card>
+			<CardHeader class="flex flex-row items-center justify-between">
+				<div class="flex items-center gap-2">
+					<CalendarClock class="h-5 w-5 text-muted-foreground" />
+					<CardTitle class="text-base">Renewing Soon</CardTitle>
+					{#if data.stats.urgentRenewals > 0}
+						<span class="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
+							{data.stats.urgentRenewals} within 7 days
+						</span>
+					{/if}
+				</div>
+			</CardHeader>
+			<CardContent>
+				{#if data.renewingSoon.length === 0}
+					<div class="flex flex-col items-center justify-center py-8 text-center">
+						<CalendarClock class="mb-2 h-8 w-8 text-muted-foreground/40" />
+						<p class="text-sm text-muted-foreground">No policies renewing in the next 30 days.</p>
+					</div>
+				{:else}
+					<div class="space-y-2">
+						{#each data.renewingSoon as p (p.id)}
+							{@const days = daysUntil(p.endDate)}
+							<a
+								href="/clients/{p.clientId}"
+								class="flex items-center justify-between rounded-lg border p-3 transition-colors {renewalRowClass(days)}"
+							>
+								<div class="min-w-0 flex-1 space-y-0.5">
+									<p class="truncate text-sm font-medium">{p.policyNumber ?? '—'}</p>
+									<p class="text-xs text-muted-foreground">
+										{p.insurer ?? '—'} · {p.clientName}
+									</p>
+								</div>
+								<div class="ml-3 shrink-0 text-right">
+									<p class="text-xs text-muted-foreground">{formatDate(p.endDate)}</p>
+									<p class="text-xs {renewalUrgencyClass(days)}">
+										{days === 0 ? 'Today' : days === 1 ? '1 day' : `${days} days`}
+									</p>
+								</div>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</CardContent>
+		</Card>
 
 		<!-- Recent Activity -->
 		<Card>

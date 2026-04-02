@@ -7,10 +7,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const orgId = locals.session?.activeOrganizationId;
 	if (!orgId) {
 		return {
-			stats: { clients: 0, activePolicies: 0, openClaims: 0, pendingTasks: 0 },
+			stats: { clients: 0, activePolicies: 0, openClaims: 0, pendingTasks: 0, urgentRenewals: 0 },
 			myTasks: [],
 			overdueTasks: [],
-			recentTasks: []
+			recentTasks: [],
+			renewingSoon: []
 		};
 	}
 
@@ -23,7 +24,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		pendingTaskCount,
 		myTasks,
 		overdueTasks,
-		recentTasks
+		recentTasks,
+		renewingSoon,
+		urgentRenewalCount
 	] = await Promise.all([
 		db.select({ count: count() }).from(client).where(eq(client.organizationId, orgId)),
 		db.select({ count: count() }).from(policy).where(
@@ -49,7 +52,33 @@ export const load: PageServerLoad = async ({ locals }) => {
 		db.select({ task: task, clientName: client.name })
 			.from(task).leftJoin(client, eq(task.clientId, client.id))
 			.where(eq(task.organizationId, orgId))
-			.orderBy(desc(task.createdAt)).limit(5)
+			.orderBy(desc(task.createdAt)).limit(5),
+		// Policies expiring within 30 days
+		db.select({
+			policy: policy,
+			clientName: client.name,
+			clientId: client.id
+		})
+		.from(policy)
+		.innerJoin(client, eq(policy.clientId, client.id))
+		.where(and(
+			eq(policy.organizationId, orgId),
+			eq(policy.status, 'active'),
+			sql`${policy.endDate} IS NOT NULL`,
+			sql`${policy.endDate} <= (CURRENT_DATE + INTERVAL '30 days')`,
+			sql`${policy.endDate} >= CURRENT_DATE`
+		))
+		.orderBy(policy.endDate)
+		.limit(10),
+		db.select({ count: count() }).from(policy).where(
+			and(
+				eq(policy.organizationId, orgId),
+				eq(policy.status, 'active'),
+				sql`${policy.endDate} IS NOT NULL`,
+				sql`${policy.endDate} <= (CURRENT_DATE + INTERVAL '7 days')`,
+				sql`${policy.endDate} >= CURRENT_DATE`
+			)
+		)
 	]);
 
 	return {
@@ -57,10 +86,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 			clients: clientCount[0].count,
 			activePolicies: activePolicyCount[0].count,
 			openClaims: openClaimCount[0].count,
-			pendingTasks: pendingTaskCount[0].count
+			pendingTasks: pendingTaskCount[0].count,
+			urgentRenewals: urgentRenewalCount[0].count
 		},
 		myTasks: myTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
 		overdueTasks: overdueTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
-		recentTasks: recentTasks.map((r) => ({ ...r.task, clientName: r.clientName }))
+		recentTasks: recentTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
+		renewingSoon: renewingSoon.map((r) => ({ ...r.policy, clientName: r.clientName, clientId: r.clientId }))
 	};
 };
