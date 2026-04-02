@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { client, task, policy, claim } from '$lib/server/db/schema';
+import { client, task, policy, claim, activity } from '$lib/server/db/schema';
 import { eq, and, ne, sql, desc, count } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
@@ -11,7 +11,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 			myTasks: [],
 			overdueTasks: [],
 			recentTasks: [],
-			renewingSoon: []
+			renewingSoon: [],
+			recentActivity: []
 		};
 	}
 
@@ -26,7 +27,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		overdueTasks,
 		recentTasks,
 		renewingSoon,
-		urgentRenewalCount
+		urgentRenewalCount,
+		recentActivity
 	] = await Promise.all([
 		db.select({ count: count() }).from(client).where(eq(client.organizationId, orgId)),
 		db.select({ count: count() }).from(policy).where(
@@ -78,7 +80,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 				sql`${policy.endDate} <= (CURRENT_DATE + INTERVAL '7 days')`,
 				sql`${policy.endDate} >= CURRENT_DATE`
 			)
-		)
+		),
+		db.select().from(activity)
+			.where(eq(activity.organizationId, orgId))
+			.orderBy(desc(activity.createdAt))
+			.limit(15)
 	]);
 
 	return {
@@ -92,6 +98,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		myTasks: myTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
 		overdueTasks: overdueTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
 		recentTasks: recentTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
-		renewingSoon: renewingSoon.map((r) => ({ ...r.policy, clientName: r.clientName, clientId: r.clientId }))
+		renewingSoon: renewingSoon.map((r) => ({ ...r.policy, clientName: r.clientName, clientId: r.clientId })),
+		recentActivity
 	};
 };

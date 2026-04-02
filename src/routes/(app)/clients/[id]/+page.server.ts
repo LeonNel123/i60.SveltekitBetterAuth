@@ -111,6 +111,40 @@ export const actions: Actions = {
 		return { noteSuccess: true };
 	},
 
+	editNote: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { noteError: 'Not authorised.' });
+
+		const fd = await request.formData();
+		const noteId = fd.get('noteId') as string;
+		const content = (fd.get('content') as string)?.trim();
+		if (!noteId || !content) return fail(400, { noteError: 'Note content is required.' });
+
+		await db.update(note).set({ content, updatedAt: new Date() })
+			.where(and(eq(note.id, noteId), eq(note.organizationId, orgId)));
+
+		return { noteSuccess: true };
+	},
+
+	deleteNote: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { noteError: 'Not authorised.' });
+
+		const fd = await request.formData();
+		const noteId = fd.get('noteId') as string;
+		if (!noteId) return fail(400, { noteError: 'Note ID is required.' });
+
+		await db.delete(note).where(and(eq(note.id, noteId), eq(note.organizationId, orgId)));
+
+		await logActivity({
+			organizationId: orgId, clientId: params.id, entityType: 'note',
+			entityId: noteId, action: 'deleted', description: 'Deleted a note',
+			performedById: locals.user.id
+		});
+
+		return { noteSuccess: true };
+	},
+
 	addPolicy: async ({ request, locals, params }) => {
 		const orgId = locals.session?.activeOrganizationId;
 		if (!orgId || !locals.user) return fail(403, { policyError: 'Not authorised.' });

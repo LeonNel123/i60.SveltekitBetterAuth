@@ -11,6 +11,7 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components/ui/table';
+	import { Badge } from '$lib/components/ui/badge';
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';
 	import TaskStatusBadge from '$lib/components/tasks/task-status-badge.svelte';
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
@@ -20,9 +21,10 @@
 	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
 	import CheckCircle from '@lucide/svelte/icons/check-circle';
 	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
+	import Activity from '@lucide/svelte/icons/activity';
 	import type { PageProps } from './$types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
-	import { formatDate } from '$lib/utils/format';
+	import { formatDate, timeAgo } from '$lib/utils/format';
 
 	let { data }: PageProps = $props();
 
@@ -260,46 +262,48 @@
 
 		<!-- Recent Activity -->
 		<Card>
-			<CardHeader>
-				<CardTitle class="text-base">Recent Activity</CardTitle>
+			<CardHeader class="flex flex-row items-center justify-between">
+				<div class="flex items-center gap-2">
+					<Activity class="h-5 w-5 text-muted-foreground" />
+					<CardTitle class="text-base">Recent Activity</CardTitle>
+				</div>
 			</CardHeader>
 			<CardContent>
-				{#if data.recentTasks.length === 0}
-					<p class="py-8 text-center text-sm text-muted-foreground">No recent tasks.</p>
+				{#if data.recentActivity.length === 0}
+					<div class="flex flex-col items-center justify-center py-8 text-center">
+						<Activity class="mb-2 h-8 w-8 text-muted-foreground/40" />
+						<p class="text-sm text-muted-foreground">No activity yet.</p>
+					</div>
 				{:else}
-					<div class="overflow-x-auto">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Task</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead>Priority</TableHead>
-								<TableHead>Client</TableHead>
-								<TableHead>Created</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{#each data.recentTasks as t (t.id)}
-								<TableRow
-									class="cursor-pointer hover:bg-muted/50"
-									onclick={() => goto(`/tasks/${t.id}`)}
-									onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
-									role="button"
-									tabindex={0}
+					<div class="space-y-2">
+						{#each data.recentActivity as a (a.id)}
+							{#if a.clientId}
+								<a
+									href="/clients/{a.clientId}"
+									class="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
 								>
-									<TableCell class="font-medium">{t.title}</TableCell>
-									<TableCell>
-										<TaskStatusBadge status={t.status as TaskStatus} />
-									</TableCell>
-									<TableCell>
-										<TaskPriorityBadge priority={t.priority as TaskPriority} />
-									</TableCell>
-									<TableCell class="text-muted-foreground">{t.clientName ?? '—'}</TableCell>
-									<TableCell class="text-muted-foreground">{formatDate(t.createdAt)}</TableCell>
-								</TableRow>
-							{/each}
-						</TableBody>
-					</Table>
+									<div class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary/40"></div>
+									<div class="flex-1 min-w-0">
+										<p class="text-sm">{a.description}</p>
+										<p class="mt-1 text-xs text-muted-foreground">{timeAgo(a.createdAt)}</p>
+									</div>
+									<Badge variant="outline" class="shrink-0 text-xs capitalize">
+										{a.entityType}
+									</Badge>
+								</a>
+							{:else}
+								<div class="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30">
+									<div class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary/40"></div>
+									<div class="flex-1 min-w-0">
+										<p class="text-sm">{a.description}</p>
+										<p class="mt-1 text-xs text-muted-foreground">{timeAgo(a.createdAt)}</p>
+									</div>
+									<Badge variant="outline" class="shrink-0 text-xs capitalize">
+										{a.entityType}
+									</Badge>
+								</div>
+							{/if}
+						{/each}
 					</div>
 				{/if}
 			</CardContent>

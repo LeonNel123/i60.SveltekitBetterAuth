@@ -5,6 +5,8 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { timeAgo } from '$lib/utils/format';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	type Note = {
 		id: string;
@@ -24,6 +26,8 @@
 	} = $props();
 
 	let loading = $state(false);
+	let editingNoteId = $state<string | null>(null);
+	let editContent = $state('');
 </script>
 
 <div class="space-y-4">
@@ -72,10 +76,88 @@
 			{#each notes as n (n.id)}
 				<Card>
 					<CardContent class="py-4">
-						<p class="whitespace-pre-wrap text-sm leading-relaxed">{n.content}</p>
-						<p class="mt-2 text-xs text-muted-foreground">
-							{timeAgo(n.createdAt)}
-						</p>
+						{#if editingNoteId === n.id}
+							<!-- Inline edit form -->
+							<form
+								method="POST"
+								action="?/editNote"
+								use:enhance={() => {
+									return async ({ result, update }) => {
+										await update();
+										if (result.type === 'success') {
+											editingNoteId = null;
+											toast.success('Note updated');
+										}
+									};
+								}}
+								class="space-y-2"
+							>
+								<input type="hidden" name="noteId" value={n.id} />
+								<Textarea
+									name="content"
+									value={editContent}
+									oninput={(e) => { editContent = (e.target as HTMLTextAreaElement).value; }}
+									rows={3}
+									required
+								/>
+								<div class="flex justify-end gap-2">
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onclick={() => { editingNoteId = null; }}
+									>
+										Cancel
+									</Button>
+									<Button type="submit" size="sm">Save</Button>
+								</div>
+							</form>
+						{:else}
+							<!-- Note display -->
+							<div class="flex items-start justify-between gap-2">
+								<p class="flex-1 whitespace-pre-wrap text-sm leading-relaxed">{n.content}</p>
+								<div class="flex shrink-0 items-center gap-1">
+									<Button
+										variant="ghost"
+										size="icon"
+										class="h-7 w-7 text-muted-foreground hover:text-foreground"
+										onclick={() => {
+											editingNoteId = n.id;
+											editContent = n.content;
+										}}
+										title="Edit note"
+									>
+										<Pencil class="h-3.5 w-3.5" />
+									</Button>
+									<form
+										method="POST"
+										action="?/deleteNote"
+										use:enhance={() => {
+											return async ({ result, update }) => {
+												await update();
+												if (result.type === 'success') {
+													toast.success('Note deleted');
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="noteId" value={n.id} />
+										<Button
+											type="submit"
+											variant="ghost"
+											size="icon"
+											class="h-7 w-7 text-muted-foreground hover:text-destructive"
+											title="Delete note"
+										>
+											<Trash2 class="h-3.5 w-3.5" />
+										</Button>
+									</form>
+								</div>
+							</div>
+							<p class="mt-2 text-xs text-muted-foreground">
+								{timeAgo(n.createdAt)}
+							</p>
+						{/if}
 					</CardContent>
 				</Card>
 			{/each}
