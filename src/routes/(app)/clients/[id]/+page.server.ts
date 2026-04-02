@@ -24,9 +24,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const orgId = locals.session?.activeOrganizationId;
 	if (!orgId) return error(403, 'No active organisation');
 
+	const creator = alias(user, 'creator');
 	const [found] = await db
-		.select()
+		.select({ client: client, createdByName: creator.name })
 		.from(client)
+		.leftJoin(creator, eq(client.createdById, creator.id))
 		.where(and(eq(client.id, params.id), eq(client.organizationId, orgId)));
 	if (!found) return error(404, 'Client not found');
 
@@ -97,7 +99,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	return {
-		client: found,
+		client: { ...found.client, createdByName: found.createdByName },
 		policies,
 		claims,
 		tasks: tasks.map((r) => ({ ...r.task, assigneeName: r.assigneeName })),
@@ -186,6 +188,7 @@ export const actions: Actions = {
 		const startDate = (fd.get('startDate') as string) || null;
 		const endDate = (fd.get('endDate') as string) || null;
 		const premium = (fd.get('premium') as string) || null;
+		const isActivePrimary = fd.get('isActivePrimary') === 'on';
 
 		const [created] = await db
 			.insert(policy)
@@ -199,6 +202,7 @@ export const actions: Actions = {
 				startDate,
 				endDate,
 				premium,
+				isActivePrimary,
 				createdById: locals.user.id
 			})
 			.returning();
@@ -239,6 +243,7 @@ export const actions: Actions = {
 		const startDate = (fd.get('startDate') as string) || null;
 		const endDate = (fd.get('endDate') as string) || null;
 		const premium = (fd.get('premium') as string) || null;
+		const isActivePrimary = fd.get('isActivePrimary') === 'on';
 
 		await db
 			.update(policy)
@@ -250,6 +255,7 @@ export const actions: Actions = {
 				startDate,
 				endDate,
 				premium,
+				isActivePrimary,
 				updatedAt: new Date()
 			})
 			.where(eq(policy.id, policyId));
@@ -306,6 +312,7 @@ export const actions: Actions = {
 		const description = (fd.get('description') as string)?.trim() || null;
 		const dateOfLoss = (fd.get('dateOfLoss') as string) || null;
 		const amountClaimed = (fd.get('amountClaimed') as string) || null;
+		const amountSettled = (fd.get('amountSettled') as string) || null;
 
 		const [created] = await db
 			.insert(claim)
@@ -318,6 +325,7 @@ export const actions: Actions = {
 				description,
 				dateOfLoss,
 				amountClaimed,
+				amountSettled,
 				createdById: locals.user.id
 			})
 			.returning();

@@ -17,6 +17,7 @@
 	import DocumentsTab from '$lib/components/clients/documents-tab.svelte';
 	import NotesTab from '$lib/components/clients/notes-tab.svelte';
 	import ActivityTab from '$lib/components/clients/activity-tab.svelte';
+	import { formatDate } from '$lib/utils/format';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Mail from '@lucide/svelte/icons/mail';
@@ -128,6 +129,11 @@
 						</div>
 					{/if}
 				</div>
+				{#if data.client.createdByName || data.client.createdAt}
+					<p class="mt-4 border-t pt-3 text-xs text-muted-foreground">
+						{#if data.client.createdByName}Created by {data.client.createdByName}{/if}{#if data.client.createdByName && data.client.createdAt} on {formatDate(data.client.createdAt)}{:else if data.client.createdAt}Created {formatDate(data.client.createdAt)}{/if}
+					</p>
+				{/if}
 			</CardContent>
 		</Card>
 

@@ -25,9 +25,11 @@
 		policyStatusVariant,
 		policyStatusLabel
 	} from '$lib/utils/format';
+	import { Switch } from '$lib/components/ui/switch';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import Star from '@lucide/svelte/icons/star';
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 
 	type Policy = {
@@ -39,6 +41,7 @@
 		startDate: string | null;
 		endDate: string | null;
 		premium: string | null;
+		isActivePrimary: boolean;
 		[key: string]: unknown;
 	};
 
@@ -65,11 +68,13 @@
 	// Form field states
 	let policyType = $state('other');
 	let policyStatus = $state('active');
+	let isPrimary = $state(false);
 
 	function openAdd() {
 		editingPolicy = null;
 		policyType = 'other';
 		policyStatus = 'active';
+		isPrimary = false;
 		dialogOpen = true;
 	}
 
@@ -77,6 +82,7 @@
 		editingPolicy = p;
 		policyType = p.type;
 		policyStatus = p.status;
+		isPrimary = p.isActivePrimary;
 		dialogOpen = true;
 	}
 
@@ -118,7 +124,12 @@
 				<TableBody>
 					{#each policies as p (p.id)}
 						<TableRow class="hover:bg-muted/50">
-							<TableCell class="font-medium">{p.policyNumber}</TableCell>
+							<TableCell class="font-medium">
+								{p.policyNumber}
+								{#if p.isActivePrimary}
+									<Badge variant="default" class="ml-1.5 gap-1 text-xs"><Star class="h-3 w-3" />Primary</Badge>
+								{/if}
+							</TableCell>
 							<TableCell>{p.insurer}</TableCell>
 							<TableCell>
 								<Badge variant="outline">{policyTypeLabel(p.type)}</Badge>
@@ -249,6 +260,12 @@
 			<div class="grid gap-2">
 				<Label for="premium">Monthly Premium (ZAR)</Label>
 				<Input id="premium" name="premium" type="number" step="0.01" placeholder="0.00" value={editingPolicy?.premium ?? ''} />
+			</div>
+
+			<div class="flex items-center gap-2">
+				<Switch bind:checked={isPrimary} />
+				<input type="hidden" name="isActivePrimary" value={isPrimary ? 'on' : ''} />
+				<Label>Primary Policy</Label>
 			</div>
 
 			<Dialog.Footer>

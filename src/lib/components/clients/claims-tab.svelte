@@ -258,12 +258,10 @@
 					<Label for="amountClaimed">Amount Claimed (ZAR)</Label>
 					<Input id="amountClaimed" name="amountClaimed" type="number" step="0.01" placeholder="0.00" value={editingClaim?.amountClaimed ?? ''} />
 				</div>
-				{#if editingClaim}
-					<div class="grid gap-2">
-						<Label for="amountSettled">Amount Settled (ZAR)</Label>
-						<Input id="amountSettled" name="amountSettled" type="number" step="0.01" placeholder="0.00" value={editingClaim?.amountSettled ?? ''} />
-					</div>
-				{/if}
+				<div class="grid gap-2">
+					<Label for="amountSettled">Amount Settled (ZAR)</Label>
+					<Input id="amountSettled" name="amountSettled" type="number" step="0.01" placeholder="0.00" value={editingClaim?.amountSettled ?? ''} />
+				</div>
 			</div>
 
 			<Dialog.Footer>

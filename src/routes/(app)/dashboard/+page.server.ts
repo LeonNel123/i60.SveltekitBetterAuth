@@ -1,7 +1,10 @@
 import { db } from '$lib/server/db';
-import { client, task, policy, claim, activity } from '$lib/server/db/schema';
+import { client, task, policy, claim, activity, user } from '$lib/server/db/schema';
+import { alias } from 'drizzle-orm/pg-core';
 import { eq, and, ne, sql, desc, count } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
+
+const assignee = alias(user, 'assignee');
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const orgId = locals.session?.activeOrganizationId;
@@ -41,18 +44,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 			and(eq(task.organizationId, orgId), ne(task.status, 'done'))
 		),
 		userId
-			? db.select({ task: task, clientName: client.name })
-				.from(task).leftJoin(client, eq(task.clientId, client.id))
+			? db.select({ task: task, clientName: client.name, assigneeName: assignee.name })
+				.from(task).leftJoin(client, eq(task.clientId, client.id)).leftJoin(assignee, eq(task.assignedToId, assignee.id))
 				.where(and(eq(task.organizationId, orgId), eq(task.assignedToId, userId), ne(task.status, 'done')))
 				.orderBy(sql`CASE ${task.priority} WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END`, desc(task.createdAt))
 				.limit(10)
 			: Promise.resolve([]),
-		db.select({ task: task, clientName: client.name })
-			.from(task).leftJoin(client, eq(task.clientId, client.id))
+		db.select({ task: task, clientName: client.name, assigneeName: assignee.name })
+			.from(task).leftJoin(client, eq(task.clientId, client.id)).leftJoin(assignee, eq(task.assignedToId, assignee.id))
 			.where(and(eq(task.organizationId, orgId), ne(task.status, 'done'), sql`${task.dueDate} < NOW()`))
 			.orderBy(task.dueDate).limit(10),
-		db.select({ task: task, clientName: client.name })
-			.from(task).leftJoin(client, eq(task.clientId, client.id))
+		db.select({ task: task, clientName: client.name, assigneeName: assignee.name })
+			.from(task).leftJoin(client, eq(task.clientId, client.id)).leftJoin(assignee, eq(task.assignedToId, assignee.id))
 			.where(eq(task.organizationId, orgId))
 			.orderBy(desc(task.createdAt)).limit(5),
 		// Policies expiring within 30 days
@@ -95,9 +98,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			pendingTasks: pendingTaskCount[0].count,
 			urgentRenewals: urgentRenewalCount[0].count
 		},
-		myTasks: myTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
-		overdueTasks: overdueTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
-		recentTasks: recentTasks.map((r) => ({ ...r.task, clientName: r.clientName })),
+		myTasks: myTasks.map((r) => ({ ...r.task, clientName: r.clientName, assigneeName: r.assigneeName })),
+		overdueTasks: overdueTasks.map((r) => ({ ...r.task, clientName: r.clientName, assigneeName: r.assigneeName })),
+		recentTasks: recentTasks.map((r) => ({ ...r.task, clientName: r.clientName, assigneeName: r.assigneeName })),
 		renewingSoon: renewingSoon.map((r) => ({ ...r.policy, clientName: r.clientName, clientId: r.clientId })),
 		recentActivity
 	};

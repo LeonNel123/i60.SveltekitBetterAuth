@@ -159,14 +159,18 @@
 							>
 								<div class="min-w-0 flex-1 space-y-1">
 									<p class="truncate text-sm font-medium">{t.title}</p>
-									{#if t.dueDate}
-										<p class="text-xs text-muted-foreground">
-											Due {formatDate(t.dueDate)}
+									<p class="text-xs text-muted-foreground">
+										{#if t.clientName}{t.clientName}{/if}
+										{#if t.dueDate}
+											{#if t.clientName} · {/if}Due {formatDate(t.dueDate)}
 											{#if isOverdue(t.dueDate, t.status)}
 												<span class="font-medium text-destructive"> · Overdue</span>
 											{/if}
-										</p>
-									{/if}
+										{/if}
+										{#if t.assigneeName}
+											{#if t.clientName || t.dueDate} · {/if}{t.assigneeName}
+										{/if}
+									</p>
 								</div>
 								<div class="ml-3 shrink-0">
 									<TaskPriorityBadge priority={t.priority as TaskPriority} />
@@ -202,6 +206,9 @@
 											{t.clientName} ·
 										{/if}
 										Due {formatDate(t.dueDate)}
+										{#if t.assigneeName}
+											 · {t.assigneeName}
+										{/if}
 									</p>
 								</div>
 								<div class="ml-3 shrink-0">

@@ -23,21 +23,21 @@
 <section class="border-t bg-muted/50 py-24">
 	<div class="container mx-auto grid gap-8 px-4 md:grid-cols-3">
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Team Management</h3>
+			<h3 class="text-xl font-semibold">Client Management</h3>
 			<p class="text-muted-foreground">
-				Invite members, assign roles, and manage your organization with ease.
+				Track insured individuals and companies, with full policy and claims history at your fingertips.
 			</p>
 		</div>
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Secure by Default</h3>
+			<h3 class="text-xl font-semibold">Task-Driven Operations</h3>
 			<p class="text-muted-foreground">
-				Enterprise-grade authentication with session management and role-based access.
+				Every action is tracked. Tasks are assigned, escalated, and completed with full traceability.
 			</p>
 		</div>
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Built to Scale</h3>
+			<h3 class="text-xl font-semibold">Document Compliance</h3>
 			<p class="text-muted-foreground">
-				Multi-tenant architecture designed for growing teams and organizations.
+				Upload, tag, and retrieve documents instantly. Built for South African regulatory requirements.
 			</p>
 		</div>
 	</div>
