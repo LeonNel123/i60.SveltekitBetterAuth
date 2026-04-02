@@ -11,10 +11,16 @@
 		CardContent,
 		CardFooter
 	} from '$lib/components/ui/card';
+	import { APP_NAME } from '$lib/config';
+	import type { PageProps } from './$types';
 
-	let { form } = $props();
+	let { form }: PageProps = $props();
 	let submitting = $state(false);
 </script>
+
+<svelte:head>
+	<title>Reset password — {APP_NAME}</title>
+</svelte:head>
 
 <Card>
 	<CardHeader>
@@ -38,9 +44,21 @@
 				}}
 				class="grid gap-4"
 			>
+				{#if form?.error}
+					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+						{form.error}
+					</div>
+				{/if}
 				<div class="grid gap-2">
 					<Label for="email">Email</Label>
-					<Input id="email" name="email" type="email" placeholder="you@example.com" required />
+					<Input
+						id="email"
+						name="email"
+						type="email"
+						autocomplete="email"
+						placeholder="you@example.com"
+						required
+					/>
 				</div>
 				<Button type="submit" class="w-full" disabled={submitting}>
 					{submitting ? 'Sending...' : 'Send reset link'}

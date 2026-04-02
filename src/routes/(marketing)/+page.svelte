@@ -3,6 +3,10 @@
 	import { APP_NAME, APP_DESCRIPTION } from '$lib/config';
 </script>
 
+<svelte:head>
+	<title>{APP_NAME} — {APP_DESCRIPTION}</title>
+</svelte:head>
+
 <section class="container mx-auto px-4 py-24 text-center">
 	<h1 class="text-5xl font-bold tracking-tight sm:text-6xl">
 		Welcome to <span class="text-primary">{APP_NAME}</span>

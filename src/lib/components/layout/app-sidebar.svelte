@@ -5,6 +5,7 @@
 	import User from '@lucide/svelte/icons/user';
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import Users from '@lucide/svelte/icons/users';
+	import Shield from '@lucide/svelte/icons/shield';
 	import {
 		Sidebar,
 		SidebarContent,
@@ -21,7 +22,8 @@
 		{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 		{ href: '/settings/profile', label: 'Profile', icon: User },
 		{ href: '/settings/organization', label: 'Organization', icon: Building2 },
-		{ href: '/settings/members', label: 'Members', icon: Users }
+		{ href: '/settings/members', label: 'Members', icon: Users },
+		{ href: '/settings/security', label: 'Security', icon: Shield }
 	];
 </script>
 

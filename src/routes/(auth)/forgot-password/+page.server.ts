@@ -1,4 +1,5 @@
 import { auth } from '$lib/server/auth';
+import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -7,13 +8,13 @@ export const actions: Actions = {
 		const email = formData.get('email') as string;
 
 		if (!email) {
-			return { success: false };
+			return fail(400, { error: 'Email is required' });
 		}
 
 		try {
 			await auth.api.requestPasswordReset({
 				headers: request.headers,
-				body: { email, redirectTo: '/login' }
+				body: { email, redirectTo: '/reset-password' }
 			});
 		} catch {
 			// Always return success to prevent email enumeration

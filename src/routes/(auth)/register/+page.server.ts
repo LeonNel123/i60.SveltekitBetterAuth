@@ -1,6 +1,15 @@
 import { auth } from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { GOOGLE_CLIENT_ID, GITHUB_CLIENT_ID, MICROSOFT_CLIENT_ID } from '$env/static/private';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async () => {
+	return {
+		hasGoogle: !!GOOGLE_CLIENT_ID,
+		hasGithub: !!GITHUB_CLIENT_ID,
+		hasMicrosoft: !!MICROSOFT_CLIENT_ID
+	};
+};
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -30,6 +39,6 @@ export const actions: Actions = {
 			});
 		}
 
-		throw redirect(303, '/dashboard');
+		throw redirect(303, `/verify-email?email=${encodeURIComponent(email)}`);
 	}
 };

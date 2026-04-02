@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
 	import { Separator } from '$lib/components/ui/separator';
+	import ThemeToggle from './theme-toggle.svelte';
 	import UserMenu from './user-menu.svelte';
 
 	interface Props {
@@ -14,5 +15,6 @@
 	<SidebarTrigger class="-ml-1" />
 	<Separator orientation="vertical" class="h-4" />
 	<div class="flex-1"></div>
+	<ThemeToggle />
 	<UserMenu {user} />
 </header>

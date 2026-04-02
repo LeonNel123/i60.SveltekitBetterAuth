@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
+	import { APP_NAME } from '$lib/config';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
@@ -15,6 +16,10 @@
 		await goto('/login', { invalidateAll: true });
 	}
 </script>
+
+<svelte:head>
+	<title>Account Suspended — {APP_NAME}</title>
+</svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-background">
 	<Card class="max-w-md">

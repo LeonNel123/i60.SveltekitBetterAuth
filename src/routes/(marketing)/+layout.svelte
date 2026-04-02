@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { APP_NAME } from '$lib/config';
+	import ThemeToggle from '$lib/components/layout/theme-toggle.svelte';
+	import type { LayoutProps } from './$types';
 
-	let { data, children } = $props();
+	let { data, children }: LayoutProps = $props();
 </script>
 
 <div class="flex min-h-screen flex-col">
 	<header class="border-b">
 		<div class="container mx-auto flex h-16 items-center justify-between px-4">
 			<a href="/" class="text-xl font-bold">{APP_NAME}</a>
-			<nav class="flex items-center gap-4">
+			<nav class="flex items-center gap-2">
+				<ThemeToggle />
 				{#if data.user}
 					<Button href="/dashboard" variant="default">Dashboard</Button>
 				{:else}

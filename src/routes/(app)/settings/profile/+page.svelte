@@ -10,9 +10,15 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { APP_NAME } from '$lib/config';
+	import type { PageProps } from './$types';
 
-	let { data, form } = $props();
+	let { data, form }: PageProps = $props();
 </script>
+
+<svelte:head>
+	<title>Profile — {APP_NAME}</title>
+</svelte:head>
 
 <Card class="max-w-lg">
 	<CardHeader>

@@ -1,5 +1,10 @@
 import { createAuthClient } from 'better-auth/svelte';
-import { organizationClient, twoFactorClient, adminClient } from 'better-auth/client/plugins';
+import {
+	organizationClient,
+	twoFactorClient,
+	adminClient,
+	emailOTPClient
+} from 'better-auth/client/plugins';
 
 export const authClient = createAuthClient({
 	plugins: [
@@ -7,6 +12,7 @@ export const authClient = createAuthClient({
 		twoFactorClient({
 			twoFactorPage: '/two-factor'
 		}),
-		adminClient()
+		adminClient(),
+		emailOTPClient()
 	]
 });

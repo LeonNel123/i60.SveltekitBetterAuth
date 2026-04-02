@@ -20,8 +20,10 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components/ui/table';
+	import { APP_NAME } from '$lib/config';
+	import type { PageProps } from './$types';
 
-	let { data } = $props();
+	let { data }: PageProps = $props();
 
 	let inviteEmail = $state('');
 	let inviteRole = $state<'member' | 'admin'>('member');
@@ -55,6 +57,10 @@
 		return 'secondary';
 	}
 </script>
+
+<svelte:head>
+	<title>Members — {APP_NAME}</title>
+</svelte:head>
 
 <div class="space-y-8">
 	<Card>

@@ -11,8 +11,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { APP_NAME } from '$lib/config';
+	import type { PageProps } from './$types';
 
-	let { data } = $props();
+	let { data }: PageProps = $props();
 
 	let orgName = $state('');
 	let orgSlug = $state('');
@@ -36,6 +38,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Organization — {APP_NAME}</title>
+</svelte:head>
 
 {#if data.organization}
 	<Card class="max-w-lg">

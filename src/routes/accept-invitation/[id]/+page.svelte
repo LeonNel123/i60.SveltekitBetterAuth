@@ -9,10 +9,16 @@
 		CardContent,
 		CardFooter
 	} from '$lib/components/ui/card';
+	import { APP_NAME } from '$lib/config';
+	import type { PageProps } from './$types';
 
-	let { form } = $props();
+	let { form }: PageProps = $props();
 	let submitting = $state(false);
 </script>
+
+<svelte:head>
+	<title>Invitation — {APP_NAME}</title>
+</svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-background">
 	<Card class="max-w-md">

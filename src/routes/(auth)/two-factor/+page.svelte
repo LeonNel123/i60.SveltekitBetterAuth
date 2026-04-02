@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
+	import { APP_NAME } from '$lib/config';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -36,6 +37,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Two-factor authentication — {APP_NAME}</title>
+</svelte:head>
 
 <Card>
 	<CardHeader>

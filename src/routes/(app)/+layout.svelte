@@ -2,8 +2,9 @@
 	import { SidebarProvider, SidebarInset } from '$lib/components/ui/sidebar';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import AppHeader from '$lib/components/layout/app-header.svelte';
+	import type { LayoutProps } from './$types';
 
-	let { data, children } = $props();
+	let { data, children }: LayoutProps = $props();
 </script>
 
 <SidebarProvider>

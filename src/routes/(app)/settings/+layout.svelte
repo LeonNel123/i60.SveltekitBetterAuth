@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { LayoutProps } from './$types';
 
-	let { children } = $props();
+	let { children }: LayoutProps = $props();
 
 	const tabs = [
 		{ href: '/settings/profile', label: 'Profile' },
