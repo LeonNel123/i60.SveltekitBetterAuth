@@ -11,9 +11,9 @@ import {
 	documentTag
 } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
-import { saveUploadedFile } from '$lib/server/files';
+import { saveUploadedFile, deleteFile } from '$lib/server/files';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -154,6 +154,85 @@ export const actions: Actions = {
 		return { policySuccess: true };
 	},
 
+	editPolicy: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { policyError: 'Not authorised.' });
+		const fd = await request.formData();
+		const policyId = (fd.get('policyId') as string)?.trim();
+		if (!policyId) return fail(400, { policyError: 'Policy ID is required.' });
+
+		// Verify the policy belongs to this org
+		const [existing] = await db
+			.select()
+			.from(policy)
+			.where(and(eq(policy.id, policyId), eq(policy.organizationId, orgId)));
+		if (!existing) return fail(404, { policyError: 'Policy not found.' });
+
+		const policyNumber = (fd.get('policyNumber') as string)?.trim();
+		const insurer = (fd.get('insurer') as string)?.trim();
+		if (!policyNumber || !insurer)
+			return fail(400, { policyError: 'Policy number and insurer are required.' });
+
+		const type = (fd.get('type') as string) || 'other';
+		const status = (fd.get('status') as string) || 'active';
+		const startDate = (fd.get('startDate') as string) || null;
+		const endDate = (fd.get('endDate') as string) || null;
+		const premium = (fd.get('premium') as string) || null;
+
+		await db
+			.update(policy)
+			.set({
+				policyNumber,
+				insurer,
+				type,
+				status,
+				startDate,
+				endDate,
+				premium,
+				updatedAt: new Date()
+			})
+			.where(eq(policy.id, policyId));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'policy',
+			entityId: policyId,
+			action: 'updated',
+			description: `Updated policy ${policyNumber} (${insurer})`,
+			performedById: locals.user.id
+		});
+		return { policySuccess: true };
+	},
+
+	deletePolicy: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { policyError: 'Not authorised.' });
+		const fd = await request.formData();
+		const policyId = (fd.get('policyId') as string)?.trim();
+		if (!policyId) return fail(400, { policyError: 'Policy ID is required.' });
+
+		// Verify the policy belongs to this org
+		const [existing] = await db
+			.select()
+			.from(policy)
+			.where(and(eq(policy.id, policyId), eq(policy.organizationId, orgId)));
+		if (!existing) return fail(404, { policyError: 'Policy not found.' });
+
+		await db.delete(policy).where(eq(policy.id, policyId));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'policy',
+			entityId: policyId,
+			action: 'deleted',
+			description: `Deleted policy ${existing.policyNumber} (${existing.insurer})`,
+			performedById: locals.user.id
+		});
+		return { policySuccess: true };
+	},
+
 	addClaim: async ({ request, locals, params }) => {
 		const orgId = locals.session?.activeOrganizationId;
 		if (!orgId || !locals.user) return fail(403, { claimError: 'Not authorised.' });
@@ -189,6 +268,82 @@ export const actions: Actions = {
 			entityId: created.id,
 			action: 'created',
 			description: `Opened claim ${claimNumber}`,
+			performedById: locals.user.id
+		});
+		return { claimSuccess: true };
+	},
+
+	editClaim: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { claimError: 'Not authorised.' });
+		const fd = await request.formData();
+		const claimId = (fd.get('claimId') as string)?.trim();
+		if (!claimId) return fail(400, { claimError: 'Claim ID is required.' });
+
+		// Verify the claim belongs to this org
+		const [existing] = await db
+			.select()
+			.from(claim)
+			.where(and(eq(claim.id, claimId), eq(claim.organizationId, orgId)));
+		if (!existing) return fail(404, { claimError: 'Claim not found.' });
+
+		const claimNumber = (fd.get('claimNumber') as string)?.trim();
+		if (!claimNumber) return fail(400, { claimError: 'Claim number is required.' });
+
+		const status = (fd.get('status') as string) || 'open';
+		const description = (fd.get('description') as string)?.trim() || null;
+		const dateOfLoss = (fd.get('dateOfLoss') as string) || null;
+		const amountClaimed = (fd.get('amountClaimed') as string) || null;
+		const amountSettled = (fd.get('amountSettled') as string) || null;
+
+		await db
+			.update(claim)
+			.set({
+				claimNumber,
+				status,
+				description,
+				dateOfLoss,
+				amountClaimed,
+				amountSettled,
+				updatedAt: new Date()
+			})
+			.where(eq(claim.id, claimId));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'claim',
+			entityId: claimId,
+			action: 'updated',
+			description: `Updated claim ${claimNumber}`,
+			performedById: locals.user.id
+		});
+		return { claimSuccess: true };
+	},
+
+	deleteClaim: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { claimError: 'Not authorised.' });
+		const fd = await request.formData();
+		const claimId = (fd.get('claimId') as string)?.trim();
+		if (!claimId) return fail(400, { claimError: 'Claim ID is required.' });
+
+		// Verify the claim belongs to this org
+		const [existing] = await db
+			.select()
+			.from(claim)
+			.where(and(eq(claim.id, claimId), eq(claim.organizationId, orgId)));
+		if (!existing) return fail(404, { claimError: 'Claim not found.' });
+
+		await db.delete(claim).where(eq(claim.id, claimId));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'claim',
+			entityId: claimId,
+			action: 'deleted',
+			description: `Deleted claim ${existing.claimNumber}`,
 			performedById: locals.user.id
 		});
 		return { claimSuccess: true };
@@ -275,5 +430,74 @@ export const actions: Actions = {
 		} catch {
 			return fail(500, { docError: 'Failed to upload document.' });
 		}
+	},
+
+	deleteDocument: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { docError: 'Not authorised.' });
+		const fd = await request.formData();
+		const documentId = (fd.get('documentId') as string)?.trim();
+		if (!documentId) return fail(400, { docError: 'Document ID is required.' });
+
+		// Verify the document belongs to this org
+		const [existing] = await db
+			.select()
+			.from(document)
+			.where(and(eq(document.id, documentId), eq(document.organizationId, orgId)));
+		if (!existing) return fail(404, { docError: 'Document not found.' });
+
+		// Delete tags first, then document record, then file from disk
+		await db.delete(documentTag).where(eq(documentTag.documentId, documentId));
+		await db.delete(document).where(eq(document.id, documentId));
+		await deleteFile(existing.storagePath);
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'document',
+			entityId: documentId,
+			action: 'deleted',
+			description: `Deleted document "${existing.name}"`,
+			performedById: locals.user.id
+		});
+		return { docSuccess: true };
+	},
+
+	deleteClient: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
+		const fd = await request.formData();
+		const confirm = (fd.get('confirm') as string)?.trim();
+		if (confirm !== 'yes') return fail(400, { error: 'Deletion not confirmed.' });
+
+		// Verify the client belongs to this org
+		const [existing] = await db
+			.select()
+			.from(client)
+			.where(and(eq(client.id, params.id), eq(client.organizationId, orgId)));
+		if (!existing) return fail(404, { error: 'Client not found.' });
+
+		// Delete associated documents' files from disk before cascade deletes records
+		const docs = await db
+			.select({ storagePath: document.storagePath })
+			.from(document)
+			.where(and(eq(document.clientId, params.id), eq(document.organizationId, orgId)));
+		for (const d of docs) {
+			await deleteFile(d.storagePath);
+		}
+
+		// Delete the client — FK cascades handle policies, claims, notes, documents, tasks
+		await db.delete(client).where(eq(client.id, params.id));
+
+		await logActivity({
+			organizationId: orgId,
+			entityType: 'client',
+			entityId: params.id,
+			action: 'deleted',
+			description: `Deleted client "${existing.name}"`,
+			performedById: locals.user.id
+		});
+
+		redirect(303, '/clients');
 	}
 };
