@@ -8,6 +8,7 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { page } from '$app/state';
 	import PageHeader from '$lib/components/shared/page-header.svelte';
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';
 	import PoliciesTab from '$lib/components/clients/policies-tab.svelte';
@@ -28,6 +29,8 @@
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
+
+	let members = $derived(page.data.members ?? []);
 
 	// Active tab
 	let activeTab = $state('policies');
@@ -208,6 +211,7 @@
 				<TasksTab
 					tasks={data.tasks}
 					clientId={data.client.id}
+					{members}
 					{form}
 				/>
 			</Tabs.Content>

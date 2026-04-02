@@ -16,6 +16,7 @@
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
 	import { TASK_PRIORITIES } from '$lib/types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
+	import { formatDate } from '$lib/utils/format';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -39,12 +40,6 @@
 	$effect(() => {
 		editPriority = data.task.priority;
 	});
-
-	function formatDate(d: string | Date | null | undefined): string {
-		if (!d) return '—';
-		const date = typeof d === 'string' ? new Date(d) : d;
-		return date.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
-	}
 
 	function toInputDate(d: string | Date | null | undefined): string {
 		if (!d) return '';

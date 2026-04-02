@@ -1,8 +1,11 @@
 import { db } from '$lib/server/db';
-import { task, client } from '$lib/server/db/schema';
+import { task, client, user } from '$lib/server/db/schema';
+import { alias } from 'drizzle-orm/pg-core';
 import { eq, and, desc, ne, sql, ilike } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+
+const assignee = alias(user, 'assignee');
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const orgId = locals.session?.activeOrganizationId;
@@ -26,9 +29,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const where = conditions.length === 1 ? conditions[0] : and(...conditions);
 
 	const tasks = await db
-		.select({ task: task, clientName: client.name })
+		.select({ task: task, clientName: client.name, assigneeName: assignee.name })
 		.from(task)
 		.leftJoin(client, eq(task.clientId, client.id))
+		.leftJoin(assignee, eq(task.assignedToId, assignee.id))
 		.where(where)
 		.orderBy(
 			sql`CASE ${task.priority} WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END`,
@@ -37,7 +41,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		.limit(100);
 
 	return {
-		tasks: tasks.map((r) => ({ ...r.task, clientName: r.clientName })),
+		tasks: tasks.map((r) => ({ ...r.task, clientName: r.clientName, assigneeName: r.assigneeName })),
 		filter,
 		search
 	};

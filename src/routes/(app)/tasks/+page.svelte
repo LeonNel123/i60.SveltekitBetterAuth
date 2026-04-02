@@ -25,6 +25,7 @@
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
 	import { TASK_PRIORITIES } from '$lib/types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
+	import { formatDate } from '$lib/utils/format';
 	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
@@ -67,12 +68,6 @@
 			params.set('filter', f);
 		}
 		goto(`?${params.toString()}`, { replaceState: true });
-	}
-
-	function formatDate(d: string | Date | null | undefined): string {
-		if (!d) return '—';
-		const date = typeof d === 'string' ? new Date(d) : d;
-		return date.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
 	}
 
 	function isOverdue(d: string | Date | null | undefined, status: string): boolean {
@@ -167,6 +162,7 @@
 							<TableHead>Status</TableHead>
 							<TableHead>Priority</TableHead>
 							<TableHead>Client</TableHead>
+							<TableHead>Assignee</TableHead>
 							<TableHead>Due Date</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -188,6 +184,9 @@
 								</TableCell>
 								<TableCell class="text-muted-foreground">
 									{t.clientName ?? '—'}
+								</TableCell>
+								<TableCell class="text-muted-foreground">
+									{t.assigneeName ?? '—'}
 								</TableCell>
 								<TableCell
 									class={isOverdue(t.dueDate, t.status) ? 'text-destructive' : 'text-muted-foreground'}

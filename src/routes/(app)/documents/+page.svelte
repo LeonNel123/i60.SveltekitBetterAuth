@@ -15,6 +15,7 @@
 	import PageHeader from '$lib/components/shared/page-header.svelte';
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';
 	import EmptyState from '$lib/components/shared/empty-state.svelte';
+	import { formatDate, formatFileSize } from '$lib/utils/format';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Search from '@lucide/svelte/icons/search';
 	import Download from '@lucide/svelte/icons/download';
@@ -41,20 +42,6 @@
 			}
 			goto(`?${params.toString()}`, { replaceState: true, keepFocus: true });
 		}, 300);
-	}
-
-	function formatSize(bytes: number): string {
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	}
-
-	function formatDate(date: Date | string): string {
-		return new Date(date).toLocaleDateString('en-ZA', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
 	}
 
 	function mimeSubtype(mimeType: string): string {
@@ -126,7 +113,7 @@
 									{/if}
 								</TableCell>
 								<TableCell class="text-muted-foreground">{mimeSubtype(doc.mimeType)}</TableCell>
-								<TableCell class="text-muted-foreground">{formatSize(doc.size)}</TableCell>
+								<TableCell class="text-muted-foreground">{formatFileSize(doc.size)}</TableCell>
 								<TableCell class="text-muted-foreground">{formatDate(doc.createdAt)}</TableCell>
 								<TableCell class="text-right">
 									<Button variant="ghost" size="sm" href="/api/documents/{doc.id}">

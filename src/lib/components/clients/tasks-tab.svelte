@@ -32,25 +32,36 @@
 		status: string;
 		priority: string;
 		dueDate: Date | string | null;
+		assigneeName?: string | null;
+		[key: string]: unknown;
+	};
+
+	type Member = {
+		userId: string;
+		user: { name: string };
 		[key: string]: unknown;
 	};
 
 	let {
 		tasks,
 		clientId,
+		members = [],
 		form
 	}: {
 		tasks: Task[];
 		clientId: string;
+		members?: Member[];
 		form: Record<string, unknown> | null;
 	} = $props();
 
 	let dialogOpen = $state(false);
 	let loading = $state(false);
 	let taskPriority = $state('medium');
+	let taskAssignee = $state('');
 
 	function openAdd() {
 		taskPriority = 'medium';
+		taskAssignee = '';
 		dialogOpen = true;
 	}
 </script>
@@ -77,6 +88,7 @@
 						<TableHead>Title</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Priority</TableHead>
+						<TableHead>Assignee</TableHead>
 						<TableHead>Due Date</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -95,6 +107,9 @@
 							</TableCell>
 							<TableCell>
 								<TaskPriorityBadge priority={t.priority as TaskPriority} />
+							</TableCell>
+							<TableCell class="text-muted-foreground">
+								{t.assigneeName ?? '—'}
 							</TableCell>
 							<TableCell class="text-muted-foreground">
 								{formatDate(t.dueDate)}
@@ -132,6 +147,7 @@
 					if (result.type === 'success') {
 						dialogOpen = false;
 						taskPriority = 'medium';
+						taskAssignee = '';
 						toast.success('Task created');
 					}
 				};
@@ -167,6 +183,33 @@
 					<Input id="dueDate" name="dueDate" type="date" />
 				</div>
 			</div>
+
+			{#if members.length > 0}
+				<div class="grid gap-2">
+					<Label>Assign To</Label>
+					<Select.Root
+						type="single"
+						name="assignedToId"
+						value={taskAssignee}
+						onValueChange={(v) => (taskAssignee = v)}
+					>
+						<Select.Trigger class="w-full">
+							{#if taskAssignee}
+								{members.find((m) => m.userId === taskAssignee)?.user?.name ?? 'Select member...'}
+							{:else}
+								Me (default)
+							{/if}
+						</Select.Trigger>
+						<Select.Content>
+							{#each members as m (m.userId)}
+								<Select.Item value={m.userId}>
+									{m.user.name}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+			{/if}
 
 			<Dialog.Footer>
 				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>

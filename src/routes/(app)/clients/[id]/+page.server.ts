@@ -8,13 +8,17 @@ import {
 	note,
 	activity,
 	tag,
-	documentTag
+	documentTag,
+	user
 } from '$lib/server/db/schema';
+import { alias } from 'drizzle-orm/pg-core';
 import { logActivity } from '$lib/server/activity';
 import { saveUploadedFile, deleteFile } from '$lib/server/files';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+
+const assignee = alias(user, 'assignee');
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const orgId = locals.session?.activeOrganizationId;
@@ -40,8 +44,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			.orderBy(desc(claim.createdAt))
 			.limit(100),
 		db
-			.select()
+			.select({ task: task, assigneeName: assignee.name })
 			.from(task)
+			.leftJoin(assignee, eq(task.assignedToId, assignee.id))
 			.where(and(eq(task.clientId, params.id), eq(task.organizationId, orgId)))
 			.orderBy(desc(task.createdAt))
 			.limit(100),
@@ -73,7 +78,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		client: found,
 		policies,
 		claims,
-		tasks,
+		tasks: tasks.map((r) => ({ ...r.task, assigneeName: r.assigneeName })),
 		documents,
 		notes,
 		activities,
@@ -393,6 +398,7 @@ export const actions: Actions = {
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
 		const dueDate = (fd.get('dueDate') as string) || null;
+		const assignedToId = (fd.get('assignedToId') as string) || locals.user.id;
 
 		const [created] = await db
 			.insert(task)
@@ -403,7 +409,8 @@ export const actions: Actions = {
 				description,
 				priority,
 				dueDate: dueDate ? new Date(dueDate) : null,
-				createdById: locals.user.id
+				createdById: locals.user.id,
+				assignedToId
 			})
 			.returning();
 
