@@ -3,9 +3,12 @@ import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building } from '$app/environment';
 import { redirect, json } from '@sveltejs/kit';
 import type { Handle } from '@sveltejs/kit';
+import { seedSystemTags } from '$lib/server/seed-tags';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	if (building) return resolve(event);
+
+	await seedSystemTags();
 
 	const session = await auth.api.getSession({
 		headers: event.request.headers
