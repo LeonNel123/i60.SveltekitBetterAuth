@@ -106,7 +106,7 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.documents as doc (doc.id)}
-							<TableRow>
+							<TableRow class="hover:bg-muted/50">
 								<TableCell class="font-medium">{doc.name}</TableCell>
 								<TableCell>
 									{#if doc.clientId && doc.clientName}

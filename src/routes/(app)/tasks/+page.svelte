@@ -167,7 +167,7 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.tasks as t (t.id)}
-							<TableRow class="cursor-pointer" onclick={() => goto(`/tasks/${t.id}`)}>
+							<TableRow class="cursor-pointer hover:bg-muted/50" onclick={() => goto(`/tasks/${t.id}`)}>
 								<TableCell class="font-medium">{t.title}</TableCell>
 								<TableCell>
 									<TaskStatusBadge status={t.status as TaskStatus} />

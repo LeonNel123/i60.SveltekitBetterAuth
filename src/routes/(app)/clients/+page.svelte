@@ -97,7 +97,7 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.clients as c (c.id)}
-							<TableRow class="cursor-pointer" onclick={() => goto(`/clients/${c.id}`)}>
+							<TableRow class="cursor-pointer hover:bg-muted/50" onclick={() => goto(`/clients/${c.id}`)}>
 								<TableCell class="font-medium">{c.name}</TableCell>
 								<TableCell>
 									<Badge variant="outline">

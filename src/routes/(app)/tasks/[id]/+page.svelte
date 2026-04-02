@@ -83,29 +83,31 @@
 		</PageHeader>
 
 		<!-- Quick status change -->
-		<div class="flex flex-wrap gap-2">
-			<span class="self-center text-sm text-muted-foreground">Change status:</span>
-			{#each ['todo', 'in_progress', 'done'] as s}
-				<form
-					method="POST"
-					action="?/updateStatus"
-					use:enhance={() => {
-						return async ({ update }) => {
-							await update();
-						};
-					}}
-				>
-					<input type="hidden" name="status" value={s} />
-					<Button
-						type="submit"
-						size="sm"
-						variant={data.task.status === s ? 'default' : 'outline'}
+		<Card>
+			<CardContent class="flex flex-wrap items-center gap-3 py-3">
+				<span class="text-sm font-medium text-muted-foreground">Status:</span>
+				{#each ['todo', 'in_progress', 'done'] as s}
+					<form
+						method="POST"
+						action="?/updateStatus"
+						use:enhance={() => {
+							return async ({ update }) => {
+								await update();
+							};
+						}}
 					>
-						{s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}
-					</Button>
-				</form>
-			{/each}
-		</div>
+						<input type="hidden" name="status" value={s} />
+						<Button
+							type="submit"
+							size="sm"
+							variant={data.task.status === s ? 'default' : 'outline'}
+						>
+							{s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}
+						</Button>
+					</form>
+				{/each}
+			</CardContent>
+		</Card>
 
 		{#if form?.error}
 			<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -218,22 +220,24 @@
 			<div>
 				<Card>
 					<CardHeader>
-						<CardTitle>Details</CardTitle>
+						<CardTitle class="text-base">Details</CardTitle>
 					</CardHeader>
-					<CardContent class="space-y-4">
-						<div class="grid gap-1">
+					<CardContent class="divide-y">
+						<div class="grid gap-1 pb-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Priority
 							</p>
-							<TaskPriorityBadge priority={data.task.priority as TaskPriority} />
+							<div>
+								<TaskPriorityBadge priority={data.task.priority as TaskPriority} />
+							</div>
 						</div>
 
-						<div class="grid gap-1">
+						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Due Date
 							</p>
 							<p
-								class="text-sm {isOverdue(data.task.dueDate, data.task.status)
+								class="text-sm font-medium {isOverdue(data.task.dueDate, data.task.status)
 									? 'text-destructive'
 									: ''}"
 							>
@@ -241,14 +245,14 @@
 							</p>
 						</div>
 
-						<div class="grid gap-1">
+						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Client
 							</p>
 							{#if data.task.clientId && data.task.clientName}
 								<a
 									href="/clients/{data.task.clientId}"
-									class="text-sm text-primary hover:underline"
+									class="text-sm font-medium text-primary hover:underline"
 								>
 									{data.task.clientName}
 								</a>
@@ -257,7 +261,7 @@
 							{/if}
 						</div>
 
-						<div class="grid gap-1">
+						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Created
 							</p>
@@ -265,7 +269,7 @@
 						</div>
 
 						{#if data.task.completedAt}
-							<div class="grid gap-1">
+							<div class="grid gap-1 pt-3">
 								<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 									Completed
 								</p>

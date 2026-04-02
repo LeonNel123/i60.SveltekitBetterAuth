@@ -187,35 +187,60 @@
 		<!-- Client Info Summary -->
 		<Card>
 			<CardContent class="pt-6">
-				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<div class="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
 					{#if data.client.email}
-						<div class="flex items-center gap-2 text-sm">
-							<Mail class="h-4 w-4 text-muted-foreground" />
-							<span>{data.client.email}</span>
+						<div class="flex items-center gap-2.5 text-sm">
+							<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+								<Mail class="h-4 w-4 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs text-muted-foreground">Email</p>
+								<p class="truncate">{data.client.email}</p>
+							</div>
 						</div>
 					{/if}
 					{#if data.client.phone}
-						<div class="flex items-center gap-2 text-sm">
-							<Phone class="h-4 w-4 text-muted-foreground" />
-							<span>{data.client.phone}</span>
+						<div class="flex items-center gap-2.5 text-sm">
+							<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+								<Phone class="h-4 w-4 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs text-muted-foreground">Phone</p>
+								<p class="truncate">{data.client.phone}</p>
+							</div>
 						</div>
 					{/if}
 					{#if data.client.address}
-						<div class="flex items-center gap-2 text-sm">
-							<MapPin class="h-4 w-4 text-muted-foreground" />
-							<span>{data.client.address}</span>
+						<div class="flex items-center gap-2.5 text-sm">
+							<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+								<MapPin class="h-4 w-4 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs text-muted-foreground">Address</p>
+								<p class="truncate">{data.client.address}</p>
+							</div>
 						</div>
 					{/if}
 					{#if data.client.idNumber}
-						<div class="flex items-center gap-2 text-sm">
-							<span class="text-muted-foreground">ID:</span>
-							<span>{data.client.idNumber}</span>
+						<div class="flex items-center gap-2.5 text-sm">
+							<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+								<FileText class="h-4 w-4 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs text-muted-foreground">ID Number</p>
+								<p class="truncate">{data.client.idNumber}</p>
+							</div>
 						</div>
 					{/if}
 					{#if data.client.registrationNumber}
-						<div class="flex items-center gap-2 text-sm">
-							<span class="text-muted-foreground">Reg:</span>
-							<span>{data.client.registrationNumber}</span>
+						<div class="flex items-center gap-2.5 text-sm">
+							<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+								<FileText class="h-4 w-4 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="text-xs text-muted-foreground">Reg Number</p>
+								<p class="truncate">{data.client.registrationNumber}</p>
+							</div>
 						</div>
 					{/if}
 				</div>
@@ -226,37 +251,45 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			<Card>
 				<CardContent class="flex items-center gap-3 pt-6">
-					<ShieldCheck class="h-8 w-8 text-primary" />
+					<div class="rounded-lg bg-primary/10 p-2.5">
+						<ShieldCheck class="h-5 w-5 text-primary" />
+					</div>
 					<div>
 						<p class="text-2xl font-bold">{data.policies.length}</p>
-						<p class="text-sm text-muted-foreground">Policies</p>
+						<p class="text-xs text-muted-foreground">Policies</p>
 					</div>
 				</CardContent>
 			</Card>
 			<Card>
 				<CardContent class="flex items-center gap-3 pt-6">
-					<AlertTriangle class="h-8 w-8 text-orange-500" />
+					<div class="rounded-lg bg-orange-500/10 p-2.5">
+						<AlertTriangle class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+					</div>
 					<div>
 						<p class="text-2xl font-bold">{data.claims.length}</p>
-						<p class="text-sm text-muted-foreground">Claims</p>
+						<p class="text-xs text-muted-foreground">Claims</p>
 					</div>
 				</CardContent>
 			</Card>
 			<Card>
 				<CardContent class="flex items-center gap-3 pt-6">
-					<ClipboardList class="h-8 w-8 text-blue-500" />
+					<div class="rounded-lg bg-blue-500/10 p-2.5">
+						<ClipboardList class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+					</div>
 					<div>
 						<p class="text-2xl font-bold">{openTaskCount}</p>
-						<p class="text-sm text-muted-foreground">Open Tasks</p>
+						<p class="text-xs text-muted-foreground">Open Tasks</p>
 					</div>
 				</CardContent>
 			</Card>
 			<Card>
 				<CardContent class="flex items-center gap-3 pt-6">
-					<FileText class="h-8 w-8 text-green-500" />
+					<div class="rounded-lg bg-green-500/10 p-2.5">
+						<FileText class="h-5 w-5 text-green-600 dark:text-green-400" />
+					</div>
 					<div>
 						<p class="text-2xl font-bold">{data.documents.length}</p>
-						<p class="text-sm text-muted-foreground">Documents</p>
+						<p class="text-xs text-muted-foreground">Documents</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -274,7 +307,7 @@
 			</Tabs.List>
 
 			<!-- Policies Tab -->
-			<Tabs.Content value="policies">
+			<Tabs.Content value="policies" class="mt-4">
 				<div class="space-y-4">
 					<div class="flex justify-end">
 						<Button size="sm" onclick={() => (policyDialogOpen = true)}>
@@ -305,7 +338,7 @@
 								</TableHeader>
 								<TableBody>
 									{#each data.policies as p (p.id)}
-										<TableRow>
+										<TableRow class="hover:bg-muted/50">
 											<TableCell class="font-medium">{p.policyNumber}</TableCell>
 											<TableCell>{p.insurer}</TableCell>
 											<TableCell>
@@ -335,7 +368,7 @@
 			</Tabs.Content>
 
 			<!-- Claims Tab -->
-			<Tabs.Content value="claims">
+			<Tabs.Content value="claims" class="mt-4">
 				<div class="space-y-4">
 					<div class="flex justify-end">
 						<Button size="sm" onclick={() => (claimDialogOpen = true)}>
@@ -365,7 +398,7 @@
 								</TableHeader>
 								<TableBody>
 									{#each data.claims as c (c.id)}
-										<TableRow>
+										<TableRow class="hover:bg-muted/50">
 											<TableCell class="font-medium">{c.claimNumber}</TableCell>
 											<TableCell>
 												<Badge variant={claimStatusVariant(c.status)}>
@@ -394,7 +427,7 @@
 			</Tabs.Content>
 
 			<!-- Tasks Tab -->
-			<Tabs.Content value="tasks">
+			<Tabs.Content value="tasks" class="mt-4">
 				<div class="space-y-4">
 					<div class="flex justify-end">
 						<Button size="sm" onclick={() => (taskDialogOpen = true)}>
@@ -423,7 +456,7 @@
 								<TableBody>
 									{#each data.tasks as t (t.id)}
 										<TableRow
-											class="cursor-pointer"
+											class="cursor-pointer hover:bg-muted/50"
 											onclick={() => goto(`/tasks/${t.id}`)}
 										>
 											<TableCell class="font-medium">{t.title}</TableCell>
@@ -446,7 +479,7 @@
 			</Tabs.Content>
 
 			<!-- Documents Tab -->
-			<Tabs.Content value="documents">
+			<Tabs.Content value="documents" class="mt-4">
 				<div class="space-y-4">
 					<div class="flex justify-end">
 						<Button size="sm" onclick={() => (docDialogOpen = true)}>
@@ -475,7 +508,7 @@
 								</TableHeader>
 								<TableBody>
 									{#each data.documents as d (d.id)}
-										<TableRow>
+										<TableRow class="hover:bg-muted/50">
 											<TableCell class="font-medium">{d.name}</TableCell>
 											<TableCell class="text-muted-foreground">
 												{d.mimeType.split('/').pop()}
@@ -505,7 +538,7 @@
 			</Tabs.Content>
 
 			<!-- Notes Tab -->
-			<Tabs.Content value="notes">
+			<Tabs.Content value="notes" class="mt-4">
 				<div class="space-y-4">
 					<!-- Add Note Form -->
 					<Card>
@@ -539,13 +572,13 @@
 					</Card>
 
 					{#if data.notes.length === 0}
-						<p class="py-8 text-center text-sm text-muted-foreground">No notes yet.</p>
+						<p class="py-8 text-center text-sm text-muted-foreground">No notes yet. Add one above to get started.</p>
 					{:else}
-						<div class="space-y-3">
+						<div class="space-y-2">
 							{#each data.notes as n (n.id)}
 								<Card>
-									<CardContent class="pt-4 pb-4">
-										<p class="whitespace-pre-wrap text-sm">{n.content}</p>
+									<CardContent class="py-4">
+										<p class="whitespace-pre-wrap text-sm leading-relaxed">{n.content}</p>
 										<p class="mt-2 text-xs text-muted-foreground">
 											{timeAgo(n.createdAt)}
 										</p>
@@ -558,22 +591,23 @@
 			</Tabs.Content>
 
 			<!-- Activity Tab -->
-			<Tabs.Content value="activity">
+			<Tabs.Content value="activity" class="mt-4">
 				{#if data.activities.length === 0}
 					<p class="py-8 text-center text-sm text-muted-foreground">No activity yet.</p>
 				{:else}
-					<div class="space-y-3">
+					<div class="space-y-2">
 						{#each data.activities as a (a.id)}
 							<div
-								class="flex items-start gap-3 rounded-lg border p-3"
+								class="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30"
 							>
+								<div class="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary/40"></div>
 								<div class="flex-1">
 									<p class="text-sm">{a.description}</p>
 									<p class="mt-1 text-xs text-muted-foreground">
 										{timeAgo(a.createdAt)}
 									</p>
 								</div>
-								<Badge variant="outline" class="shrink-0 capitalize">
+								<Badge variant="outline" class="shrink-0 text-xs capitalize">
 									{a.entityType}
 								</Badge>
 							</div>

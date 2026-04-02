@@ -12,11 +12,11 @@
 	} = $props();
 </script>
 
-<div class="flex items-start justify-between gap-4">
+<div class="flex items-start justify-between gap-4 border-b pb-4">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">{title}</h1>
+		<h1 class="text-2xl font-bold tracking-tight">{title}</h1>
 		{#if description}
-			<p class="mt-1 text-muted-foreground">{description}</p>
+			<p class="mt-1 text-sm text-muted-foreground">{description}</p>
 		{/if}
 	</div>
 	{#if actions}
