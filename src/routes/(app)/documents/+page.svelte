@@ -4,6 +4,7 @@
 	import { APP_NAME } from '$lib/config';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
 	import {
 		Table,
 		TableBody,
@@ -44,6 +45,16 @@
 		}, 300);
 	}
 
+	function setTagFilter(tagId: string) {
+		const params = new URLSearchParams(page.url.searchParams);
+		if (tagId) {
+			params.set('tag', tagId);
+		} else {
+			params.delete('tag');
+		}
+		goto(`?${params.toString()}`, { replaceState: true });
+	}
+
 	function mimeSubtype(mimeType: string): string {
 		const sub = mimeType.split('/')[1] ?? mimeType;
 		return sub.toUpperCase();
@@ -75,6 +86,23 @@
 			{/if}
 		</div>
 
+		{#if data.tags.length > 0}
+			<div class="flex flex-wrap gap-1.5">
+				<Button
+					variant={!data.tagFilter ? 'default' : 'outline'}
+					size="sm"
+					onclick={() => setTagFilter('')}
+				>All</Button>
+				{#each data.tags as t (t.id)}
+					<Button
+						variant={data.tagFilter === t.id ? 'default' : 'outline'}
+						size="sm"
+						onclick={() => setTagFilter(t.id)}
+					>{t.name}</Button>
+				{/each}
+			</div>
+		{/if}
+
 		{#if data.documents.length === 0}
 			<EmptyState
 				icon={FileText}
@@ -90,6 +118,7 @@
 						<TableRow>
 							<TableHead>Name</TableHead>
 							<TableHead>Client</TableHead>
+							<TableHead>Tags</TableHead>
 							<TableHead>Type</TableHead>
 							<TableHead>Size</TableHead>
 							<TableHead>Uploaded</TableHead>
@@ -108,6 +137,17 @@
 										>
 											{doc.clientName}
 										</a>
+									{:else}
+										<span class="text-muted-foreground">—</span>
+									{/if}
+								</TableCell>
+								<TableCell>
+									{#if doc.tags?.length}
+										<div class="flex flex-wrap gap-1">
+											{#each doc.tags as t (t.id)}
+												<Badge variant="outline" class="text-xs">{t.name}</Badge>
+											{/each}
+										</div>
 									{:else}
 										<span class="text-muted-foreground">—</span>
 									{/if}

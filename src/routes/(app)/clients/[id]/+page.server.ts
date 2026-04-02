@@ -14,7 +14,7 @@ import {
 import { alias } from 'drizzle-orm/pg-core';
 import { logActivity } from '$lib/server/activity';
 import { saveUploadedFile, deleteFile } from '$lib/server/files';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -74,12 +74,34 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			.where(sql`${tag.organizationId} = ${orgId} OR ${tag.isSystem} = true`)
 	]);
 
+	// Load tags for each document
+	const docIds = documents.map((d) => d.id);
+	let docTagMap: Record<string, { id: string; name: string; isSystem: boolean }[]> = {};
+
+	if (docIds.length > 0) {
+		const docTags = await db
+			.select({
+				documentId: documentTag.documentId,
+				tagId: tag.id,
+				tagName: tag.name,
+				isSystem: tag.isSystem
+			})
+			.from(documentTag)
+			.innerJoin(tag, eq(documentTag.tagId, tag.id))
+			.where(inArray(documentTag.documentId, docIds));
+
+		for (const dt of docTags) {
+			if (!docTagMap[dt.documentId]) docTagMap[dt.documentId] = [];
+			docTagMap[dt.documentId].push({ id: dt.tagId, name: dt.tagName, isSystem: dt.isSystem });
+		}
+	}
+
 	return {
 		client: found,
 		policies,
 		claims,
 		tasks: tasks.map((r) => ({ ...r.task, assigneeName: r.assigneeName })),
-		documents,
+		documents: documents.map((d) => ({ ...d, tags: docTagMap[d.id] ?? [] })),
 		notes,
 		activities,
 		tags: orgTags

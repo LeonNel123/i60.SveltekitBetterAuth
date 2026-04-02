@@ -15,11 +15,18 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import EmptyState from '$lib/components/shared/empty-state.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import { formatDate, formatFileSize } from '$lib/utils/format';
 	import Upload from '@lucide/svelte/icons/upload';
 	import Download from '@lucide/svelte/icons/download';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import FileText from '@lucide/svelte/icons/file-text';
+
+	type DocTag = {
+		id: string;
+		name: string;
+		isSystem: boolean;
+	};
 
 	type Doc = {
 		id: string;
@@ -29,6 +36,7 @@
 		size: number;
 		storagePath: string;
 		createdAt: Date | string;
+		tags?: DocTag[];
 		[key: string]: unknown;
 	};
 
@@ -88,6 +96,7 @@
 				<TableHeader>
 					<TableRow>
 						<TableHead>Name</TableHead>
+						<TableHead>Tags</TableHead>
 						<TableHead>Type</TableHead>
 						<TableHead>Size</TableHead>
 						<TableHead>Uploaded</TableHead>
@@ -98,6 +107,17 @@
 					{#each documents as d (d.id)}
 						<TableRow class="hover:bg-muted/50">
 							<TableCell class="font-medium">{d.name}</TableCell>
+							<TableCell>
+								{#if d.tags?.length}
+									<div class="flex flex-wrap gap-1">
+										{#each d.tags as t (t.id)}
+											<Badge variant="outline" class="text-xs">{t.name}</Badge>
+										{/each}
+									</div>
+								{:else}
+									<span class="text-muted-foreground">—</span>
+								{/if}
+							</TableCell>
 							<TableCell class="text-muted-foreground">
 								{d.mimeType.split('/').pop()}
 							</TableCell>
