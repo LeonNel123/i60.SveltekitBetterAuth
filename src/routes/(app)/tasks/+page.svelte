@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import { toast } from 'svelte-sonner';
@@ -25,16 +26,19 @@
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
 	import { TASK_PRIORITIES } from '$lib/types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
-	import { formatDate } from '$lib/utils/format';
+	import { formatDate, isOverdueDate } from '$lib/utils/format';
 	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
 	import type { PageProps } from './$types';
+	import { buildRelativeUrl } from '$lib/utils/query';
 
 	let { data, form }: PageProps = $props();
 
 	let searchValue = $state('');
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let searching = $state(false);
 	let createDialogOpen = $state(false);
 	let createPriority = $state('medium');
 	let createAssignee = $state('');
@@ -49,31 +53,26 @@
 
 	function handleSearch() {
 		clearTimeout(searchTimeout);
+		searching = true;
 		searchTimeout = setTimeout(() => {
-			const params = new URLSearchParams(page.url.searchParams);
-			if (searchValue.trim()) {
-				params.set('q', searchValue.trim());
-			} else {
-				params.delete('q');
-			}
-			goto(`?${params.toString()}`, { replaceState: true, keepFocus: true });
+			goto(
+				buildRelativeUrl(page.url.pathname, page.url.search, {
+					q: searchValue.trim() || null
+				}),
+				{ replaceState: true, keepFocus: true }
+			).finally(() => {
+				searching = false;
+			});
 		}, 300);
 	}
 
 	function setFilter(f: string) {
-		const params = new URLSearchParams(page.url.searchParams);
-		if (f === 'all') {
-			params.delete('filter');
-		} else {
-			params.set('filter', f);
-		}
-		goto(`?${params.toString()}`, { replaceState: true });
-	}
-
-	function isOverdue(d: string | Date | null | undefined, status: string): boolean {
-		if (!d || status === 'done') return false;
-		const date = typeof d === 'string' ? new Date(d) : d;
-		return date < new Date();
+		goto(
+			buildRelativeUrl(page.url.pathname, page.url.search, {
+				filter: f === 'all' ? null : f
+			}),
+			{ replaceState: true }
+		);
 	}
 </script>
 
@@ -120,7 +119,11 @@
 
 			<!-- Search -->
 			<div class="relative max-w-sm flex-1">
-				<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+				{#if searching}
+					<LoaderCircle class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+				{:else}
+					<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+				{/if}
 				<Input
 					placeholder="Search tasks..."
 					class="pl-9"
@@ -168,28 +171,26 @@
 					</TableHeader>
 					<TableBody>
 						{#each data.tasks as t (t.id)}
-							<TableRow
-								class="cursor-pointer hover:bg-muted/50"
-								onclick={() => goto(`/tasks/${t.id}`)}
-								onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
-								role="button"
-								tabindex={0}
-							>
-								<TableCell class="font-medium">{t.title}</TableCell>
-								<TableCell>
+							<TableRow class="cursor-pointer hover:bg-muted/50 transition-colors">
+								<TableCell class="py-3.5 font-medium">
+									<a href={resolve(`/tasks/${t.id}`)} class="hover:underline">{t.title}</a>
+								</TableCell>
+								<TableCell class="py-3.5">
 									<TaskStatusBadge status={t.status as TaskStatus} />
 								</TableCell>
-								<TableCell>
+								<TableCell class="py-3.5">
 									<TaskPriorityBadge priority={t.priority as TaskPriority} />
 								</TableCell>
-								<TableCell class="text-muted-foreground">
+								<TableCell class="py-3.5 text-muted-foreground">
 									{t.clientName ?? '—'}
 								</TableCell>
-								<TableCell class="text-muted-foreground">
+								<TableCell class="py-3.5 text-muted-foreground">
 									{t.assigneeName ?? '—'}
 								</TableCell>
 								<TableCell
-									class={isOverdue(t.dueDate, t.status) ? 'text-destructive' : 'text-muted-foreground'}
+									class="py-3.5 {isOverdueDate(t.dueDate, t.status)
+										? 'text-destructive'
+										: 'text-muted-foreground'}"
 								>
 									{formatDate(t.dueDate)}
 								</TableCell>
@@ -233,7 +234,7 @@
 				class="space-y-4"
 			>
 				<div class="grid gap-2">
-					<Label for="title">Title</Label>
+					<Label for="title">Title <span class="text-destructive">*</span></Label>
 					<Input id="title" name="title" required placeholder="e.g. Follow up on renewal" />
 				</div>
 
@@ -260,7 +261,7 @@
 								{createPriority.charAt(0).toUpperCase() + createPriority.slice(1)}
 							</Select.Trigger>
 							<Select.Content>
-								{#each TASK_PRIORITIES as p}
+								{#each TASK_PRIORITIES as p (p)}
 									<Select.Item value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</Select.Item>
 								{/each}
 							</Select.Content>
@@ -283,7 +284,8 @@
 						>
 							<Select.Trigger class="w-full">
 								{#if createAssignee}
-									{members.find((m: { userId: string }) => m.userId === createAssignee)?.user?.name ?? 'Select member...'}
+									{members.find((m: { userId: string }) => m.userId === createAssignee)?.user
+										?.name ?? 'Select member...'}
 								{:else}
 									Me (default)
 								{/if}

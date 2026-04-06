@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
 	import { Button } from '$lib/components/ui/button';
@@ -16,7 +17,8 @@
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
 	import { TASK_PRIORITIES } from '$lib/types';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
-	import { formatDate } from '$lib/utils/format';
+	import { formatDate, isOverdueDate } from '$lib/utils/format';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -33,7 +35,8 @@
 
 	let members = $derived(page.data.members ?? []);
 	let assigneeName = $derived(
-		members.find((m: { userId: string }) => m.userId === data.task.assignedToId)?.user?.name ?? 'Unassigned'
+		members.find((m: { userId: string }) => m.userId === data.task.assignedToId)?.user?.name ??
+			'Unassigned'
 	);
 
 	// Sync edit priority from data
@@ -46,12 +49,6 @@
 		const date = typeof d === 'string' ? new Date(d) : d;
 		return date.toISOString().slice(0, 10);
 	}
-
-	function isOverdue(d: string | Date | null | undefined, status: string): boolean {
-		if (!d || status === 'done') return false;
-		const date = typeof d === 'string' ? new Date(d) : d;
-		return date < new Date();
-	}
 </script>
 
 <svelte:head>
@@ -62,7 +59,7 @@
 	<div class="space-y-6">
 		<!-- Back link -->
 		<div>
-			<Button variant="ghost" size="sm" href="/tasks" class="-ml-2">
+			<Button variant="ghost" size="sm" href={resolve('/tasks')} class="-ml-2">
 				<ArrowLeft class="mr-2 h-4 w-4" />
 				Back to Tasks
 			</Button>
@@ -94,10 +91,10 @@
 		</PageHeader>
 
 		<!-- Quick status change -->
-		<Card>
+		<Card class="rounded-xl">
 			<CardContent class="flex flex-wrap items-center gap-3 py-3">
 				<span class="text-sm font-medium text-muted-foreground">Status:</span>
-				{#each ['todo', 'in_progress', 'done'] as s}
+				{#each ['todo', 'in_progress', 'done'] as s (s)}
 					<form
 						method="POST"
 						action="?/updateStatus"
@@ -105,7 +102,9 @@
 							return async ({ result, update }) => {
 								await update();
 								if (result.type === 'success') {
-									toast.success(`Status updated to ${s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}`);
+									toast.success(
+										`Status updated to ${s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}`
+									);
 								}
 							};
 						}}
@@ -124,8 +123,9 @@
 		</Card>
 
 		{#if form?.error}
-			<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-				{form.error}
+			<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+				<span>{form?.error}</span>
 			</div>
 		{/if}
 
@@ -135,7 +135,7 @@
 			<div class="lg:col-span-2">
 				{#if editMode}
 					<!-- Edit form -->
-					<Card>
+					<Card class="rounded-xl">
 						<CardHeader>
 							<CardTitle>Edit Task</CardTitle>
 						</CardHeader>
@@ -158,12 +158,7 @@
 							>
 								<div class="grid gap-2">
 									<Label for="title">Title</Label>
-									<Input
-										id="title"
-										name="title"
-										required
-										value={data.task.title}
-									/>
+									<Input id="title" name="title" required value={data.task.title} />
 								</div>
 
 								<div class="grid gap-2">
@@ -190,7 +185,7 @@
 												{editPriority.charAt(0).toUpperCase() + editPriority.slice(1)}
 											</Select.Trigger>
 											<Select.Content>
-												{#each TASK_PRIORITIES as p}
+												{#each TASK_PRIORITIES as p (p)}
 													<Select.Item value={p}>
 														{p.charAt(0).toUpperCase() + p.slice(1)}
 													</Select.Item>
@@ -222,9 +217,9 @@
 					</Card>
 				{:else}
 					<!-- Description view -->
-					<Card>
+					<Card class="rounded-xl">
 						<CardHeader>
-							<CardTitle>Description</CardTitle>
+							<CardTitle class="text-lg font-semibold">Description</CardTitle>
 						</CardHeader>
 						<CardContent>
 							{#if data.task.description}
@@ -239,9 +234,9 @@
 
 			<!-- Details sidebar (right / 1 col) -->
 			<div>
-				<Card>
+				<Card class="rounded-xl">
 					<CardHeader>
-						<CardTitle class="text-base">Details</CardTitle>
+						<CardTitle class="text-lg font-semibold">Details</CardTitle>
 					</CardHeader>
 					<CardContent class="divide-y">
 						<div class="grid gap-1 pb-3">
@@ -258,7 +253,7 @@
 								Due Date
 							</p>
 							<p
-								class="text-sm font-medium {isOverdue(data.task.dueDate, data.task.status)
+								class="text-sm font-medium {isOverdueDate(data.task.dueDate, data.task.status)
 									? 'text-destructive'
 									: ''}"
 							>
@@ -291,14 +286,14 @@
 										value={data.task.assignedToId ?? ''}
 										onValueChange={(v) => {
 											const assignForm = document.getElementById('assign-form') as HTMLFormElement;
-											const hidden = assignForm?.querySelector('input[name="assignedToId"]') as HTMLInputElement;
+											const hidden = assignForm?.querySelector(
+												'input[name="assignedToId"]'
+											) as HTMLInputElement;
 											if (hidden) hidden.value = v;
 											assignForm?.requestSubmit();
 										}}
 									>
-										<Select.Trigger class="w-full text-xs">
-											Reassign...
-										</Select.Trigger>
+										<Select.Trigger class="w-full text-xs">Reassign...</Select.Trigger>
 										<Select.Content>
 											{#each members as m (m.userId)}
 												<Select.Item value={m.userId}>
@@ -317,7 +312,7 @@
 							</p>
 							{#if data.task.clientId && data.task.clientName}
 								<a
-									href="/clients/{data.task.clientId}"
+									href={resolve(`/clients/${data.task.clientId}`)}
 									class="text-sm font-medium text-primary hover:underline"
 								>
 									{data.task.clientName}
@@ -370,7 +365,11 @@
 						};
 					}}
 				>
-					<AlertDialog.Action type="submit" class="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={deleteLoading}>
+					<AlertDialog.Action
+						type="submit"
+						class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						disabled={deleteLoading}
+					>
 						{deleteLoading ? 'Deleting...' : 'Delete'}
 					</AlertDialog.Action>
 				</form>
