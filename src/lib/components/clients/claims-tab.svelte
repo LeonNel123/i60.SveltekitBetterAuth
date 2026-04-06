@@ -52,12 +52,10 @@
 	let {
 		claims,
 		policies,
-		clientId,
 		form
 	}: {
 		claims: Claim[];
 		policies: Policy[];
-		clientId: string;
 		form: Record<string, unknown> | null;
 	} = $props();
 
@@ -149,7 +147,12 @@
 									<Button variant="ghost" size="sm" onclick={() => openEdit(c)}>
 										<Pencil class="h-3.5 w-3.5" />
 									</Button>
-									<Button variant="ghost" size="sm" class="text-destructive hover:text-destructive" onclick={() => openDelete(c)}>
+									<Button
+										variant="ghost"
+										size="sm"
+										class="text-destructive hover:text-destructive"
+										onclick={() => openDelete(c)}
+									>
 										<Trash2 class="h-3.5 w-3.5" />
 									</Button>
 								</div>
@@ -204,12 +207,23 @@
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
-					<Label for="claimNumber">Claim Number</Label>
-					<Input id="claimNumber" name="claimNumber" required placeholder="e.g. CLM-001" value={editingClaim?.claimNumber ?? ''} />
+					<Label for="claimNumber">Claim Number <span class="text-destructive">*</span></Label>
+					<Input
+						id="claimNumber"
+						name="claimNumber"
+						required
+						placeholder="e.g. CLM-001"
+						value={editingClaim?.claimNumber ?? ''}
+					/>
 				</div>
 				<div class="grid gap-2">
 					<Label>Linked Policy</Label>
-					<Select.Root type="single" name="policyId" value={claimPolicyId} onValueChange={(v) => (claimPolicyId = v)}>
+					<Select.Root
+						type="single"
+						name="policyId"
+						value={claimPolicyId}
+						onValueChange={(v) => (claimPolicyId = v)}
+					>
 						<Select.Trigger class="w-full">
 							{#if claimPolicyId}
 								{policies.find((p) => p.id === claimPolicyId)?.policyNumber ?? 'Select policy'}
@@ -231,12 +245,17 @@
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label>Status</Label>
-					<Select.Root type="single" name="status" value={claimStatus} onValueChange={(v) => (claimStatus = v)}>
+					<Select.Root
+						type="single"
+						name="status"
+						value={claimStatus}
+						onValueChange={(v) => (claimStatus = v)}
+					>
 						<Select.Trigger class="w-full">
 							{claimStatusLabel(claimStatus)}
 						</Select.Trigger>
 						<Select.Content>
-							{#each CLAIM_STATUSES as s}
+							{#each CLAIM_STATUSES as s (s)}
 								<Select.Item value={s}>{claimStatusLabel(s)}</Select.Item>
 							{/each}
 						</Select.Content>
@@ -244,30 +263,53 @@
 				</div>
 				<div class="grid gap-2">
 					<Label for="dateOfLoss">Date of Loss</Label>
-					<Input id="dateOfLoss" name="dateOfLoss" type="date" value={editingClaim?.dateOfLoss ?? ''} />
+					<Input
+						id="dateOfLoss"
+						name="dateOfLoss"
+						type="date"
+						value={editingClaim?.dateOfLoss ?? ''}
+					/>
 				</div>
 			</div>
 
 			<div class="grid gap-2">
 				<Label for="claimDescription">Description</Label>
-				<Textarea id="claimDescription" name="description" placeholder="Describe the loss..." rows={3} value={editingClaim?.description ?? ''} />
+				<Textarea
+					id="claimDescription"
+					name="description"
+					placeholder="Describe the loss..."
+					rows={3}
+					value={editingClaim?.description ?? ''}
+				/>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label for="amountClaimed">Amount Claimed (ZAR)</Label>
-					<Input id="amountClaimed" name="amountClaimed" type="number" step="0.01" placeholder="0.00" value={editingClaim?.amountClaimed ?? ''} />
+					<Input
+						id="amountClaimed"
+						name="amountClaimed"
+						type="number"
+						step="0.01"
+						placeholder="0.00"
+						value={editingClaim?.amountClaimed ?? ''}
+					/>
 				</div>
 				<div class="grid gap-2">
 					<Label for="amountSettled">Amount Settled (ZAR)</Label>
-					<Input id="amountSettled" name="amountSettled" type="number" step="0.01" placeholder="0.00" value={editingClaim?.amountSettled ?? ''} />
+					<Input
+						id="amountSettled"
+						name="amountSettled"
+						type="number"
+						step="0.01"
+						placeholder="0.00"
+						value={editingClaim?.amountSettled ?? ''}
+					/>
 				</div>
 			</div>
 
 			<Dialog.Footer>
-				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>
-					Cancel
-				</Button>
+				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>Cancel</Button>
 				<Button type="submit" disabled={loading}>
 					{loading ? 'Saving...' : editingClaim ? 'Update Claim' : 'Add Claim'}
 				</Button>
@@ -282,7 +324,8 @@
 		<AlertDialog.Header>
 			<AlertDialog.Title>Delete Claim</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to delete claim "{deletingClaim?.claimNumber}"? This action cannot be undone.
+				Are you sure you want to delete claim "{deletingClaim?.claimNumber}"? This action cannot be
+				undone.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

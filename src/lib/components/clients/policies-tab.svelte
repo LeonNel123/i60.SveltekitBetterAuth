@@ -47,11 +47,9 @@
 
 	let {
 		policies,
-		clientId,
 		form
 	}: {
 		policies: Policy[];
-		clientId: string;
 		form: Record<string, unknown> | null;
 	} = $props();
 
@@ -127,7 +125,9 @@
 							<TableCell class="font-medium">
 								{p.policyNumber}
 								{#if p.isActivePrimary}
-									<Badge variant="default" class="ml-1.5 gap-1 text-xs"><Star class="h-3 w-3" />Primary</Badge>
+									<Badge variant="default" class="ml-1.5 gap-1 text-xs"
+										><Star class="h-3 w-3" />Primary</Badge
+									>
 								{/if}
 							</TableCell>
 							<TableCell>{p.insurer}</TableCell>
@@ -153,7 +153,12 @@
 									<Button variant="ghost" size="sm" onclick={() => openEdit(p)}>
 										<Pencil class="h-3.5 w-3.5" />
 									</Button>
-									<Button variant="ghost" size="sm" class="text-destructive hover:text-destructive" onclick={() => openDelete(p)}>
+									<Button
+										variant="ghost"
+										size="sm"
+										class="text-destructive hover:text-destructive"
+										onclick={() => openDelete(p)}
+									>
 										<Trash2 class="h-3.5 w-3.5" />
 									</Button>
 								</div>
@@ -172,7 +177,9 @@
 		<Dialog.Header>
 			<Dialog.Title>{editingPolicy ? 'Edit Policy' : 'Add Policy'}</Dialog.Title>
 			<Dialog.Description>
-				{editingPolicy ? 'Update this insurance policy.' : 'Add a new insurance policy for this client.'}
+				{editingPolicy
+					? 'Update this insurance policy.'
+					: 'Add a new insurance policy for this client.'}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -208,24 +215,41 @@
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
-					<Label for="policyNumber">Policy Number</Label>
-					<Input id="policyNumber" name="policyNumber" required placeholder="e.g. POL-001" value={editingPolicy?.policyNumber ?? ''} />
+					<Label for="policyNumber">Policy Number <span class="text-destructive">*</span></Label>
+					<Input
+						id="policyNumber"
+						name="policyNumber"
+						required
+						placeholder="e.g. POL-001"
+						value={editingPolicy?.policyNumber ?? ''}
+					/>
 				</div>
 				<div class="grid gap-2">
-					<Label for="insurer">Insurer</Label>
-					<Input id="insurer" name="insurer" required placeholder="e.g. Santam" value={editingPolicy?.insurer ?? ''} />
+					<Label for="insurer">Insurer <span class="text-destructive">*</span></Label>
+					<Input
+						id="insurer"
+						name="insurer"
+						required
+						placeholder="e.g. Santam"
+						value={editingPolicy?.insurer ?? ''}
+					/>
 				</div>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label>Type</Label>
-					<Select.Root type="single" name="type" value={policyType} onValueChange={(v) => (policyType = v)}>
+					<Select.Root
+						type="single"
+						name="type"
+						value={policyType}
+						onValueChange={(v) => (policyType = v)}
+					>
 						<Select.Trigger class="w-full">
 							{policyTypeLabel(policyType)}
 						</Select.Trigger>
 						<Select.Content>
-							{#each POLICY_TYPES as t}
+							{#each POLICY_TYPES as t (t)}
 								<Select.Item value={t}>{policyTypeLabel(t)}</Select.Item>
 							{/each}
 						</Select.Content>
@@ -233,12 +257,17 @@
 				</div>
 				<div class="grid gap-2">
 					<Label>Status</Label>
-					<Select.Root type="single" name="status" value={policyStatus} onValueChange={(v) => (policyStatus = v)}>
+					<Select.Root
+						type="single"
+						name="status"
+						value={policyStatus}
+						onValueChange={(v) => (policyStatus = v)}
+					>
 						<Select.Trigger class="w-full">
 							{policyStatusLabel(policyStatus)}
 						</Select.Trigger>
 						<Select.Content>
-							{#each POLICY_STATUSES as s}
+							{#each POLICY_STATUSES as s (s)}
 								<Select.Item value={s}>{policyStatusLabel(s)}</Select.Item>
 							{/each}
 						</Select.Content>
@@ -249,7 +278,12 @@
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label for="startDate">Start Date</Label>
-					<Input id="startDate" name="startDate" type="date" value={editingPolicy?.startDate ?? ''} />
+					<Input
+						id="startDate"
+						name="startDate"
+						type="date"
+						value={editingPolicy?.startDate ?? ''}
+					/>
 				</div>
 				<div class="grid gap-2">
 					<Label for="endDate">End Date</Label>
@@ -259,7 +293,14 @@
 
 			<div class="grid gap-2">
 				<Label for="premium">Monthly Premium (ZAR)</Label>
-				<Input id="premium" name="premium" type="number" step="0.01" placeholder="0.00" value={editingPolicy?.premium ?? ''} />
+				<Input
+					id="premium"
+					name="premium"
+					type="number"
+					step="0.01"
+					placeholder="0.00"
+					value={editingPolicy?.premium ?? ''}
+				/>
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -269,9 +310,7 @@
 			</div>
 
 			<Dialog.Footer>
-				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>
-					Cancel
-				</Button>
+				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>Cancel</Button>
 				<Button type="submit" disabled={loading}>
 					{loading ? 'Saving...' : editingPolicy ? 'Update Policy' : 'Add Policy'}
 				</Button>
@@ -286,7 +325,8 @@
 		<AlertDialog.Header>
 			<AlertDialog.Title>Delete Policy</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to delete policy "{deletingPolicy?.policyNumber}"? This action cannot be undone.
+				Are you sure you want to delete policy "{deletingPolicy?.policyNumber}"? This action cannot
+				be undone.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

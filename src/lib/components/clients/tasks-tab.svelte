@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -44,12 +45,10 @@
 
 	let {
 		tasks,
-		clientId,
 		members = [],
 		form
 	}: {
 		tasks: Task[];
-		clientId: string;
 		members?: Member[];
 		form: Record<string, unknown> | null;
 	} = $props();
@@ -96,8 +95,10 @@
 					{#each tasks as t (t.id)}
 						<TableRow
 							class="cursor-pointer hover:bg-muted/50"
-							onclick={() => goto(`/tasks/${t.id}`)}
-							onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') goto(`/tasks/${t.id}`); }}
+							onclick={() => goto(resolve(`/tasks/${t.id}`))}
+							onkeydown={(e: KeyboardEvent) => {
+								if (e.key === 'Enter') goto(resolve(`/tasks/${t.id}`));
+							}}
 							role="button"
 							tabindex={0}
 						>
@@ -161,18 +162,28 @@
 
 			<div class="grid gap-2">
 				<Label for="taskDescription">Description</Label>
-				<Textarea id="taskDescription" name="description" placeholder="Optional details..." rows={3} />
+				<Textarea
+					id="taskDescription"
+					name="description"
+					placeholder="Optional details..."
+					rows={3}
+				/>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label>Priority</Label>
-					<Select.Root type="single" name="priority" value={taskPriority} onValueChange={(v) => (taskPriority = v)}>
+					<Select.Root
+						type="single"
+						name="priority"
+						value={taskPriority}
+						onValueChange={(v) => (taskPriority = v)}
+					>
 						<Select.Trigger class="w-full">
 							{taskPriority.charAt(0).toUpperCase() + taskPriority.slice(1)}
 						</Select.Trigger>
 						<Select.Content>
-							{#each TASK_PRIORITIES as p}
+							{#each TASK_PRIORITIES as p (p)}
 								<Select.Item value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</Select.Item>
 							{/each}
 						</Select.Content>
@@ -212,9 +223,7 @@
 			{/if}
 
 			<Dialog.Footer>
-				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>
-					Cancel
-				</Button>
+				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>Cancel</Button>
 				<Button type="submit" disabled={loading}>
 					{loading ? 'Adding...' : 'Add Task'}
 				</Button>

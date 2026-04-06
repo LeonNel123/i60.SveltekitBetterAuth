@@ -4,9 +4,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import EmptyState from '$lib/components/shared/empty-state.svelte';
 	import { timeAgo } from '$lib/utils/format';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import StickyNote from '@lucide/svelte/icons/sticky-note';
 
 	type Note = {
 		id: string;
@@ -17,11 +19,9 @@
 
 	let {
 		notes,
-		clientId,
 		form
 	}: {
 		notes: Note[];
-		clientId: string;
 		form: Record<string, unknown> | null;
 	} = $props();
 
@@ -54,12 +54,7 @@
 				}}
 				class="space-y-3"
 			>
-				<Textarea
-					name="content"
-					placeholder="Write a note..."
-					rows={3}
-					required
-				/>
+				<Textarea name="content" placeholder="Write a note..." rows={3} required />
 				<div class="flex justify-end">
 					<Button type="submit" size="sm" disabled={loading}>
 						{loading ? 'Adding...' : 'Add Note'}
@@ -70,7 +65,7 @@
 	</Card>
 
 	{#if notes.length === 0}
-		<p class="py-8 text-center text-sm text-muted-foreground">No notes yet. Add one above to get started.</p>
+		<EmptyState icon={StickyNote} title="No notes yet" description="Add notes to track conversations, decisions, and follow-ups with this client." />
 	{:else}
 		<div class="space-y-2">
 			{#each notes as n (n.id)}
@@ -96,7 +91,9 @@
 								<Textarea
 									name="content"
 									value={editContent}
-									oninput={(e) => { editContent = (e.target as HTMLTextAreaElement).value; }}
+									oninput={(e) => {
+										editContent = (e.target as HTMLTextAreaElement).value;
+									}}
 									rows={3}
 									required
 								/>
@@ -105,7 +102,9 @@
 										type="button"
 										variant="ghost"
 										size="sm"
-										onclick={() => { editingNoteId = null; }}
+										onclick={() => {
+											editingNoteId = null;
+										}}
 									>
 										Cancel
 									</Button>

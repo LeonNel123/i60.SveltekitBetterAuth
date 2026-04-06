@@ -49,12 +49,10 @@
 	let {
 		documents,
 		tags,
-		clientId,
 		form
 	}: {
 		documents: Doc[];
 		tags: Tag[];
-		clientId: string;
 		form: Record<string, unknown> | null;
 	} = $props();
 
@@ -129,14 +127,15 @@
 							</TableCell>
 							<TableCell class="text-right">
 								<div class="flex justify-end gap-1">
+									<Button variant="ghost" size="sm" href="/api/documents/{d.id}">
+										<Download class="h-4 w-4" />
+									</Button>
 									<Button
 										variant="ghost"
 										size="sm"
-										href="/api/documents/{d.id}"
+										class="text-destructive hover:text-destructive"
+										onclick={() => openDelete(d)}
 									>
-										<Download class="h-4 w-4" />
-									</Button>
-									<Button variant="ghost" size="sm" class="text-destructive hover:text-destructive" onclick={() => openDelete(d)}>
 										<Trash2 class="h-3.5 w-3.5" />
 									</Button>
 								</div>
@@ -205,9 +204,7 @@
 			{/if}
 
 			<Dialog.Footer>
-				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>
-					Cancel
-				</Button>
+				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>Cancel</Button>
 				<Button type="submit" disabled={loading}>
 					{loading ? 'Uploading...' : 'Upload'}
 				</Button>
