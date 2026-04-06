@@ -7,6 +7,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { CLIENT_TYPES } from '$lib/types';
+	import { AlertCircle } from 'lucide-svelte';
 
 	let {
 		client,
@@ -48,22 +49,28 @@
 			}
 		};
 	}}
-	class="space-y-4"
+	class="space-y-6"
 >
 	{#if formResult?.error}
-		<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-			{formResult.error}
+		<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+			<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+			<span>{formResult.error}</span>
 		</div>
 	{/if}
 
 	<div class="grid gap-2">
 		<Label for="type">Client Type</Label>
-		<Select.Root type="single" name="type" value={clientType} onValueChange={(v) => (clientType = v)}>
+		<Select.Root
+			type="single"
+			name="type"
+			value={clientType}
+			onValueChange={(v) => (clientType = v)}
+		>
 			<Select.Trigger class="w-full">
 				{clientType === 'individual' ? 'Individual' : 'Company'}
 			</Select.Trigger>
 			<Select.Content>
-				{#each CLIENT_TYPES as t}
+				{#each CLIENT_TYPES as t (t)}
 					<Select.Item value={t}>{t === 'individual' ? 'Individual' : 'Company'}</Select.Item>
 				{/each}
 			</Select.Content>
@@ -71,36 +78,70 @@
 	</div>
 
 	<div class="grid gap-2">
-		<Label for="name">Name</Label>
-		<Input id="name" name="name" value={client?.name ?? ''} required placeholder={clientType === 'individual' ? 'Full name' : 'Company name'} />
+		<Label for="name">Name <span class="text-destructive">*</span></Label>
+		<Input
+			id="name"
+			name="name"
+			value={client?.name ?? ''}
+			required
+			placeholder={clientType === 'individual' ? 'Full name' : 'Company name'}
+		/>
 	</div>
 
 	{#if clientType === 'individual'}
 		<div class="grid gap-2">
 			<Label for="idNumber">SA ID Number</Label>
-			<Input id="idNumber" name="idNumber" value={client?.idNumber ?? ''} placeholder="e.g. 9001015009087" />
+			<Input
+				id="idNumber"
+				name="idNumber"
+				value={client?.idNumber ?? ''}
+				placeholder="e.g. 9001015009087"
+			/>
 		</div>
 	{:else}
 		<div class="grid gap-2">
 			<Label for="registrationNumber">Registration Number</Label>
-			<Input id="registrationNumber" name="registrationNumber" value={client?.registrationNumber ?? ''} placeholder="e.g. 2024/123456/07" />
+			<Input
+				id="registrationNumber"
+				name="registrationNumber"
+				value={client?.registrationNumber ?? ''}
+				placeholder="e.g. 2024/123456/07"
+			/>
 		</div>
 	{/if}
 
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="grid gap-2">
 			<Label for="email">Email</Label>
-			<Input id="email" name="email" type="email" value={client?.email ?? ''} placeholder="client@example.com" />
+			<Input
+				id="email"
+				name="email"
+				type="email"
+				value={client?.email ?? ''}
+				placeholder="client@example.com"
+			/>
 		</div>
 		<div class="grid gap-2">
 			<Label for="phone">Phone</Label>
-			<Input id="phone" name="phone" type="tel" value={client?.phone ?? ''} placeholder="083 123 4567" />
+			<Input
+				id="phone"
+				name="phone"
+				type="tel"
+				value={client?.phone ?? ''}
+				placeholder="083 123 4567"
+			/>
 		</div>
 	</div>
 
 	<div class="grid gap-2">
 		<Label for="address">Address</Label>
-		<Textarea id="address" name="address" value={client?.address ?? ''} placeholder="Physical or postal address" rows={3} />
+		<Textarea
+			id="address"
+			name="address"
+			value={client?.address ?? ''}
+			placeholder="Physical or postal address"
+			rows={3}
+		/>
 	</div>
 
 	<div class="flex gap-2">
