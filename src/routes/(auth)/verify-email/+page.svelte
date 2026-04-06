@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { authClient } from '$lib/auth-client';
 	import { APP_NAME } from '$lib/config';
+	import { AlertCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import {
@@ -61,7 +62,7 @@
 	<title>Verify email — {APP_NAME}</title>
 </svelte:head>
 
-<Card>
+<Card class="rounded-xl">
 	<CardHeader>
 		<CardTitle class="text-2xl">Verify your email</CardTitle>
 		<CardDescription>
@@ -71,8 +72,9 @@
 	<CardContent>
 		<div class="grid gap-4">
 			{#if error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-					{error}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{error}</span>
 				</div>
 			{/if}
 			{#if resent}

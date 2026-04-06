@@ -2,6 +2,7 @@
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
+	import { AlertCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -42,7 +43,7 @@
 	<title>Two-factor authentication — {APP_NAME}</title>
 </svelte:head>
 
-<Card>
+<Card class="rounded-xl">
 	<CardHeader>
 		<CardTitle class="text-2xl">Two-factor authentication</CardTitle>
 		<CardDescription>
@@ -54,8 +55,9 @@
 	<CardContent>
 		<form onsubmit={handleVerify} class="grid gap-4">
 			{#if error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-					{error}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{error}</span>
 				</div>
 			{/if}
 			<div class="grid gap-2">

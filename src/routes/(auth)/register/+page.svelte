@@ -13,6 +13,7 @@
 		CardFooter
 	} from '$lib/components/ui/card';
 	import { APP_NAME } from '$lib/config';
+	import { AlertCircle } from 'lucide-svelte';
 	import type { PageProps } from './$types';
 
 	let { form, data }: PageProps = $props();
@@ -30,7 +31,7 @@
 	<title>Create account — {APP_NAME}</title>
 </svelte:head>
 
-<Card>
+<Card class="rounded-xl">
 	<CardHeader>
 		<CardTitle class="text-2xl">Create account</CardTitle>
 		<CardDescription>Enter your details to get started</CardDescription>
@@ -48,12 +49,13 @@
 			class="grid gap-4"
 		>
 			{#if form?.error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-					{form.error}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{form.error}</span>
 				</div>
 			{/if}
 			<div class="grid gap-2">
-				<Label for="name">Name</Label>
+				<Label for="name">Name <span class="text-destructive">*</span></Label>
 				<Input
 					id="name"
 					name="name"
@@ -65,7 +67,7 @@
 				/>
 			</div>
 			<div class="grid gap-2">
-				<Label for="email">Email</Label>
+				<Label for="email">Email <span class="text-destructive">*</span></Label>
 				<Input
 					id="email"
 					name="email"
@@ -77,7 +79,7 @@
 				/>
 			</div>
 			<div class="grid gap-2">
-				<Label for="password">Password</Label>
+				<Label for="password">Password <span class="text-destructive">*</span></Label>
 				<Input
 					id="password"
 					name="password"

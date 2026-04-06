@@ -12,6 +12,7 @@
 		CardFooter
 	} from '$lib/components/ui/card';
 	import { APP_NAME } from '$lib/config';
+	import { AlertCircle } from 'lucide-svelte';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -22,7 +23,7 @@
 	<title>Set new password — {APP_NAME}</title>
 </svelte:head>
 
-<Card>
+<Card class="rounded-xl">
 	<CardHeader>
 		<CardTitle class="text-2xl">Set new password</CardTitle>
 		<CardDescription>Enter your new password below</CardDescription>
@@ -40,8 +41,9 @@
 			class="grid gap-4"
 		>
 			{#if form?.error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-					{form.error}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{form.error}</span>
 				</div>
 			{/if}
 			<input type="hidden" name="token" value={data.token} />
