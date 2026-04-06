@@ -11,7 +11,7 @@
 	<AppSidebar />
 	<SidebarInset>
 		<AppHeader user={data.user} />
-		<main class="flex-1 p-6">
+		<main id="main-content" class="flex-1 p-6">
 			{@render children()}
 		</main>
 	</SidebarInset>
