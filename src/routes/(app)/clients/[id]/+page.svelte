@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
@@ -41,9 +39,7 @@
 	let deleteClientLoading = $state(false);
 
 	// Stats
-	let openTaskCount = $derived(
-		data.tasks.filter((t) => t.status !== 'done').length
-	);
+	let openTaskCount = $derived(data.tasks.filter((t) => t.status !== 'done').length);
 </script>
 
 <svelte:head>
@@ -70,7 +66,7 @@
 		</PageHeader>
 
 		<!-- Client Info Summary -->
-		<Card>
+		<Card class="rounded-xl">
 			<CardContent class="pt-6">
 				<div class="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
 					{#if data.client.email}
@@ -131,15 +127,19 @@
 				</div>
 				{#if data.client.createdByName || data.client.createdAt}
 					<p class="mt-4 border-t pt-3 text-xs text-muted-foreground">
-						{#if data.client.createdByName}Created by {data.client.createdByName}{/if}{#if data.client.createdByName && data.client.createdAt} on {formatDate(data.client.createdAt)}{:else if data.client.createdAt}Created {formatDate(data.client.createdAt)}{/if}
+						{#if data.client.createdByName}Created by {data.client
+								.createdByName}{/if}{#if data.client.createdByName && data.client.createdAt}
+							on {formatDate(data.client.createdAt)}{:else if data.client.createdAt}Created {formatDate(
+								data.client.createdAt
+							)}{/if}
 					</p>
 				{/if}
 			</CardContent>
 		</Card>
 
 		<!-- Quick Stats -->
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<Card>
+		<div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			<Card class="rounded-xl">
 				<CardContent class="flex items-center gap-3 pt-6">
 					<div class="rounded-lg bg-primary/10 p-2.5">
 						<ShieldCheck class="h-5 w-5 text-primary" />
@@ -150,7 +150,7 @@
 					</div>
 				</CardContent>
 			</Card>
-			<Card>
+			<Card class="rounded-xl">
 				<CardContent class="flex items-center gap-3 pt-6">
 					<div class="rounded-lg bg-orange-500/10 p-2.5">
 						<AlertTriangle class="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -161,7 +161,7 @@
 					</div>
 				</CardContent>
 			</Card>
-			<Card>
+			<Card class="rounded-xl">
 				<CardContent class="flex items-center gap-3 pt-6">
 					<div class="rounded-lg bg-blue-500/10 p-2.5">
 						<ClipboardList class="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -172,7 +172,7 @@
 					</div>
 				</CardContent>
 			</Card>
-			<Card>
+			<Card class="rounded-xl">
 				<CardContent class="flex items-center gap-3 pt-6">
 					<div class="rounded-lg bg-green-500/10 p-2.5">
 						<FileText class="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -186,7 +186,7 @@
 		</div>
 
 		<!-- Tabbed Content -->
-		<Tabs.Root bind:value={activeTab}>
+		<Tabs.Root bind:value={activeTab} class="mt-8">
 			<Tabs.List>
 				<Tabs.Trigger value="policies">Policies</Tabs.Trigger>
 				<Tabs.Trigger value="claims">Claims</Tabs.Trigger>
@@ -196,50 +196,27 @@
 				<Tabs.Trigger value="activity">Activity</Tabs.Trigger>
 			</Tabs.List>
 
-			<Tabs.Content value="policies" class="mt-4">
-				<PoliciesTab
-					policies={data.policies}
-					clientId={data.client.id}
-					{form}
-				/>
+			<Tabs.Content value="policies" class="mt-6">
+				<PoliciesTab policies={data.policies} {form} />
 			</Tabs.Content>
 
-			<Tabs.Content value="claims" class="mt-4">
-				<ClaimsTab
-					claims={data.claims}
-					policies={data.policies}
-					clientId={data.client.id}
-					{form}
-				/>
+			<Tabs.Content value="claims" class="mt-6">
+				<ClaimsTab claims={data.claims} policies={data.policies} {form} />
 			</Tabs.Content>
 
-			<Tabs.Content value="tasks" class="mt-4">
-				<TasksTab
-					tasks={data.tasks}
-					clientId={data.client.id}
-					{members}
-					{form}
-				/>
+			<Tabs.Content value="tasks" class="mt-6">
+				<TasksTab tasks={data.tasks} {members} {form} />
 			</Tabs.Content>
 
-			<Tabs.Content value="documents" class="mt-4">
-				<DocumentsTab
-					documents={data.documents}
-					tags={data.tags}
-					clientId={data.client.id}
-					{form}
-				/>
+			<Tabs.Content value="documents" class="mt-6">
+				<DocumentsTab documents={data.documents} tags={data.tags} {form} />
 			</Tabs.Content>
 
-			<Tabs.Content value="notes" class="mt-4">
-				<NotesTab
-					notes={data.notes}
-					clientId={data.client.id}
-					{form}
-				/>
+			<Tabs.Content value="notes" class="mt-6">
+				<NotesTab notes={data.notes} {form} />
 			</Tabs.Content>
 
-			<Tabs.Content value="activity" class="mt-4">
+			<Tabs.Content value="activity" class="mt-6">
 				<ActivityTab activities={data.activities} />
 			</Tabs.Content>
 		</Tabs.Root>
@@ -251,7 +228,8 @@
 			<AlertDialog.Header>
 				<AlertDialog.Title>Delete Client</AlertDialog.Title>
 				<AlertDialog.Description>
-					Are you sure you want to delete "{data.client.name}"? All associated policies, claims, tasks, documents, and notes will be permanently removed. This action cannot be undone.
+					Are you sure you want to delete "{data.client.name}"? All associated policies, claims,
+					tasks, documents, and notes will be permanently removed. This action cannot be undone.
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 			<AlertDialog.Footer>
