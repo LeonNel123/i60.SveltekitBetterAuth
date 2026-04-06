@@ -19,7 +19,7 @@
 		{#each tabs as tab (tab.href)}
 			<a
 				href={tab.href}
-				class="px-4 py-2 text-sm font-medium transition-colors -mb-px border-b-2
+				class="px-4 py-2 text-sm font-medium transition-colors -mb-px border-b-[3px]
 					{page.url.pathname === tab.href
 					? 'border-primary text-primary'
 					: 'border-transparent text-muted-foreground hover:text-foreground'}"

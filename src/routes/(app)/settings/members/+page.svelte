@@ -20,6 +20,7 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components/ui/table';
+	import { AlertCircle } from 'lucide-svelte';
 	import { APP_NAME } from '$lib/config';
 	import type { PageProps } from './$types';
 
@@ -63,7 +64,7 @@
 </svelte:head>
 
 <div class="space-y-8">
-	<Card>
+	<Card class="rounded-xl">
 		<CardHeader>
 			<CardTitle>Members</CardTitle>
 			<CardDescription>People in your organization.</CardDescription>
@@ -96,7 +97,7 @@
 		</CardContent>
 	</Card>
 
-	<Card class="max-w-lg">
+	<Card class="max-w-lg rounded-xl">
 		<CardHeader>
 			<CardTitle>Invite member</CardTitle>
 			<CardDescription>Send an invitation to join your organization.</CardDescription>
@@ -104,8 +105,9 @@
 		<CardContent>
 			<form onsubmit={handleInvite} class="space-y-4">
 				{#if inviteError}
-					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-						{inviteError}
+					<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+						<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+						<span>{inviteError}</span>
 					</div>
 				{/if}
 				{#if inviteSuccess}

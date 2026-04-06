@@ -12,6 +12,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Badge } from '$lib/components/ui/badge';
+	import { AlertCircle } from 'lucide-svelte';
 	import QRCode from 'qrcode';
 	import { APP_NAME } from '$lib/config';
 	import type { PageProps } from './$types';
@@ -142,7 +143,7 @@
 </svelte:head>
 
 <div class="space-y-8">
-	<Card class="max-w-lg">
+	<Card class="max-w-lg rounded-xl">
 		<CardHeader>
 			<div class="flex items-center justify-between">
 				<div>
@@ -156,7 +157,10 @@
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if error}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{error}</span>
+				</div>
 			{/if}
 
 			{#if step === 'idle'}
@@ -242,15 +246,16 @@
 		</CardContent>
 	</Card>
 
-	<Card class="max-w-lg">
+	<Card class="max-w-lg rounded-xl">
 		<CardHeader>
 			<CardTitle>Change Password</CardTitle>
 			<CardDescription>Update your account password.</CardDescription>
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if passwordError}
-				<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-					{passwordError}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{passwordError}</span>
 				</div>
 			{/if}
 			{#if passwordSuccess}

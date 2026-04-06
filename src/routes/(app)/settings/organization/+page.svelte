@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { authClient } from '$lib/auth-client';
+	import { enhance } from '$app/forms';
 	import {
 		Card,
 		CardContent,
@@ -11,31 +10,25 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { AlertCircle } from 'lucide-svelte';
 	import { APP_NAME } from '$lib/config';
 	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 
-	let orgName = $state('');
-	let orgSlug = $state('');
 	let creating = $state(false);
-	let createError = $state('');
 
-	async function handleCreate(e: SubmitEvent) {
-		e.preventDefault();
-		if (!orgName.trim()) return;
-		creating = true;
-		createError = '';
-		const result = await authClient.organization.create({
-			name: orgName.trim(),
-			slug: orgSlug.trim() || orgName.trim().toLowerCase().replace(/\s+/g, '-')
-		});
-		creating = false;
-		if (result.error) {
-			createError = result.error.message ?? 'Failed to create organization';
-		} else {
-			await invalidateAll();
+	function getCreateFormValues(currentForm: PageProps['form']) {
+		if (
+			currentForm &&
+			'values' in currentForm &&
+			currentForm.values &&
+			typeof currentForm.values === 'object'
+		) {
+			return currentForm.values as { name?: string; slug?: string };
 		}
+
+		return {};
 	}
 </script>
 
@@ -44,7 +37,7 @@
 </svelte:head>
 
 {#if data.organization}
-	<Card class="max-w-lg">
+	<Card class="max-w-lg rounded-xl">
 		<CardHeader>
 			<CardTitle>Organization</CardTitle>
 			<CardDescription>Your current organization details.</CardDescription>
@@ -60,8 +53,48 @@
 			</div>
 		</CardContent>
 	</Card>
+{:else if data.organizations.length > 0}
+	<Card class="max-w-2xl rounded-xl">
+		<CardHeader>
+			<CardTitle>Restore Organization Access</CardTitle>
+			<CardDescription>
+				Your account already belongs to an organization, but this session does not have an active
+				organization selected yet.
+			</CardDescription>
+		</CardHeader>
+		<CardContent class="space-y-4">
+			{#if form?.activateError}
+				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+					<span>{form.activateError}</span>
+				</div>
+			{/if}
+
+			<div class="space-y-3">
+				{#each data.organizations as organization (organization.id)}
+					<form
+						method="POST"
+						action="?/activate"
+						class="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+					>
+						<div class="space-y-1">
+							<p class="font-medium">{organization.name}</p>
+							<p class="text-muted-foreground text-sm">/{organization.slug}</p>
+						</div>
+						<input type="hidden" name="organizationId" value={organization.id} />
+						<Button type="submit" variant="outline">Use organization</Button>
+					</form>
+				{/each}
+			</div>
+
+			<p class="text-muted-foreground text-sm">
+				If the organization you expect is not listed here, the organization row exists without a
+				matching membership and needs a one-time production repair.
+			</p>
+		</CardContent>
+	</Card>
 {:else}
-	<Card class="max-w-lg">
+	<Card class="max-w-lg rounded-xl">
 		<CardHeader>
 			<CardTitle>Create Organization</CardTitle>
 			<CardDescription
@@ -69,25 +102,46 @@
 			>
 		</CardHeader>
 		<CardContent>
-			<form onsubmit={handleCreate} class="space-y-4">
-				{#if createError}
-					<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-						{createError}
+			<form
+				method="POST"
+				action="?/create"
+				class="space-y-4"
+				use:enhance={() => {
+					creating = true;
+					return async ({ update }) => {
+						await update();
+						creating = false;
+					};
+				}}
+			>
+				{#if form?.createError}
+					<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+						<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+						<span>{form.createError}</span>
 					</div>
 				{/if}
 				<div class="grid gap-2">
-					<Label for="new-org-name">Organization name</Label>
-					<Input id="new-org-name" bind:value={orgName} required placeholder="My Organization" />
+					<Label for="new-org-name">Organization name <span class="text-destructive">*</span></Label>
+					<Input
+						id="new-org-name"
+						name="name"
+						value={getCreateFormValues(form).name ?? ''}
+						required
+						placeholder="My Organization"
+					/>
 				</div>
 				<div class="grid gap-2">
 					<Label for="new-org-slug"
 						>Slug <span class="text-muted-foreground">(optional)</span></Label
 					>
-					<Input id="new-org-slug" bind:value={orgSlug} placeholder="my-organization" />
+					<Input
+						id="new-org-slug"
+						name="slug"
+						value={getCreateFormValues(form).slug ?? ''}
+						placeholder="my-organization"
+					/>
 				</div>
-				<Button type="submit" disabled={creating}>
-					{creating ? 'Creating…' : 'Create organization'}
-				</Button>
+				<Button type="submit" disabled={creating}>{creating ? 'Creating...' : 'Create organization'}</Button>
 			</form>
 		</CardContent>
 	</Card>
