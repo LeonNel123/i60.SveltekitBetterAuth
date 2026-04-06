@@ -8,6 +8,34 @@ export function formatDate(d: string | Date | null | undefined): string {
 	return date.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+export function currentGreeting(now: Date = new Date()): string {
+	const hour = now.getHours();
+	if (hour < 12) return 'Good morning';
+	if (hour < 17) return 'Good afternoon';
+	return 'Good evening';
+}
+
+export function daysUntilDate(d: string | Date | null | undefined): number {
+	if (!d) return Infinity;
+
+	const endDate = typeof d === 'string' ? new Date(d) : new Date(d.getTime());
+	if (isNaN(endDate.getTime())) return Infinity;
+
+	endDate.setHours(0, 0, 0, 0);
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	return Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function isOverdueDate(d: string | Date | null | undefined, status?: string): boolean {
+	if (!d || status === 'done') return false;
+
+	const dueTime = typeof d === 'string' ? Date.parse(d) : d.getTime();
+	return !Number.isNaN(dueTime) && dueTime < Date.now();
+}
+
 export function formatCurrency(v: string | number | null | undefined): string {
 	if (v == null || v === '') return '\u2014';
 	const num = typeof v === 'string' ? parseFloat(v) : v;
@@ -69,7 +97,9 @@ export function claimStatusLabel(s: string): string {
 	return labels[s] ?? s;
 }
 
-export function policyStatusVariant(s: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+export function policyStatusVariant(
+	s: string
+): 'default' | 'secondary' | 'destructive' | 'outline' {
 	const map: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
 		active: 'default',
 		pending: 'outline',
