@@ -115,8 +115,8 @@
 		{#if data.documents.length === 0}
 			<EmptyState
 				icon={FileText}
-				title={data.search || data.tag ? 'No documents found' : 'No documents yet'}
-				description={data.search || data.tag
+				title={data.search || data.tagFilter ? 'No documents found' : 'No documents yet'}
+				description={data.search || data.tagFilter
 					? 'Try adjusting your search or filter.'
 					: 'Documents uploaded to clients will appear here.'}
 			/>

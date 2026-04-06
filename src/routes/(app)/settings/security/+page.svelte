@@ -12,7 +12,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Badge } from '$lib/components/ui/badge';
-	import { AlertCircle } from 'lucide-svelte';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import QRCode from 'qrcode';
 	import { APP_NAME } from '$lib/config';
 	import type { PageProps } from './$types';

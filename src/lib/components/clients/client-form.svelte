@@ -7,7 +7,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { CLIENT_TYPES } from '$lib/types';
-	import { AlertCircle } from 'lucide-svelte';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 
 	let {
 		client,

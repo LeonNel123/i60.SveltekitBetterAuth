@@ -20,7 +20,7 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components/ui/table';
-	import { AlertCircle } from 'lucide-svelte';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import { APP_NAME } from '$lib/config';
 	import type { PageProps } from './$types';
 

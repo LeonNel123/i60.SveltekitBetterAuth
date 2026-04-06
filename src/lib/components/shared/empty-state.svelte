@@ -19,8 +19,8 @@
 	class="flex flex-col items-center justify-center rounded-xl bg-muted/40 p-16 text-center"
 >
 	{#if Icon}
-		<div class="mb-4 rounded-full bg-muted p-4">
-			<Icon class="h-8 w-8 text-muted-foreground/60" aria-hidden="true" />
+		<div class="mb-4 rounded-full bg-muted p-4" aria-hidden="true">
+			<Icon class="h-8 w-8 text-muted-foreground/60" />
 		</div>
 	{/if}
 	<h3 class="text-lg font-semibold">{title}</h3>

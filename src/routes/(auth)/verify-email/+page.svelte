@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { authClient } from '$lib/auth-client';
 	import { APP_NAME } from '$lib/config';
-	import { AlertCircle } from 'lucide-svelte';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import {

@@ -14,7 +14,7 @@
 		CardFooter
 	} from '$lib/components/ui/card';
 	import { APP_NAME } from '$lib/config';
-	import { AlertCircle } from 'lucide-svelte';
+	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import type { PageProps } from './$types';
 
 	let { form, data }: PageProps = $props();
