@@ -15,15 +15,17 @@
 	} = $props();
 </script>
 
-<div class="flex flex-col items-center justify-center rounded-lg border border-dashed p-16 text-center">
+<div
+	class="flex flex-col items-center justify-center rounded-xl bg-muted/40 p-16 text-center"
+>
 	{#if Icon}
-		<div class="mb-4 rounded-full bg-muted p-3">
-			<Icon class="h-8 w-8 text-muted-foreground/60" />
+		<div class="mb-4 rounded-full bg-muted p-4">
+			<Icon class="h-8 w-8 text-muted-foreground/60" aria-hidden="true" />
 		</div>
 	{/if}
 	<h3 class="text-lg font-semibold">{title}</h3>
 	{#if description}
-		<p class="mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
+		<p class="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
 	{/if}
 	{#if action}
 		<div class="mt-5">
