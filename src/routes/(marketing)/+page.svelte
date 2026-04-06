@@ -25,19 +25,22 @@
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Client Management</h3>
 			<p class="text-muted-foreground">
-				Track insured individuals and companies, with full policy and claims history at your fingertips.
+				Track insured individuals and companies, with full policy and claims history at your
+				fingertips.
 			</p>
 		</div>
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Task-Driven Operations</h3>
 			<p class="text-muted-foreground">
-				Every action is tracked. Tasks are assigned, escalated, and completed with full traceability.
+				Every action is tracked. Tasks are assigned, escalated, and completed with full
+				traceability.
 			</p>
 		</div>
 		<div class="space-y-2">
 			<h3 class="text-xl font-semibold">Document Compliance</h3>
 			<p class="text-muted-foreground">
-				Upload, tag, and retrieve documents instantly. Built for South African regulatory requirements.
+				Upload, tag, and retrieve documents instantly. Built for South African regulatory
+				requirements.
 			</p>
 		</div>
 	</div>
