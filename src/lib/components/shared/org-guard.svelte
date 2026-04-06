@@ -26,7 +26,9 @@
 					<Building2 class="h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
 				</div>
 				<CardTitle>Organisation Required</CardTitle>
-				<CardDescription>Create or join an organisation to start managing clients, policies, and tasks.</CardDescription>
+				<CardDescription
+					>Create or join an organisation to start managing clients, policies, and tasks.</CardDescription
+				>
 			</CardHeader>
 			<CardContent>
 				<Button href="/settings/organization">Go to Organisation Settings</Button>

@@ -65,7 +65,11 @@
 	</Card>
 
 	{#if notes.length === 0}
-		<EmptyState icon={StickyNote} title="No notes yet" description="Add notes to track conversations, decisions, and follow-ups with this client." />
+		<EmptyState
+			icon={StickyNote}
+			title="No notes yet"
+			description="Add notes to track conversations, decisions, and follow-ups with this client."
+		/>
 	{:else}
 		<div class="space-y-2">
 			{#each notes as n (n.id)}

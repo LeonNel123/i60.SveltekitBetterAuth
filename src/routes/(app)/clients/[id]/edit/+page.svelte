@@ -3,7 +3,13 @@
 	import { toast } from 'svelte-sonner';
 	import { APP_NAME } from '$lib/config';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+		CardDescription
+	} from '$lib/components/ui/card';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import ClientForm from '$lib/components/clients/client-form.svelte';
 	import PageHeader from '$lib/components/shared/page-header.svelte';
@@ -38,7 +44,11 @@
 			<CardDescription>Permanently delete this client and all associated data.</CardDescription>
 		</CardHeader>
 		<CardContent>
-			<Button variant="outline" class="border-destructive/50 text-destructive hover:bg-destructive/10" onclick={() => (deleteOpen = true)}>
+			<Button
+				variant="outline"
+				class="border-destructive/50 text-destructive hover:bg-destructive/10"
+				onclick={() => (deleteOpen = true)}
+			>
 				<Trash2 class="mr-2 h-4 w-4" />
 				Delete Client
 			</Button>
@@ -51,7 +61,8 @@
 		<AlertDialog.Header>
 			<AlertDialog.Title>Delete Client</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to delete "{data.client.name}"? All associated policies, claims, tasks, documents, and notes will be permanently removed. This action cannot be undone.
+				Are you sure you want to delete "{data.client.name}"? All associated policies, claims,
+				tasks, documents, and notes will be permanently removed. This action cannot be undone.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

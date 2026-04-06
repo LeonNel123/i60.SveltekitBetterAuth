@@ -20,7 +20,11 @@
 </script>
 
 {#if activities.length === 0}
-	<EmptyState icon={ActivityIcon} title="No activity yet" description="Actions on this client's policies, claims, and tasks will appear here." />
+	<EmptyState
+		icon={ActivityIcon}
+		title="No activity yet"
+		description="Actions on this client's policies, claims, and tasks will appear here."
+	/>
 {:else}
 	<div class="space-y-2">
 		{#each activities as a (a.id)}

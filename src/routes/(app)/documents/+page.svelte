@@ -77,7 +77,9 @@
 		<div class="flex items-center gap-4">
 			<div class="relative max-w-sm flex-1">
 				{#if searching}
-					<LoaderCircle class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+					<LoaderCircle
+						class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+					/>
 				{:else}
 					<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 				{/if}
@@ -161,9 +163,15 @@
 										<span class="text-muted-foreground">—</span>
 									{/if}
 								</TableCell>
-								<TableCell class="py-3.5 text-muted-foreground">{mimeSubtype(doc.mimeType)}</TableCell>
-								<TableCell class="py-3.5 text-muted-foreground">{formatFileSize(doc.size)}</TableCell>
-								<TableCell class="py-3.5 text-muted-foreground">{formatDate(doc.createdAt)}</TableCell>
+								<TableCell class="py-3.5 text-muted-foreground"
+									>{mimeSubtype(doc.mimeType)}</TableCell
+								>
+								<TableCell class="py-3.5 text-muted-foreground"
+									>{formatFileSize(doc.size)}</TableCell
+								>
+								<TableCell class="py-3.5 text-muted-foreground"
+									>{formatDate(doc.createdAt)}</TableCell
+								>
 								<TableCell class="py-3.5 text-right">
 									<Button variant="ghost" size="sm" href={resolve(`/api/documents/${doc.id}`)}>
 										<Download class="h-4 w-4" />

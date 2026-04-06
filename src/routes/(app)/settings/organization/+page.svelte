@@ -64,7 +64,9 @@
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if form?.activateError}
-				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<div
+					class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+				>
 					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
 					<span>{form.activateError}</span>
 				</div>
@@ -115,13 +117,16 @@
 				}}
 			>
 				{#if form?.createError}
-					<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+					<div
+						class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+					>
 						<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
 						<span>{form.createError}</span>
 					</div>
 				{/if}
 				<div class="grid gap-2">
-					<Label for="new-org-name">Organization name <span class="text-destructive">*</span></Label>
+					<Label for="new-org-name">Organization name <span class="text-destructive">*</span></Label
+					>
 					<Input
 						id="new-org-name"
 						name="name"
@@ -141,7 +146,9 @@
 						placeholder="my-organization"
 					/>
 				</div>
-				<Button type="submit" disabled={creating}>{creating ? 'Creating...' : 'Create organization'}</Button>
+				<Button type="submit" disabled={creating}
+					>{creating ? 'Creating...' : 'Create organization'}</Button
+				>
 			</form>
 		</CardContent>
 	</Card>

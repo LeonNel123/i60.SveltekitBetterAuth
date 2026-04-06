@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { APP_NAME } from '$lib/config';
-	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+		CardDescription
+	} from '$lib/components/ui/card';
 	import ClientForm from '$lib/components/clients/client-form.svelte';
 	import PageHeader from '$lib/components/shared/page-header.svelte';
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';

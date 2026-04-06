@@ -65,7 +65,9 @@
 		<div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 			<Card class="rounded-xl transition-colors hover:bg-accent/50">
 				<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Clients</CardTitle>
+					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+						>Clients</CardTitle
+					>
 					<div class="rounded-md bg-primary/10 p-2">
 						<Users class="h-4 w-4 text-primary" />
 					</div>
@@ -84,7 +86,9 @@
 
 			<Card class="rounded-xl transition-colors hover:bg-accent/50">
 				<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Active Policies</CardTitle>
+					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+						>Active Policies</CardTitle
+					>
 					<div class="rounded-md bg-green-500/10 p-2">
 						<Shield class="h-4 w-4 text-green-600 dark:text-green-400" />
 					</div>
@@ -97,7 +101,9 @@
 
 			<Card class="rounded-xl transition-colors hover:bg-accent/50">
 				<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Open Claims</CardTitle>
+					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+						>Open Claims</CardTitle
+					>
 					<div class="rounded-md bg-orange-500/10 p-2">
 						<AlertTriangle class="h-4 w-4 text-orange-600 dark:text-orange-400" />
 					</div>
@@ -110,7 +116,9 @@
 
 			<Card class="rounded-xl transition-colors hover:bg-accent/50">
 				<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pending Tasks</CardTitle>
+					<CardTitle class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+						>Pending Tasks</CardTitle
+					>
 					<div class="rounded-md bg-blue-500/10 p-2">
 						<ClipboardList class="h-4 w-4 text-blue-600 dark:text-blue-400" />
 					</div>

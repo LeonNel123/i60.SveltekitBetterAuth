@@ -41,7 +41,9 @@
 			class="space-y-4"
 		>
 			{#if form?.error}
-				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<div
+					class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+				>
 					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
 					<span>{form.error}</span>
 				</div>
@@ -58,7 +60,9 @@
 				<Input id="email" type="email" value={data.user.email} disabled />
 				<p class="text-xs text-muted-foreground">Email cannot be changed.</p>
 			</div>
-			<Button type="submit" class="w-fit" disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</Button>
+			<Button type="submit" class="w-fit" disabled={saving}
+				>{saving ? 'Saving...' : 'Save changes'}</Button
+			>
 		</form>
 	</CardContent>
 </Card>

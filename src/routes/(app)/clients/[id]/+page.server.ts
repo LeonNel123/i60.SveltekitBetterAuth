@@ -16,9 +16,58 @@ import { logActivity } from '$lib/server/activity';
 import { saveUploadedFile, deleteFile } from '$lib/server/files';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { filterVisibleTagIds, resolveOrgMemberUserId } from '$lib/server/organization';
+import { CLAIM_STATUSES, POLICY_STATUSES, POLICY_TYPES, TASK_PRIORITIES } from '$lib/types';
+import { isOneOf } from '$lib/utils';
 import type { PageServerLoad, Actions } from './$types';
 
 const assignee = alias(user, 'assignee');
+
+async function findClientPolicy(orgId: string, clientId: string, policyId: string) {
+	const [existingPolicy] = await db
+		.select()
+		.from(policy)
+		.where(
+			and(eq(policy.id, policyId), eq(policy.clientId, clientId), eq(policy.organizationId, orgId))
+		);
+
+	return existingPolicy;
+}
+
+async function findClientClaim(orgId: string, clientId: string, claimId: string) {
+	const [existingClaim] = await db
+		.select()
+		.from(claim)
+		.where(
+			and(eq(claim.id, claimId), eq(claim.clientId, clientId), eq(claim.organizationId, orgId))
+		);
+
+	return existingClaim;
+}
+
+async function findClientNote(orgId: string, clientId: string, noteId: string) {
+	const [existingNote] = await db
+		.select()
+		.from(note)
+		.where(and(eq(note.id, noteId), eq(note.clientId, clientId), eq(note.organizationId, orgId)));
+
+	return existingNote;
+}
+
+async function findClientDocument(orgId: string, clientId: string, documentId: string) {
+	const [existingDocument] = await db
+		.select()
+		.from(document)
+		.where(
+			and(
+				eq(document.id, documentId),
+				eq(document.clientId, clientId),
+				eq(document.organizationId, orgId)
+			)
+		);
+
+	return existingDocument;
+}
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const orgId = locals.session?.activeOrganizationId;
@@ -78,7 +127,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// Load tags for each document
 	const docIds = documents.map((d) => d.id);
-	let docTagMap: Record<string, { id: string; name: string; isSystem: boolean }[]> = {};
+	const docTagMap: Record<string, { id: string; name: string; isSystem: boolean }[]> = {};
 
 	if (docIds.length > 0) {
 		const docTags = await db
@@ -149,8 +198,15 @@ export const actions: Actions = {
 		const content = (fd.get('content') as string)?.trim();
 		if (!noteId || !content) return fail(400, { noteError: 'Note content is required.' });
 
-		await db.update(note).set({ content, updatedAt: new Date() })
-			.where(and(eq(note.id, noteId), eq(note.organizationId, orgId)));
+		const existingNote = await findClientNote(orgId, params.id, noteId);
+		if (!existingNote) return fail(404, { noteError: 'Note not found.' });
+
+		await db
+			.update(note)
+			.set({ content, updatedAt: new Date() })
+			.where(
+				and(eq(note.id, noteId), eq(note.clientId, params.id), eq(note.organizationId, orgId))
+			);
 
 		return { noteSuccess: true };
 	},
@@ -163,11 +219,22 @@ export const actions: Actions = {
 		const noteId = fd.get('noteId') as string;
 		if (!noteId) return fail(400, { noteError: 'Note ID is required.' });
 
-		await db.delete(note).where(and(eq(note.id, noteId), eq(note.organizationId, orgId)));
+		const existingNote = await findClientNote(orgId, params.id, noteId);
+		if (!existingNote) return fail(404, { noteError: 'Note not found.' });
+
+		await db
+			.delete(note)
+			.where(
+				and(eq(note.id, noteId), eq(note.clientId, params.id), eq(note.organizationId, orgId))
+			);
 
 		await logActivity({
-			organizationId: orgId, clientId: params.id, entityType: 'note',
-			entityId: noteId, action: 'deleted', description: 'Deleted a note',
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'note',
+			entityId: noteId,
+			action: 'deleted',
+			description: 'Deleted a note',
 			performedById: locals.user.id
 		});
 
@@ -185,6 +252,10 @@ export const actions: Actions = {
 
 		const type = (fd.get('type') as string) || 'other';
 		const status = (fd.get('status') as string) || 'active';
+		if (!isOneOf(type, POLICY_TYPES)) return fail(400, { policyError: 'Invalid policy type.' });
+		if (!isOneOf(status, POLICY_STATUSES))
+			return fail(400, { policyError: 'Invalid policy status.' });
+
 		const startDate = (fd.get('startDate') as string) || null;
 		const endDate = (fd.get('endDate') as string) || null;
 		const premium = (fd.get('premium') as string) || null;
@@ -226,11 +297,7 @@ export const actions: Actions = {
 		const policyId = (fd.get('policyId') as string)?.trim();
 		if (!policyId) return fail(400, { policyError: 'Policy ID is required.' });
 
-		// Verify the policy belongs to this org
-		const [existing] = await db
-			.select()
-			.from(policy)
-			.where(and(eq(policy.id, policyId), eq(policy.organizationId, orgId)));
+		const existing = await findClientPolicy(orgId, params.id, policyId);
 		if (!existing) return fail(404, { policyError: 'Policy not found.' });
 
 		const policyNumber = (fd.get('policyNumber') as string)?.trim();
@@ -240,6 +307,10 @@ export const actions: Actions = {
 
 		const type = (fd.get('type') as string) || 'other';
 		const status = (fd.get('status') as string) || 'active';
+		if (!isOneOf(type, POLICY_TYPES)) return fail(400, { policyError: 'Invalid policy type.' });
+		if (!isOneOf(status, POLICY_STATUSES))
+			return fail(400, { policyError: 'Invalid policy status.' });
+
 		const startDate = (fd.get('startDate') as string) || null;
 		const endDate = (fd.get('endDate') as string) || null;
 		const premium = (fd.get('premium') as string) || null;
@@ -258,7 +329,13 @@ export const actions: Actions = {
 				isActivePrimary,
 				updatedAt: new Date()
 			})
-			.where(eq(policy.id, policyId));
+			.where(
+				and(
+					eq(policy.id, policyId),
+					eq(policy.clientId, params.id),
+					eq(policy.organizationId, orgId)
+				)
+			);
 
 		await logActivity({
 			organizationId: orgId,
@@ -279,14 +356,18 @@ export const actions: Actions = {
 		const policyId = (fd.get('policyId') as string)?.trim();
 		if (!policyId) return fail(400, { policyError: 'Policy ID is required.' });
 
-		// Verify the policy belongs to this org
-		const [existing] = await db
-			.select()
-			.from(policy)
-			.where(and(eq(policy.id, policyId), eq(policy.organizationId, orgId)));
+		const existing = await findClientPolicy(orgId, params.id, policyId);
 		if (!existing) return fail(404, { policyError: 'Policy not found.' });
 
-		await db.delete(policy).where(eq(policy.id, policyId));
+		await db
+			.delete(policy)
+			.where(
+				and(
+					eq(policy.id, policyId),
+					eq(policy.clientId, params.id),
+					eq(policy.organizationId, orgId)
+				)
+			);
 
 		await logActivity({
 			organizationId: orgId,
@@ -307,8 +388,17 @@ export const actions: Actions = {
 		const claimNumber = (fd.get('claimNumber') as string)?.trim();
 		if (!claimNumber) return fail(400, { claimError: 'Claim number is required.' });
 
-		const policyId = (fd.get('policyId') as string) || null;
+		const requestedPolicyId = (fd.get('policyId') as string)?.trim() || null;
 		const status = (fd.get('status') as string) || 'open';
+		if (!isOneOf(status, CLAIM_STATUSES)) return fail(400, { claimError: 'Invalid claim status.' });
+
+		const linkedPolicy = requestedPolicyId
+			? await findClientPolicy(orgId, params.id, requestedPolicyId)
+			: null;
+		if (requestedPolicyId && !linkedPolicy) {
+			return fail(400, { claimError: 'Selected policy is invalid.' });
+		}
+
 		const description = (fd.get('description') as string)?.trim() || null;
 		const dateOfLoss = (fd.get('dateOfLoss') as string) || null;
 		const amountClaimed = (fd.get('amountClaimed') as string) || null;
@@ -319,7 +409,7 @@ export const actions: Actions = {
 			.values({
 				organizationId: orgId,
 				clientId: params.id,
-				policyId,
+				policyId: linkedPolicy?.id ?? null,
 				claimNumber,
 				status,
 				description,
@@ -349,17 +439,23 @@ export const actions: Actions = {
 		const claimId = (fd.get('claimId') as string)?.trim();
 		if (!claimId) return fail(400, { claimError: 'Claim ID is required.' });
 
-		// Verify the claim belongs to this org
-		const [existing] = await db
-			.select()
-			.from(claim)
-			.where(and(eq(claim.id, claimId), eq(claim.organizationId, orgId)));
+		const existing = await findClientClaim(orgId, params.id, claimId);
 		if (!existing) return fail(404, { claimError: 'Claim not found.' });
 
 		const claimNumber = (fd.get('claimNumber') as string)?.trim();
 		if (!claimNumber) return fail(400, { claimError: 'Claim number is required.' });
 
+		const requestedPolicyId = (fd.get('policyId') as string)?.trim() || null;
 		const status = (fd.get('status') as string) || 'open';
+		if (!isOneOf(status, CLAIM_STATUSES)) return fail(400, { claimError: 'Invalid claim status.' });
+
+		const linkedPolicy = requestedPolicyId
+			? await findClientPolicy(orgId, params.id, requestedPolicyId)
+			: null;
+		if (requestedPolicyId && !linkedPolicy) {
+			return fail(400, { claimError: 'Selected policy is invalid.' });
+		}
+
 		const description = (fd.get('description') as string)?.trim() || null;
 		const dateOfLoss = (fd.get('dateOfLoss') as string) || null;
 		const amountClaimed = (fd.get('amountClaimed') as string) || null;
@@ -369,6 +465,7 @@ export const actions: Actions = {
 			.update(claim)
 			.set({
 				claimNumber,
+				policyId: linkedPolicy?.id ?? null,
 				status,
 				description,
 				dateOfLoss,
@@ -376,7 +473,9 @@ export const actions: Actions = {
 				amountSettled,
 				updatedAt: new Date()
 			})
-			.where(eq(claim.id, claimId));
+			.where(
+				and(eq(claim.id, claimId), eq(claim.clientId, params.id), eq(claim.organizationId, orgId))
+			);
 
 		await logActivity({
 			organizationId: orgId,
@@ -397,14 +496,14 @@ export const actions: Actions = {
 		const claimId = (fd.get('claimId') as string)?.trim();
 		if (!claimId) return fail(400, { claimError: 'Claim ID is required.' });
 
-		// Verify the claim belongs to this org
-		const [existing] = await db
-			.select()
-			.from(claim)
-			.where(and(eq(claim.id, claimId), eq(claim.organizationId, orgId)));
+		const existing = await findClientClaim(orgId, params.id, claimId);
 		if (!existing) return fail(404, { claimError: 'Claim not found.' });
 
-		await db.delete(claim).where(eq(claim.id, claimId));
+		await db
+			.delete(claim)
+			.where(
+				and(eq(claim.id, claimId), eq(claim.clientId, params.id), eq(claim.organizationId, orgId))
+			);
 
 		await logActivity({
 			organizationId: orgId,
@@ -427,8 +526,16 @@ export const actions: Actions = {
 
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
+		if (!isOneOf(priority, TASK_PRIORITIES))
+			return fail(400, { taskError: 'Invalid task priority.' });
+
 		const dueDate = (fd.get('dueDate') as string) || null;
-		const assignedToId = (fd.get('assignedToId') as string) || locals.user.id;
+		const assignedToId =
+			(await resolveOrgMemberUserId(
+				orgId,
+				(fd.get('assignedToId') as string)?.trim() || locals.user.id
+			)) ?? null;
+		if (!assignedToId) return fail(400, { taskError: 'Selected assignee is invalid.' });
 
 		const [created] = await db
 			.insert(task)
@@ -464,7 +571,13 @@ export const actions: Actions = {
 		if (!file || file.size === 0) return fail(400, { docError: 'No file selected.' });
 
 		const name = (fd.get('name') as string)?.trim() || file.name;
-		const tagIds = fd.getAll('tagIds') as string[];
+		const requestedTagIds = Array.from(
+			new Set((fd.getAll('tagIds') as string[]).map((tagId) => tagId.trim()).filter(Boolean))
+		);
+		const tagIds = await filterVisibleTagIds(orgId, requestedTagIds);
+		if (tagIds.length !== requestedTagIds.length) {
+			return fail(400, { docError: 'One or more selected tags are invalid.' });
+		}
 
 		try {
 			const fileInfo = await saveUploadedFile(orgId, file);
@@ -510,16 +623,20 @@ export const actions: Actions = {
 		const documentId = (fd.get('documentId') as string)?.trim();
 		if (!documentId) return fail(400, { docError: 'Document ID is required.' });
 
-		// Verify the document belongs to this org
-		const [existing] = await db
-			.select()
-			.from(document)
-			.where(and(eq(document.id, documentId), eq(document.organizationId, orgId)));
+		const existing = await findClientDocument(orgId, params.id, documentId);
 		if (!existing) return fail(404, { docError: 'Document not found.' });
 
 		// Delete tags first, then document record, then file from disk
 		await db.delete(documentTag).where(eq(documentTag.documentId, documentId));
-		await db.delete(document).where(eq(document.id, documentId));
+		await db
+			.delete(document)
+			.where(
+				and(
+					eq(document.id, documentId),
+					eq(document.clientId, params.id),
+					eq(document.organizationId, orgId)
+				)
+			);
 		await deleteFile(existing.storagePath);
 
 		await logActivity({
@@ -569,6 +686,6 @@ export const actions: Actions = {
 			performedById: locals.user.id
 		});
 
-		redirect(303, '/clients');
+		throw redirect(303, '/clients');
 	}
 };

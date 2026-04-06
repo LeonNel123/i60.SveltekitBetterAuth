@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export function isOneOf<T extends readonly string[]>(
+	value: string,
+	allowed: T
+): value is T[number] {
+	return allowed.includes(value as T[number]);
+}
+
 // Types required by shadcn-svelte components
 export type WithElementRef<T, E extends HTMLElement = HTMLElement> = T & {
 	ref?: E | null;

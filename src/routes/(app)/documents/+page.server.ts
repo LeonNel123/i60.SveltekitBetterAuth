@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	// Load tags for each document
 	const docIds = mappedDocuments.map((d) => d.id);
-	let docTagMap: Record<string, { id: string; name: string; isSystem: boolean }[]> = {};
+	const docTagMap: Record<string, { id: string; name: string; isSystem: boolean }[]> = {};
 
 	if (docIds.length > 0) {
 		const docTags = await db

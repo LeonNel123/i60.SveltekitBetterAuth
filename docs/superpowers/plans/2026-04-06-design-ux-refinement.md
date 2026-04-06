@@ -15,6 +15,7 @@
 ### Task 1: Foundation — CSS Theme & Skip Link
 
 **Files:**
+
 - Modify: `src/app.css` (lines 6-65 — theme variables)
 - Modify: `src/app.html` (add skip link)
 - Modify: `src/routes/(app)/+layout.svelte` (add id to main)
@@ -42,7 +43,11 @@ Also update `--radius` from `0.625rem` to `0.75rem` (12px) to match the rounded-
 In `src/app.html`, add this as the first child of `<body>`, before `<div id="svelte">`:
 
 ```html
-<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-md focus:ring-2 focus:ring-ring">Skip to main content</a>
+<a
+	href="#main-content"
+	class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-md focus:ring-2 focus:ring-ring"
+	>Skip to main content</a
+>
 ```
 
 - [ ] **Step 3: Add id="main-content" to main element**
@@ -71,6 +76,7 @@ git commit -m "style: bump muted-foreground contrast, increase radius, add skip-
 ### Task 2: Foundation — Empty State Component
 
 **Files:**
+
 - Modify: `src/lib/components/shared/empty-state.svelte`
 
 - [ ] **Step 1: Refine EmptyState component**
@@ -114,6 +120,7 @@ Update `src/lib/components/shared/empty-state.svelte` — softer container (back
 ```
 
 Changes from current:
+
 - Container: `border border-dashed` → `bg-muted/40` (softer, no dashed border)
 - Container: `rounded-lg` → `rounded-xl`
 - Icon wrapper: `p-3` → `p-4` (slightly larger touch target)
@@ -132,6 +139,7 @@ git commit -m "style: refine EmptyState component — softer bg, rounded-xl, ari
 ### Task 3: Dashboard Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/dashboard/+page.svelte`
 - Modify: `src/lib/utils/format.ts` (renewal urgency helper)
 
@@ -144,6 +152,7 @@ In `src/lib/utils/format.ts`, find the `renewalRowClass` or equivalent urgency f
 Apply these changes to `src/routes/(app)/dashboard/+page.svelte`:
 
 **Page header (line 52):**
+
 ```svelte
 <!-- FROM -->
 <h1 class="text-3xl font-bold tracking-tight">Command Centre</h1>
@@ -152,6 +161,7 @@ Apply these changes to `src/routes/(app)/dashboard/+page.svelte`:
 ```
 
 **Page subtitle (line 53):**
+
 ```svelte
 <!-- FROM -->
 <p class="mt-1 text-muted-foreground">
@@ -160,6 +170,7 @@ Apply these changes to `src/routes/(app)/dashboard/+page.svelte`:
 ```
 
 **KPI cards grid (line 63):**
+
 ```svelte
 <!-- FROM -->
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -171,6 +182,7 @@ Apply these changes to `src/routes/(app)/dashboard/+page.svelte`:
 Add `rounded-xl` to each Card class.
 
 **KPI stat labels — each CardTitle (lines 69, 88, 101, 114):**
+
 ```svelte
 <!-- FROM -->
 <CardTitle class="text-sm font-medium text-muted-foreground">
@@ -179,11 +191,13 @@ Add `rounded-xl` to each Card class.
 ```
 
 **KPI stat values — ensure text-3xl font-bold (lines ~74, ~91, ~104, ~117):**
+
 ```svelte
 <p class="text-3xl font-bold">{value}</p>
 ```
 
 **Section grid (line 130):**
+
 ```svelte
 <!-- FROM -->
 <div class="grid gap-6 lg:grid-cols-2">
@@ -192,6 +206,7 @@ Add `rounded-xl` to each Card class.
 ```
 
 **Section headings — My Tasks, Overdue, Renewing Soon, Activity (CardTitle instances around lines 135, 181, 224, 274):**
+
 ```svelte
 <!-- FROM -->
 <CardTitle class="text-base">My Tasks</CardTitle>
@@ -205,6 +220,7 @@ Apply same pattern to all four section titles.
 Add `rounded-xl` to each Card.
 
 **Task items padding (lines ~146, ~195):**
+
 ```svelte
 <!-- FROM -->
 class="flex items-start justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
@@ -215,44 +231,48 @@ class="flex items-start justify-between rounded-lg border p-4 transition-colors 
 **Empty task states — replace plain text (lines 140-143, 187-190) with EmptyState:**
 
 Import EmptyState and relevant icons at top of script:
+
 ```svelte
-import EmptyState from '$lib/components/shared/empty-state.svelte';
-import { CheckCircle, ClipboardList } from 'lucide-svelte';
+import EmptyState from '$lib/components/shared/empty-state.svelte'; import {(CheckCircle,
+ClipboardList)} from 'lucide-svelte';
 ```
 
 Replace the My Tasks empty state:
+
 ```svelte
 <!-- FROM -->
 <div class="flex flex-col items-center justify-center py-8 text-center">
-  <ClipboardList class="mb-2 h-8 w-8 text-muted-foreground/40" />
-  <p class="text-sm text-muted-foreground">No tasks assigned to you</p>
+	<ClipboardList class="mb-2 h-8 w-8 text-muted-foreground/40" />
+	<p class="text-sm text-muted-foreground">No tasks assigned to you</p>
 </div>
 <!-- TO -->
 <EmptyState
-  icon={ClipboardList}
-  title="No tasks assigned"
-  description="Tasks assigned to you will appear here."
+	icon={ClipboardList}
+	title="No tasks assigned"
+	description="Tasks assigned to you will appear here."
 />
 ```
 
 Replace the Overdue empty state:
+
 ```svelte
 <!-- FROM -->
 <div class="flex flex-col items-center justify-center py-8 text-center">
-  <CheckCircle class="mb-2 h-8 w-8 text-muted-foreground/40" />
-  <p class="text-sm text-muted-foreground">No overdue tasks</p>
+	<CheckCircle class="mb-2 h-8 w-8 text-muted-foreground/40" />
+	<p class="text-sm text-muted-foreground">No overdue tasks</p>
 </div>
 <!-- TO -->
 <EmptyState
-  icon={CheckCircle}
-  title="You're all caught up"
-  description="No overdue tasks right now."
+	icon={CheckCircle}
+	title="You're all caught up"
+	description="No overdue tasks right now."
 />
 ```
 
 **Renewal urgency — replace yellow with orange (lines 37-41 area):**
 
 Find the urgency colour function and change:
+
 ```svelte
 <!-- FROM -->
 return 'text-yellow-600 dark:text-yellow-400';
@@ -261,6 +281,7 @@ return 'text-orange-600 dark:text-orange-400';
 ```
 
 And the row class:
+
 ```svelte
 <!-- FROM -->
 'border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10'
@@ -284,6 +305,7 @@ git commit -m "style: dashboard — typography, spacing, KPI cards, empty states
 ### Task 4: Client List Page Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/clients/+page.svelte`
 
 - [ ] **Step 1: Fix table row semantics and spacing**
@@ -314,6 +336,7 @@ In `src/routes/(app)/clients/+page.svelte`:
 Remove `onclick`, `onkeydown`, `role`, `tabindex` from all TableRow elements.
 
 **Add `py-3.5` to all TableCell elements** for consistent row padding:
+
 ```svelte
 <TableCell class="py-3.5 text-muted-foreground">
 ```
@@ -343,9 +366,11 @@ Add the spinner in the search input container — replace the static search icon
 
 ```svelte
 {#if searching}
-  <LoaderCircle class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+	<LoaderCircle
+		class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+	/>
 {:else}
-  <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+	<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 {/if}
 ```
 
@@ -363,6 +388,7 @@ git commit -m "style: client list — semantic link rows, table padding, search 
 ### Task 5: Client Detail Page Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/clients/[id]/+page.svelte`
 
 - [ ] **Step 1: Typography and spacing refinements**
@@ -372,12 +398,14 @@ In `src/routes/(app)/clients/[id]/+page.svelte`:
 **Page title** — the PageHeader component likely uses its own h1. Check if it uses `text-3xl`. If the title class is passed or inherited, ensure it renders as `text-2xl font-semibold tracking-tight`.
 
 **Contact info card (line ~69):**
+
 ```svelte
 <!-- Add rounded-xl to the Card -->
 <Card class="rounded-xl">
 ```
 
 **Stats-to-tabs separation (before tabs, around line 188):**
+
 ```svelte
 <!-- FROM -->
 <Tabs.Root ...>
@@ -386,6 +414,7 @@ In `src/routes/(app)/clients/[id]/+page.svelte`:
 ```
 
 **Stat cards grid (line ~140):**
+
 ```svelte
 <!-- FROM -->
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -396,6 +425,7 @@ In `src/routes/(app)/clients/[id]/+page.svelte`:
 **Stat card wrappers** — add `rounded-xl` to each Card.
 
 **Tab content spacing (line ~222 area):**
+
 ```svelte
 <!-- FROM -->
 <Tabs.Content ... class="mt-4">
@@ -415,6 +445,7 @@ git commit -m "style: client detail — rounded-xl cards, spacing, typography hi
 ### Task 6: Client Tab Components Sweep
 
 **Files:**
+
 - Modify: `src/lib/components/clients/notes-tab.svelte`
 - Modify: `src/lib/components/clients/policies-tab.svelte`
 - Modify: `src/lib/components/clients/claims-tab.svelte`
@@ -487,9 +518,9 @@ In `src/lib/components/clients/claims-tab.svelte`:
 
 ```svelte
 <EmptyState
-  icon={FileWarning}
-  title="No claims yet"
-  description="Claims filed against this client's policies will appear here."
+	icon={FileWarning}
+	title="No claims yet"
+	description="Claims filed against this client's policies will appear here."
 />
 ```
 
@@ -523,9 +554,9 @@ In `src/lib/components/clients/tasks-tab.svelte`:
 
 ```svelte
 <EmptyState
-  icon={ClipboardList}
-  title="No tasks yet"
-  description="Tasks related to this client will appear here. Create one from the Tasks page."
+	icon={ClipboardList}
+	title="No tasks yet"
+	description="Tasks related to this client will appear here. Create one from the Tasks page."
 />
 ```
 
@@ -539,9 +570,9 @@ In `src/lib/components/clients/documents-tab.svelte`:
 
 ```svelte
 <EmptyState
-  icon={FileText}
-  title="No documents yet"
-  description="Upload documents like policy schedules, claims forms, and KYC records for this client."
+	icon={FileText}
+	title="No documents yet"
+	description="Upload documents like policy schedules, claims forms, and KYC records for this client."
 />
 ```
 
@@ -557,9 +588,9 @@ Import `Activity` icon from lucide-svelte:
 
 ```svelte
 <EmptyState
-  icon={Activity}
-  title="No activity yet"
-  description="Actions on this client's policies, claims, and tasks will appear here."
+	icon={Activity}
+	title="No activity yet"
+	description="Actions on this client's policies, claims, and tasks will appear here."
 />
 ```
 
@@ -575,6 +606,7 @@ git commit -m "style: client tabs — EmptyState everywhere, dialog safety, requ
 ### Task 7: Client Form Sweep
 
 **Files:**
+
 - Modify: `src/lib/components/clients/client-form.svelte`
 
 - [ ] **Step 1: Add required markers and spacing**
@@ -585,7 +617,8 @@ In `src/lib/components/clients/client-form.svelte`:
 
 ```svelte
 <Label for="name">
-  {clientType === 'individual' ? 'Full Name' : 'Company Name'} <span class="text-destructive">*</span>
+	{clientType === 'individual' ? 'Full Name' : 'Company Name'}
+	<span class="text-destructive">*</span>
 </Label>
 ```
 
@@ -603,12 +636,12 @@ In `src/lib/components/clients/client-form.svelte`:
 ```svelte
 <!-- FROM -->
 <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-  {form?.error}
+	{form?.error}
 </div>
 <!-- TO -->
 <div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-  <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
-  <span>{form?.error}</span>
+	<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+	<span>{form?.error}</span>
 </div>
 ```
 
@@ -626,6 +659,7 @@ git commit -m "style: client form — required markers, spacing, error icon"
 ### Task 8: Task Pages Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/tasks/+page.svelte`
 - Modify: `src/routes/(app)/tasks/[id]/+page.svelte`
 
@@ -697,6 +731,7 @@ enhance: () => {
 In `src/routes/(app)/tasks/[id]/+page.svelte`:
 
 **Sidebar "Details" heading (line ~235):**
+
 ```svelte
 <!-- FROM -->
 <CardTitle class="text-base">Details</CardTitle>
@@ -705,6 +740,7 @@ In `src/routes/(app)/tasks/[id]/+page.svelte`:
 ```
 
 **Description card heading:**
+
 ```svelte
 <!-- FROM -->
 <CardTitle class="text-base">Description</CardTitle>
@@ -720,12 +756,13 @@ In `src/routes/(app)/tasks/[id]/+page.svelte`:
 
 ```svelte
 <div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-  <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
-  <span>{form?.error}</span>
+	<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+	<span>{form?.error}</span>
 </div>
 ```
 
 **Detail sidebar labels (Priority, Due Date, etc.):**
+
 ```svelte
 <!-- FROM -->
 <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -745,6 +782,7 @@ git commit -m "style: task pages — semantic links, table padding, dialog safet
 ### Task 9: Documents Page Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/documents/+page.svelte`
 
 - [ ] **Step 1: Table padding and empty states**
@@ -783,6 +821,7 @@ git commit -m "style: documents — table padding, empty state, search loading"
 ### Task 10: Settings Pages Sweep
 
 **Files:**
+
 - Modify: `src/routes/(app)/settings/+layout.svelte`
 - Modify: `src/routes/(app)/settings/profile/+page.svelte`
 - Modify: `src/routes/(app)/settings/members/+page.svelte`
@@ -794,6 +833,7 @@ git commit -m "style: documents — table padding, empty state, search loading"
 In `src/routes/(app)/settings/+layout.svelte`:
 
 **Active tab underline** — make it slightly thicker:
+
 ```svelte
 <!-- FROM -->
 border-b-2
@@ -804,6 +844,7 @@ border-b-[3px]
 - [ ] **Step 1b: Add page subtitles to settings pages**
 
 Each settings page should include a description below the CardTitle. These will be added in subsequent steps for each page:
+
 - Profile: "Manage your display name and personal details."
 - Organisation: "Create, switch, or manage your organisation."
 - Members: "Invite team members and manage roles."
@@ -816,6 +857,7 @@ In `src/routes/(app)/settings/profile/+page.svelte`:
 **Card:** Add `rounded-xl`.
 
 **Submit button loading:**
+
 ```svelte
 <!-- FROM -->
 <Button type="submit" class="w-fit">Save changes</Button>
@@ -833,7 +875,7 @@ Wire it up in the enhance callback and update the button:
 
 ```svelte
 <Button type="submit" class="w-fit" disabled={saving}>
-  {saving ? 'Saving...' : 'Save changes'}
+	{saving ? 'Saving...' : 'Save changes'}
 </Button>
 ```
 
@@ -858,9 +900,9 @@ In `src/routes/(app)/settings/members/+page.svelte`:
 <p class="py-4 text-center text-sm text-muted-foreground">No members found.</p>
 <!-- TO -->
 <TableRow>
-  <TableCell colspan={3} class="py-8 text-center text-sm text-muted-foreground">
-    No members found.
-  </TableCell>
+	<TableCell colspan={3} class="py-8 text-center text-sm text-muted-foreground">
+		No members found.
+	</TableCell>
 </TableRow>
 ```
 
@@ -868,7 +910,7 @@ In `src/routes/(app)/settings/members/+page.svelte`:
 
 ```svelte
 <Button type="submit" disabled={inviteLoading}>
-  {inviteLoading ? 'Sending...' : 'Send Invite'}
+	{inviteLoading ? 'Sending...' : 'Send Invite'}
 </Button>
 ```
 
@@ -908,7 +950,7 @@ In `src/routes/(app)/settings/security/+page.svelte`:
 
 ```svelte
 <Button onclick={handlePasswordChange} disabled={changingPassword}>
-  {changingPassword ? 'Changing...' : 'Change Password'}
+	{changingPassword ? 'Changing...' : 'Change Password'}
 </Button>
 ```
 
@@ -926,6 +968,7 @@ git commit -m "style: settings — rounded-xl cards, loading states, required ma
 ### Task 11: Auth Pages Sweep
 
 **Files:**
+
 - Modify: `src/routes/(auth)/+layout.svelte`
 - Modify: `src/routes/(auth)/login/+page.svelte`
 - Modify: `src/routes/(auth)/register/+page.svelte`
@@ -951,12 +994,12 @@ In `src/routes/(auth)/login/+page.svelte`:
 ```svelte
 <!-- FROM -->
 <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-  {form?.error}
+	{form?.error}
 </div>
 <!-- TO -->
 <div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-  <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
-  <span>{form?.error}</span>
+	<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
+	<span>{form?.error}</span>
 </div>
 ```
 
@@ -971,6 +1014,7 @@ Import `AlertCircle` from `lucide-svelte`.
 In `src/routes/(auth)/register/+page.svelte`:
 
 Same changes as login:
+
 - Card: `rounded-xl`
 - Error banner: AlertCircle icon prefix
 - Verify loading state on submit button
@@ -1026,6 +1070,7 @@ git commit -m "style: auth pages — rounded-xl cards, error icons, required mar
 ### Task 12: Landing Page & Org Guard Sweep
 
 **Files:**
+
 - Modify: `src/routes/(marketing)/+page.svelte`
 - Modify: `src/lib/components/shared/org-guard.svelte`
 
@@ -1034,6 +1079,7 @@ git commit -m "style: auth pages — rounded-xl cards, error icons, required mar
 In `src/routes/(marketing)/+page.svelte`:
 
 **Hero title:**
+
 ```svelte
 <!-- Verify it uses proper tracking. If text-5xl, keep as-is for landing page (bigger is fine here). -->
 ```
@@ -1063,7 +1109,9 @@ In `src/lib/components/shared/org-guard.svelte`:
 <!-- FROM -->
 <CardDescription>You need to create or join an organisation to use BrokerOS.</CardDescription>
 <!-- TO -->
-<CardDescription>Create or join an organisation to start managing clients, policies, and tasks.</CardDescription>
+<CardDescription
+	>Create or join an organisation to start managing clients, policies, and tasks.</CardDescription
+>
 ```
 
 - [ ] **Step 3: Commit**
@@ -1117,6 +1165,7 @@ git commit -m "chore: fix lint and format after design refinement"
 - [ ] **Step 6: Visual verification**
 
 Start the dev server with `pnpm dev` and verify:
+
 - Dashboard: KPI cards with rounded-xl, proper typography hierarchy, no yellow text
 - Client list: clickable name links, proper table padding
 - Client detail: clear section hierarchy, rounded-xl cards

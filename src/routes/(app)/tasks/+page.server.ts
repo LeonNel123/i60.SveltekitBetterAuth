@@ -1,5 +1,8 @@
 import { db } from '$lib/server/db';
 import { task, client, user } from '$lib/server/db/schema';
+import { resolveOrgMemberUserId } from '$lib/server/organization';
+import { TASK_PRIORITIES } from '$lib/types';
+import { isOneOf } from '$lib/utils';
 import { alias } from 'drizzle-orm/pg-core';
 import { eq, and, desc, ne, sql, ilike } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
@@ -41,7 +44,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		.limit(100);
 
 	return {
-		tasks: tasks.map((r) => ({ ...r.task, clientName: r.clientName, assigneeName: r.assigneeName })),
+		tasks: tasks.map((r) => ({
+			...r.task,
+			clientName: r.clientName,
+			assigneeName: r.assigneeName
+		})),
 		filter,
 		search
 	};
@@ -58,8 +65,17 @@ export const actions: Actions = {
 
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
+		if (!isOneOf(priority, TASK_PRIORITIES)) {
+			return fail(400, { error: 'Invalid task priority.' });
+		}
+
 		const dueDate = (fd.get('dueDate') as string) || null;
-		const assignedToId = (fd.get('assignedToId') as string) || locals.user.id;
+		const assignedToId =
+			(await resolveOrgMemberUserId(
+				orgId,
+				(fd.get('assignedToId') as string)?.trim() || locals.user.id
+			)) ?? null;
+		if (!assignedToId) return fail(400, { error: 'Selected assignee is invalid.' });
 
 		await db.insert(task).values({
 			organizationId: orgId,

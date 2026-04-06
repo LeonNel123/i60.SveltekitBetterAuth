@@ -15,25 +15,27 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const where = search
 		? and(
-			baseCondition,
-			or(
-				ilike(client.name, `%${search}%`),
-				ilike(client.email, `%${search}%`),
-				ilike(client.phone, `%${search}%`),
-				ilike(client.idNumber, `%${search}%`),
-				ilike(client.registrationNumber, `%${search}%`)
+				baseCondition,
+				or(
+					ilike(client.name, `%${search}%`),
+					ilike(client.email, `%${search}%`),
+					ilike(client.phone, `%${search}%`),
+					ilike(client.idNumber, `%${search}%`),
+					ilike(client.registrationNumber, `%${search}%`)
+				)
 			)
-		)
 		: baseCondition;
 
 	const [clients, countResult] = await Promise.all([
-		db.select()
+		db
+			.select()
 			.from(client)
 			.where(where)
 			.orderBy(desc(client.createdAt))
 			.limit(perPage)
 			.offset((page - 1) * perPage),
-		db.select({ count: sql<number>`count(*)` })
+		db
+			.select({ count: sql<number>`count(*)` })
 			.from(client)
 			.where(where)
 	]);

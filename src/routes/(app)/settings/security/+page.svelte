@@ -157,7 +157,9 @@
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if error}
-				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<div
+					class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+				>
 					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
 					<span>{error}</span>
 				</div>
@@ -253,7 +255,9 @@
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if passwordError}
-				<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<div
+					class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+				>
 					<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
 					<span>{passwordError}</span>
 				</div>

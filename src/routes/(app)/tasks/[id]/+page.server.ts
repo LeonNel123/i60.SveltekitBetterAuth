@@ -1,6 +1,9 @@
 import { db } from '$lib/server/db';
 import { task, client } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
+import { resolveOrgMemberUserId } from '$lib/server/organization';
+import { TASK_PRIORITIES, TASK_STATUSES } from '$lib/types';
+import { isOneOf } from '$lib/utils';
 import { eq, and } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -26,6 +29,7 @@ export const actions: Actions = {
 
 		const fd = await request.formData();
 		const status = fd.get('status') as string;
+		if (!isOneOf(status, TASK_STATUSES)) return fail(400, { error: 'Invalid task status.' });
 
 		const updates: Record<string, unknown> = { status, updatedAt: new Date() };
 		if (status === 'done') updates.completedAt = new Date();
@@ -58,8 +62,11 @@ export const actions: Actions = {
 
 		const description = (fd.get('description') as string)?.trim() || null;
 		const priority = (fd.get('priority') as string) || 'medium';
+		if (!isOneOf(priority, TASK_PRIORITIES)) {
+			return fail(400, { error: 'Invalid task priority.' });
+		}
+
 		const dueDate = (fd.get('dueDate') as string) || null;
-		const assignedToId = (fd.get('assignedToId') as string)?.trim() || null;
 
 		await db
 			.update(task)
@@ -67,7 +74,6 @@ export const actions: Actions = {
 				title,
 				description,
 				priority,
-				assignedToId,
 				dueDate: dueDate ? new Date(dueDate) : null,
 				updatedAt: new Date()
 			})
@@ -80,7 +86,13 @@ export const actions: Actions = {
 		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
 
 		const fd = await request.formData();
-		const assignedToId = (fd.get('assignedToId') as string) || null;
+		const requestedAssigneeId = (fd.get('assignedToId') as string)?.trim() || null;
+		const assignedToId = requestedAssigneeId
+			? await resolveOrgMemberUserId(orgId, requestedAssigneeId)
+			: null;
+		if (requestedAssigneeId && !assignedToId) {
+			return fail(400, { error: 'Selected assignee is invalid.' });
+		}
 
 		await db
 			.update(task)

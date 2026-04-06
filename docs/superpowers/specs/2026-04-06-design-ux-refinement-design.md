@@ -13,16 +13,17 @@
 
 Standardise all spacing to this scale. Eliminate ad-hoc values.
 
-| Token | Size | Usage |
-|-------|------|-------|
-| `gap-1` | 4px | Inline elements, icon-to-label gaps |
-| `gap-2` | 8px | Form label to input, tight groups |
-| `gap-3` | 12px | List items, table row internal spacing |
+| Token   | Size | Usage                                     |
+| ------- | ---- | ----------------------------------------- |
+| `gap-1` | 4px  | Inline elements, icon-to-label gaps       |
+| `gap-2` | 8px  | Form label to input, tight groups         |
+| `gap-3` | 12px | List items, table row internal spacing    |
 | `gap-4` | 16px | Card internal padding, form field spacing |
-| `gap-6` | 24px | Section spacing, card-to-card gaps |
-| `gap-8` | 32px | Page sections, major layout breaks |
+| `gap-6` | 24px | Section spacing, card-to-card gaps        |
+| `gap-8` | 32px | Page sections, major layout breaks        |
 
 **Rules:**
+
 - Page header to first content: `gap-8`
 - Between content sections (e.g., KPI cards → task list): `gap-6`
 - Within a card: `gap-4`
@@ -31,17 +32,18 @@ Standardise all spacing to this scale. Eliminate ad-hoc values.
 
 ### 1B. Typography Hierarchy
 
-| Role | Classes | Usage |
-|------|---------|-------|
-| Page title | `text-2xl font-semibold tracking-tight` | One per page — "Command Centre", "Clients", etc. |
-| Page subtitle | `text-sm text-muted-foreground` | Below page title — greeting, description |
-| Section heading | `text-lg font-semibold` | Card section titles — "My Tasks", "Policies", "Details" |
-| Card title | `text-base font-medium` | Within cards when section heading is already present |
-| Body text | `text-sm` | Default content text |
-| Label / meta | `text-xs text-muted-foreground` | Metadata, stat labels. Use `uppercase tracking-wide` for KPI labels. |
-| KPI number | `text-3xl font-bold` | Dashboard stat values |
+| Role            | Classes                                 | Usage                                                                |
+| --------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| Page title      | `text-2xl font-semibold tracking-tight` | One per page — "Command Centre", "Clients", etc.                     |
+| Page subtitle   | `text-sm text-muted-foreground`         | Below page title — greeting, description                             |
+| Section heading | `text-lg font-semibold`                 | Card section titles — "My Tasks", "Policies", "Details"              |
+| Card title      | `text-base font-medium`                 | Within cards when section heading is already present                 |
+| Body text       | `text-sm`                               | Default content text                                                 |
+| Label / meta    | `text-xs text-muted-foreground`         | Metadata, stat labels. Use `uppercase tracking-wide` for KPI labels. |
+| KPI number      | `text-3xl font-bold`                    | Dashboard stat values                                                |
 
 **Changes from current:**
+
 - Page titles: `text-3xl font-bold` → `text-2xl font-semibold` (less heavy)
 - Section headings: `text-base` → `text-lg font-semibold` (more visible)
 - KPI labels: add `uppercase tracking-wide` for differentiation
@@ -52,17 +54,18 @@ Standardise all spacing to this scale. Eliminate ad-hoc values.
 
 **Semantic colour system — use consistently everywhere:**
 
-| Meaning | Background | Text | Usage |
-|---------|-----------|------|-------|
-| Destructive / Urgent / Overdue | `bg-red-500/10` | `text-red-600 dark:text-red-400` | Urgent tasks, overdue items, delete actions, claims rejected |
-| Warning / High / Expiring soon | `bg-orange-500/10` | `text-orange-600 dark:text-orange-400` | High priority, renewals ≤14 days, warnings |
-| Success / Active / Settled | `bg-green-500/10` | `text-green-600 dark:text-green-400` | Active policies, settled claims, completed tasks |
-| Info / Medium / Primary | `bg-blue-500/10` | `text-blue-600 dark:text-blue-400` | Medium priority, info badges, primary actions |
-| Neutral / Low | `bg-slate-500/10` | `text-slate-600 dark:text-slate-400` | Low priority, default/inactive states |
+| Meaning                        | Background         | Text                                   | Usage                                                        |
+| ------------------------------ | ------------------ | -------------------------------------- | ------------------------------------------------------------ |
+| Destructive / Urgent / Overdue | `bg-red-500/10`    | `text-red-600 dark:text-red-400`       | Urgent tasks, overdue items, delete actions, claims rejected |
+| Warning / High / Expiring soon | `bg-orange-500/10` | `text-orange-600 dark:text-orange-400` | High priority, renewals ≤14 days, warnings                   |
+| Success / Active / Settled     | `bg-green-500/10`  | `text-green-600 dark:text-green-400`   | Active policies, settled claims, completed tasks             |
+| Info / Medium / Primary        | `bg-blue-500/10`   | `text-blue-600 dark:text-blue-400`     | Medium priority, info badges, primary actions                |
+| Neutral / Low                  | `bg-slate-500/10`  | `text-slate-600 dark:text-slate-400`   | Low priority, default/inactive states                        |
 
 **Fix:** Replace all yellow text on light backgrounds (`text-yellow-600`) with orange (`text-orange-600`). Yellow fails WCAG on white.
 
 **Card & surface treatment:**
+
 - Cards: `rounded-xl` (12px radius), 1px border, no shadow. Hover: `hover:bg-accent/50` transition.
 - Grouped list rows: `rounded-lg` (8px), muted bg on hover, 1px dividers.
 - Dialogs: `rounded-xl`.
@@ -76,6 +79,7 @@ Standardise all spacing to this scale. Eliminate ad-hoc values.
 **Rule:** Every empty state uses the `EmptyState` component. No plain `<p>` tag fallbacks.
 
 Each empty state includes:
+
 - Icon (from lucide, contextual to the section)
 - Title (e.g., "No notes yet")
 - Description (explains what this section is for, not just "nothing here")
@@ -86,14 +90,17 @@ Each empty state includes:
 ### 2B. Loading & Submission States
 
 **Button loading pattern:**
+
 - All form submit buttons: disable on submit, show spinner + "Saving..." / "Creating..." text
 - Apply to: client form, task create/edit, policy/claim/document/note dialogs, settings forms, auth forms, invite form
 
 **Search loading:**
+
 - Show a small spinner inside the search input during debounce + fetch
 - Apply to: client list search, task list search, document search
 
 **Dialog submission safety:**
+
 - Prevent dialog close (escape key + cancel button + overlay click) while a form submission is in flight
 - Only close dialog on confirmed success from server response
 - Apply to: all dialog-based forms (policies, claims, tasks, documents, notes)
@@ -103,24 +110,29 @@ Each empty state includes:
 ### 2C. Table & List Improvements
 
 **Row semantics:**
+
 - Replace `role="button" tabindex={0} onkeydown` on `<TableRow>` with a clickable `<a>` tag inside the first cell (name column) that navigates to the detail page. Remove `onclick`/`onkeydown`/`role`/`tabindex` from the row itself. Keep `cursor-pointer hover:bg-muted/50` on the row for visual feedback only.
 - This fixes: keyboard navigation (Tab/Enter), screen reader announcements, right-click/open-in-new-tab
 - Apply to: client list rows, task list rows
 
 **Row spacing:**
+
 - Table cell padding: increase to `py-3.5 px-4` (from default ~8px)
 - Table header: `text-xs font-medium text-muted-foreground` with `py-3 px-4`
 
 **Row hover:**
+
 - Consistent `hover:bg-muted/50 transition-colors` on all clickable rows
 
 ### 2D. Form Improvements
 
 **Required fields:**
+
 - Add red asterisk `*` after required field labels
 - Add `(optional)` suffix on non-required fields (use whichever is less common per form)
 
 **Error banners:**
+
 - Improve visibility: add `AlertCircle` icon prefix to error messages
 - Keep server-side validation — no client-side JS validation added
 
@@ -131,14 +143,17 @@ Each empty state includes:
 **Semantic table rows:** Replace `role="button"` with `<a>` tags (covered in 2C).
 
 **Icon aria-labels:**
+
 - Add `aria-hidden="true"` to decorative icons (empty state icons, KPI card icons)
 - Ensure all status/priority badges include visible text labels, not just colour
 
 **Skip-to-main link:**
+
 - Add visually hidden skip link in `app.html` or root layout: `<a href="#main-content" class="sr-only focus:not-sr-only ...">Skip to main content</a>`
 - Add `id="main-content"` to the `<main>` element
 
 **Contrast:**
+
 - Bump `--muted-foreground` darker (covered in 1C)
 - Replace yellow text with orange (covered in 1C)
 - Ensure all renewal urgency text includes descriptive prefix, not just colour
@@ -162,10 +177,12 @@ Each empty state includes:
 ### 3B. Clients
 
 **List page:**
+
 - Table: row padding `py-3.5 px-4`, rows as `<a>` links, search with loading spinner
 - Empty state: already uses `EmptyState` — keep as-is
 
 **Detail page:**
+
 - Client name: `text-2xl font-semibold`
 - Contact info card: `rounded-xl`
 - Stats to tabs separation: `mt-8`
@@ -173,11 +190,13 @@ Each empty state includes:
 - Tab section headings: `text-lg font-semibold`
 
 **Tab components (policies, claims, tasks, documents, notes, activity):**
+
 - All empty states → `EmptyState` component with contextual descriptions
 - All dialog forms: required field markers, submit loading spinners, dialog close prevention
 - Consistent card/list spacing within tabs
 
 **Client form (new + edit):**
+
 - Required field asterisks
 - Form sections: `gap-6`
 - Submit button with loading state
@@ -186,11 +205,13 @@ Each empty state includes:
 ### 3C. Tasks
 
 **List page:**
+
 - Same table treatment as clients: `<a>` link rows, `py-3.5 px-4` padding, search loading
 - Filter tabs: consistent spacing
 - Create task dialog: submission safety + loading
 
 **Detail page:**
+
 - Task title: `text-2xl font-semibold`
 - Description: proper `text-sm` body text
 - Sidebar "Details" card heading: `text-lg font-semibold`
@@ -206,24 +227,29 @@ Each empty state includes:
 ### 3E. Settings
 
 **Layout:**
+
 - Tab bar: consistent typography, active tab underline 3px thick
 - Each settings page gets a subtitle description under the page title
 
 **Profile:**
+
 - Submit button loading state
 - Card: `rounded-xl`
 - Required field markers
 
 **Members:**
+
 - Table with role badges
 - Invite form card: `rounded-xl`, loading on invite button
 - Empty state for no members (edge case)
 
 **Organisation:**
+
 - Org guard card: `rounded-xl`, better description text
 - Create org form: required markers, loading state
 
 **Security:**
+
 - Clear visual separation between password change and 2FA sections
 - Section headings: `text-lg font-semibold`
 - Loading states on all buttons

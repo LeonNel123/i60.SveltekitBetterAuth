@@ -120,7 +120,9 @@
 			<!-- Search -->
 			<div class="relative max-w-sm flex-1">
 				{#if searching}
-					<LoaderCircle class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+					<LoaderCircle
+						class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+					/>
 				{:else}
 					<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 				{/if}

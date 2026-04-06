@@ -1,4 +1,14 @@
-import { pgTable, text, boolean, timestamp, integer, numeric, date, jsonb, primaryKey } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	text,
+	boolean,
+	timestamp,
+	integer,
+	numeric,
+	date,
+	jsonb,
+	primaryKey
+} from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -108,8 +118,12 @@ export const twoFactorTable = pgTable('two_factor', {
 // ============================================================================
 
 export const client = pgTable('client', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
 	type: text('type').notNull().default('individual'),
 	name: text('name').notNull(),
 	email: text('email'),
@@ -117,15 +131,23 @@ export const client = pgTable('client', {
 	idNumber: text('id_number'),
 	registrationNumber: text('registration_number'),
 	address: text('address'),
-	createdById: text('created_by_id').notNull().references(() => user.id),
+	createdById: text('created_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 export const policy = pgTable('policy', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-	clientId: text('client_id').notNull().references(() => client.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
+	clientId: text('client_id')
+		.notNull()
+		.references(() => client.id, { onDelete: 'cascade' }),
 	policyNumber: text('policy_number').notNull(),
 	insurer: text('insurer').notNull(),
 	type: text('type').notNull().default('other'),
@@ -134,15 +156,23 @@ export const policy = pgTable('policy', {
 	endDate: date('end_date'),
 	premium: numeric('premium', { precision: 12, scale: 2 }),
 	isActivePrimary: boolean('is_active_primary').notNull().default(false),
-	createdById: text('created_by_id').notNull().references(() => user.id),
+	createdById: text('created_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 export const claim = pgTable('claim', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-	clientId: text('client_id').notNull().references(() => client.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
+	clientId: text('client_id')
+		.notNull()
+		.references(() => client.id, { onDelete: 'cascade' }),
 	policyId: text('policy_id').references(() => policy.id, { onDelete: 'set null' }),
 	claimNumber: text('claim_number').notNull(),
 	status: text('status').notNull().default('open'),
@@ -150,21 +180,29 @@ export const claim = pgTable('claim', {
 	dateOfLoss: date('date_of_loss'),
 	amountClaimed: numeric('amount_claimed', { precision: 12, scale: 2 }),
 	amountSettled: numeric('amount_settled', { precision: 12, scale: 2 }),
-	createdById: text('created_by_id').notNull().references(() => user.id),
+	createdById: text('created_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 export const task = pgTable('task', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
 	title: text('title').notNull(),
 	description: text('description'),
 	status: text('status').notNull().default('todo'),
 	priority: text('priority').notNull().default('medium'),
 	dueDate: timestamp('due_date'),
 	assignedToId: text('assigned_to_id').references(() => user.id, { onDelete: 'set null' }),
-	createdById: text('created_by_id').notNull().references(() => user.id),
+	createdById: text('created_by_id')
+		.notNull()
+		.references(() => user.id),
 	clientId: text('client_id').references(() => client.id, { onDelete: 'set null' }),
 	policyId: text('policy_id').references(() => policy.id, { onDelete: 'set null' }),
 	claimId: text('claim_id').references(() => claim.id, { onDelete: 'set null' }),
@@ -174,14 +212,24 @@ export const task = pgTable('task', {
 });
 
 export const taskWatcher = pgTable('task_watcher', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	taskId: text('task_id').notNull().references(() => task.id, { onDelete: 'cascade' }),
-	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' })
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	taskId: text('task_id')
+		.notNull()
+		.references(() => task.id, { onDelete: 'cascade' }),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' })
 });
 
 export const document = pgTable('document', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
 	name: text('name').notNull(),
 	fileName: text('file_name').notNull(),
 	mimeType: text('mime_type').notNull(),
@@ -191,44 +239,70 @@ export const document = pgTable('document', {
 	policyId: text('policy_id').references(() => policy.id, { onDelete: 'set null' }),
 	claimId: text('claim_id').references(() => claim.id, { onDelete: 'set null' }),
 	taskId: text('task_id').references(() => task.id, { onDelete: 'set null' }),
-	uploadedById: text('uploaded_by_id').notNull().references(() => user.id),
+	uploadedById: text('uploaded_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
 export const tag = pgTable('tag', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').references(() => organization.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id').references(() => organization.id, {
+		onDelete: 'cascade'
+	}),
 	name: text('name').notNull(),
 	isSystem: boolean('is_system').notNull().default(false),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
-export const documentTag = pgTable('document_tag', {
-	documentId: text('document_id').notNull().references(() => document.id, { onDelete: 'cascade' }),
-	tagId: text('tag_id').notNull().references(() => tag.id, { onDelete: 'cascade' })
-}, (t) => [
-	primaryKey({ columns: [t.documentId, t.tagId] })
-]);
+export const documentTag = pgTable(
+	'document_tag',
+	{
+		documentId: text('document_id')
+			.notNull()
+			.references(() => document.id, { onDelete: 'cascade' }),
+		tagId: text('tag_id')
+			.notNull()
+			.references(() => tag.id, { onDelete: 'cascade' })
+	},
+	(t) => [primaryKey({ columns: [t.documentId, t.tagId] })]
+);
 
 export const note = pgTable('note', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-	clientId: text('client_id').notNull().references(() => client.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
+	clientId: text('client_id')
+		.notNull()
+		.references(() => client.id, { onDelete: 'cascade' }),
 	content: text('content').notNull(),
-	createdById: text('created_by_id').notNull().references(() => user.id),
+	createdById: text('created_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 export const activity = pgTable('activity', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	organizationId: text('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: text('organization_id')
+		.notNull()
+		.references(() => organization.id, { onDelete: 'cascade' }),
 	clientId: text('client_id'),
 	entityType: text('entity_type').notNull(),
 	entityId: text('entity_id').notNull(),
 	action: text('action').notNull(),
 	description: text('description').notNull(),
 	metadata: jsonb('metadata'),
-	performedById: text('performed_by_id').notNull().references(() => user.id),
+	performedById: text('performed_by_id')
+		.notNull()
+		.references(() => user.id),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
