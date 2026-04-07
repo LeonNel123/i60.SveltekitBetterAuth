@@ -6,7 +6,6 @@
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
 	import {
 		Card,
 		CardHeader,
@@ -16,20 +15,82 @@
 		CardFooter
 	} from '$lib/components/ui/card';
 
+	const OTP_LENGTH = 6;
+
 	let email = $derived(page.url.searchParams.get('email') ?? '');
 	let next = $derived(getSafeRedirectPath(page.url.searchParams.get('next')));
-	let otp = $state('');
+	let digits = $state<string[]>(Array(OTP_LENGTH).fill(''));
+	let otp = $derived(digits.join(''));
 	let error = $state('');
 	let submitting = $state(false);
 	let resending = $state(false);
 	let resent = $state(false);
+	let inputs: HTMLInputElement[] = $state([]);
+
+	function focusDigit(index: number) {
+		inputs[index]?.focus();
+	}
+
+	function handleInput(index: number, e: Event) {
+		const input = e.target as HTMLInputElement;
+		const value = input.value.replace(/\D/g, '');
+
+		if (value.length > 1) {
+			// Multiple chars typed/pasted into a single box — distribute
+			const chars = value.slice(0, OTP_LENGTH - index).split('');
+			for (let i = 0; i < chars.length; i++) {
+				if (index + i < OTP_LENGTH) {
+					digits[index + i] = chars[i];
+				}
+			}
+			const nextIndex = Math.min(index + chars.length, OTP_LENGTH - 1);
+			focusDigit(nextIndex);
+		} else {
+			digits[index] = value;
+			if (value && index < OTP_LENGTH - 1) {
+				focusDigit(index + 1);
+			}
+		}
+	}
+
+	function handleKeydown(index: number, e: KeyboardEvent) {
+		if (e.key === 'Backspace') {
+			if (!digits[index] && index > 0) {
+				e.preventDefault();
+				digits[index - 1] = '';
+				focusDigit(index - 1);
+			} else {
+				digits[index] = '';
+			}
+		} else if (e.key === 'ArrowLeft' && index > 0) {
+			e.preventDefault();
+			focusDigit(index - 1);
+		} else if (e.key === 'ArrowRight' && index < OTP_LENGTH - 1) {
+			e.preventDefault();
+			focusDigit(index + 1);
+		} else if (e.key === 'Enter') {
+			verify();
+		}
+	}
+
+	function handlePaste(e: ClipboardEvent) {
+		e.preventDefault();
+		const pasted = (e.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, OTP_LENGTH);
+		if (!pasted) return;
+
+		const chars = pasted.split('');
+		for (let i = 0; i < OTP_LENGTH; i++) {
+			digits[i] = chars[i] ?? '';
+		}
+		focusDigit(Math.min(chars.length, OTP_LENGTH) - 1);
+	}
 
 	async function verify() {
 		if (!email) {
 			error = 'Missing email address. Return to sign in and try again.';
 			return;
 		}
-		if (!otp || otp.length < 6) {
+		if (otp.length < OTP_LENGTH) {
 			error = 'Please enter the 6-digit code';
 			return;
 		}
@@ -42,6 +103,9 @@
 		submitting = false;
 		if (err) {
 			error = err.message ?? 'Invalid or expired code';
+			// Clear and refocus on error
+			digits = Array(OTP_LENGTH).fill('');
+			focusDigit(0);
 		} else {
 			await goto(next, { invalidateAll: true });
 		}
@@ -64,6 +128,8 @@
 			error = err.message ?? 'Could not resend code';
 		} else {
 			resent = true;
+			digits = Array(OTP_LENGTH).fill('');
+			focusDigit(0);
 		}
 	}
 </script>
@@ -94,18 +160,27 @@
 					A new code has been sent to your email.
 				</div>
 			{/if}
-			<Input
-				type="text"
-				inputmode="numeric"
-				maxlength={6}
-				placeholder="000000"
-				class="text-center text-2xl tracking-[0.5em]"
-				bind:value={otp}
-				onkeydown={(e) => {
-					if (e.key === 'Enter') verify();
-				}}
-			/>
-			<Button onclick={verify} class="w-full" disabled={submitting}>
+
+			<!-- OTP digit inputs -->
+			<div class="flex justify-center gap-2" onpaste={handlePaste}>
+				{#each { length: OTP_LENGTH } as _, i}
+					<input
+						bind:this={inputs[i]}
+						type="text"
+						inputmode="numeric"
+						maxlength={2}
+						autocomplete="one-time-code"
+						aria-label="Digit {i + 1} of {OTP_LENGTH}"
+						class="h-12 w-10 rounded-lg border bg-background text-center text-lg font-semibold transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 sm:h-14 sm:w-12 sm:text-xl"
+						value={digits[i]}
+						oninput={(e) => handleInput(i, e)}
+						onkeydown={(e) => handleKeydown(i, e)}
+						onfocus={(e) => (e.target as HTMLInputElement).select()}
+					/>
+				{/each}
+			</div>
+
+			<Button onclick={verify} class="w-full" disabled={submitting || otp.length < OTP_LENGTH}>
 				{submitting ? 'Verifying...' : 'Verify email'}
 			</Button>
 		</div>
