@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Toaster as Sonner, type ToasterProps as SonnerProps } from 'svelte-sonner';
-	import { mode } from 'mode-watcher';
+	import { browser } from '$app/environment';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 	import OctagonXIcon from '@lucide/svelte/icons/octagon-x';
@@ -8,10 +8,21 @@
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 
 	let { ...restProps }: SonnerProps = $props();
+
+	let isDark = $state(browser && document.documentElement.classList.contains('dark'));
+
+	$effect(() => {
+		if (!browser) return;
+		const observer = new MutationObserver(() => {
+			isDark = document.documentElement.classList.contains('dark');
+		});
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
 </script>
 
 <Sonner
-	theme={mode.current}
+	theme={isDark ? 'dark' : 'light'}
 	class="toaster group"
 	style="--normal-bg: var(--color-popover); --normal-text: var(--color-popover-foreground); --normal-border: var(--color-border);"
 	{...restProps}

@@ -4,11 +4,15 @@ import { fail, redirect } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID, GITHUB_CLIENT_ID, MICROSOFT_CLIENT_ID } from '$env/static/private';
 import type { Actions, PageServerLoad } from './$types';
 
+function isRealValue(v: string): boolean {
+	return !!v && v !== 'none';
+}
+
 export const load: PageServerLoad = async () => {
 	return {
-		hasGoogle: !!GOOGLE_CLIENT_ID,
-		hasGithub: !!GITHUB_CLIENT_ID,
-		hasMicrosoft: !!MICROSOFT_CLIENT_ID
+		hasGoogle: isRealValue(GOOGLE_CLIENT_ID),
+		hasGithub: isRealValue(GITHUB_CLIENT_ID),
+		hasMicrosoft: isRealValue(MICROSOFT_CLIENT_ID)
 	};
 };
 

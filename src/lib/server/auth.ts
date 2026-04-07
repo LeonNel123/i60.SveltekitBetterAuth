@@ -78,7 +78,9 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		...(GOOGLE_CLIENT_ID &&
-			GOOGLE_CLIENT_SECRET && {
+			GOOGLE_CLIENT_ID !== 'none' &&
+			GOOGLE_CLIENT_SECRET &&
+			GOOGLE_CLIENT_SECRET !== 'none' && {
 				google: {
 					clientId: GOOGLE_CLIENT_ID,
 					clientSecret: GOOGLE_CLIENT_SECRET,
@@ -86,14 +88,18 @@ export const auth = betterAuth({
 				}
 			}),
 		...(GITHUB_CLIENT_ID &&
-			GITHUB_CLIENT_SECRET && {
+			GITHUB_CLIENT_ID !== 'none' &&
+			GITHUB_CLIENT_SECRET &&
+			GITHUB_CLIENT_SECRET !== 'none' && {
 				github: {
 					clientId: GITHUB_CLIENT_ID,
 					clientSecret: GITHUB_CLIENT_SECRET
 				}
 			}),
 		...(MICROSOFT_CLIENT_ID &&
-			MICROSOFT_CLIENT_SECRET && {
+			MICROSOFT_CLIENT_ID !== 'none' &&
+			MICROSOFT_CLIENT_SECRET &&
+			MICROSOFT_CLIENT_SECRET !== 'none' && {
 				microsoft: {
 					clientId: MICROSOFT_CLIENT_ID,
 					clientSecret: MICROSOFT_CLIENT_SECRET,

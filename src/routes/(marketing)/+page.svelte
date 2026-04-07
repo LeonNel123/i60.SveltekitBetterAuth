@@ -23,24 +23,24 @@
 <section class="border-t bg-muted/50 py-24">
 	<div class="container mx-auto grid gap-8 px-4 md:grid-cols-3">
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Client Management</h3>
+			<h3 class="text-xl font-semibold">Authentication</h3>
 			<p class="text-muted-foreground">
-				Track insured individuals and companies, with full policy and claims history at your
-				fingertips.
+				Email/password, OAuth (Google, GitHub, Microsoft), two-factor authentication, and email
+				verification out of the box.
 			</p>
 		</div>
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Task-Driven Operations</h3>
+			<h3 class="text-xl font-semibold">Multi-Tenant Orgs</h3>
 			<p class="text-muted-foreground">
-				Every action is tracked. Tasks are assigned, escalated, and completed with full
-				traceability.
+				Create organisations, invite members, assign roles, and scope all data to the active
+				organisation.
 			</p>
 		</div>
 		<div class="space-y-2">
-			<h3 class="text-xl font-semibold">Document Compliance</h3>
+			<h3 class="text-xl font-semibold">Production Ready</h3>
 			<p class="text-muted-foreground">
-				Upload, tag, and retrieve documents instantly. Built for South African regulatory
-				requirements.
+				SvelteKit 2 with Svelte 5, PostgreSQL via Drizzle ORM, Tailwind CSS v4, and dark mode.
+				Deploy anywhere with Node adapter.
 			</p>
 		</div>
 	</div>

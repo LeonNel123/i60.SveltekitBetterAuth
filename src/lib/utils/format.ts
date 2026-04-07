@@ -5,7 +5,7 @@
 export function formatDate(d: string | Date | null | undefined): string {
 	if (!d) return '\u2014';
 	const date = typeof d === 'string' ? new Date(d) : d;
-	return date.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
+	return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 export function currentGreeting(now: Date = new Date()): string {
@@ -40,7 +40,7 @@ export function formatCurrency(v: string | number | null | undefined): string {
 	if (v == null || v === '') return '\u2014';
 	const num = typeof v === 'string' ? parseFloat(v) : v;
 	if (isNaN(num)) return '\u2014';
-	return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(num);
+	return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(num);
 }
 
 export function timeAgo(d: string | Date | null | undefined): string {
