@@ -205,7 +205,13 @@
 			</Tabs.Content>
 
 			<Tabs.Content value="tasks" class="mt-6">
-				<TasksTab tasks={data.tasks} {members} {form} />
+				<TasksTab
+					tasks={data.tasks}
+					policies={data.policies}
+					claims={data.claims}
+					{members}
+					{form}
+				/>
 			</Tabs.Content>
 
 			<Tabs.Content value="documents" class="mt-6">

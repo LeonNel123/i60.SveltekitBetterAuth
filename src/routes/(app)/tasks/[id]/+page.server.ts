@@ -1,8 +1,9 @@
 import { db } from '$lib/server/db';
-import { task, client } from '$lib/server/db/schema';
+import { task, client, policy, claim } from '$lib/server/db/schema';
 import { logActivity } from '$lib/server/activity';
 import { resolveOrgMemberUserId } from '$lib/server/organization';
-import { TASK_PRIORITIES, TASK_STATUSES } from '$lib/types';
+import { TASK_PRIORITIES, TASK_STATUSES, TASK_TYPES } from '$lib/types';
+import { taskTypeLabel } from '$lib/tasks';
 import { isOneOf } from '$lib/utils';
 import { eq, and } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -13,13 +14,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!orgId) return error(403, 'No active organisation');
 
 	const [result] = await db
-		.select({ task: task, clientName: client.name })
+		.select({
+			task,
+			clientName: client.name,
+			policyNumber: policy.policyNumber,
+			claimNumber: claim.claimNumber
+		})
 		.from(task)
 		.leftJoin(client, eq(task.clientId, client.id))
+		.leftJoin(policy, eq(task.policyId, policy.id))
+		.leftJoin(claim, eq(task.claimId, claim.id))
 		.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
 
 	if (!result) return error(404, 'Task not found');
-	return { task: { ...result.task, clientName: result.clientName } };
+	return {
+		task: {
+			...result.task,
+			clientName: result.clientName,
+			policyNumber: result.policyNumber,
+			claimNumber: result.claimNumber
+		}
+	};
 };
 
 export const actions: Actions = {
@@ -30,6 +45,12 @@ export const actions: Actions = {
 		const fd = await request.formData();
 		const status = fd.get('status') as string;
 		if (!isOneOf(status, TASK_STATUSES)) return fail(400, { error: 'Invalid task status.' });
+
+		const [existing] = await db
+			.select({ clientId: task.clientId, title: task.title })
+			.from(task)
+			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+		if (!existing) return fail(404, { error: 'Task not found.' });
 
 		const updates: Record<string, unknown> = { status, updatedAt: new Date() };
 		if (status === 'done') updates.completedAt = new Date();
@@ -42,11 +63,14 @@ export const actions: Actions = {
 
 		await logActivity({
 			organizationId: orgId,
-			clientId: null,
+			clientId: existing.clientId,
 			entityType: 'task',
 			entityId: params.id,
-			action: 'status_changed',
-			description: `Task status changed to "${status}"`,
+			action: status === 'done' ? 'completed' : 'status_changed',
+			description:
+				status === 'done'
+					? `Completed task "${existing.title}"`
+					: `Task status changed to "${status}"`,
 			performedById: locals.user.id
 		});
 		return { success: true };
@@ -55,6 +79,12 @@ export const actions: Actions = {
 	update: async ({ request, locals, params }) => {
 		const orgId = locals.session?.activeOrganizationId;
 		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
+
+		const [existing] = await db
+			.select({ clientId: task.clientId, title: task.title })
+			.from(task)
+			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+		if (!existing) return fail(404, { error: 'Task not found.' });
 
 		const fd = await request.formData();
 		const title = (fd.get('title') as string)?.trim();
@@ -66,6 +96,11 @@ export const actions: Actions = {
 			return fail(400, { error: 'Invalid task priority.' });
 		}
 
+		const taskType = (fd.get('taskType') as string) || 'general';
+		if (!isOneOf(taskType, TASK_TYPES)) {
+			return fail(400, { error: 'Invalid task type.' });
+		}
+
 		const dueDate = (fd.get('dueDate') as string) || null;
 
 		await db
@@ -73,11 +108,23 @@ export const actions: Actions = {
 			.set({
 				title,
 				description,
+				taskType,
 				priority,
 				dueDate: dueDate ? new Date(dueDate) : null,
 				updatedAt: new Date()
 			})
 			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: existing.clientId,
+			entityType: 'task',
+			entityId: params.id,
+			action: 'updated',
+			description: `Updated ${taskTypeLabel(taskType).toLowerCase()} task "${title}"`,
+			performedById: locals.user.id
+		});
+
 		return { success: true };
 	},
 
@@ -85,12 +132,21 @@ export const actions: Actions = {
 		const orgId = locals.session?.activeOrganizationId;
 		if (!orgId || !locals.user) return fail(403, { error: 'Not authorised.' });
 
+		const [existing] = await db
+			.select({ clientId: task.clientId, title: task.title })
+			.from(task)
+			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+		if (!existing) return fail(404, { error: 'Task not found.' });
+
 		const fd = await request.formData();
 		const requestedAssigneeId = (fd.get('assignedToId') as string)?.trim() || null;
-		const assignedToId = requestedAssigneeId
-			? await resolveOrgMemberUserId(orgId, requestedAssigneeId)
-			: null;
-		if (requestedAssigneeId && !assignedToId) {
+		const assignedToId =
+			requestedAssigneeId === 'unassigned'
+				? null
+				: requestedAssigneeId
+					? await resolveOrgMemberUserId(orgId, requestedAssigneeId)
+					: null;
+		if (requestedAssigneeId && requestedAssigneeId !== 'unassigned' && !assignedToId) {
 			return fail(400, { error: 'Selected assignee is invalid.' });
 		}
 
@@ -98,6 +154,18 @@ export const actions: Actions = {
 			.update(task)
 			.set({ assignedToId, updatedAt: new Date() })
 			.where(and(eq(task.id, params.id), eq(task.organizationId, orgId)));
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: existing.clientId,
+			entityType: 'task',
+			entityId: params.id,
+			action: 'updated',
+			description: assignedToId
+				? `Reassigned task "${existing.title}"`
+				: `Moved task "${existing.title}" to triage`,
+			performedById: locals.user.id
+		});
 
 		return { success: true };
 	},

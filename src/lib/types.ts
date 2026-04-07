@@ -23,6 +23,16 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 export const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
+export const TASK_TYPES = [
+	'general',
+	'renewal',
+	'claim',
+	'document',
+	'compliance',
+	'internal'
+] as const;
+export type TaskType = (typeof TASK_TYPES)[number];
+
 export const ACTIVITY_ACTIONS = [
 	'created',
 	'updated',

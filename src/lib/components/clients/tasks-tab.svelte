@@ -20,7 +20,9 @@
 	import EmptyState from '$lib/components/shared/empty-state.svelte';
 	import TaskStatusBadge from '$lib/components/tasks/task-status-badge.svelte';
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
-	import { TASK_PRIORITIES } from '$lib/types';
+	import TaskTypeBadge from '$lib/components/tasks/task-type-badge.svelte';
+	import { TASK_PRIORITIES, TASK_TYPES } from '$lib/types';
+	import { taskTypeLabel } from '$lib/tasks';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -30,10 +32,13 @@
 		id: string;
 		title: string;
 		description: string | null;
+		taskType: string;
 		status: string;
 		priority: string;
 		dueDate: Date | string | null;
 		assigneeName?: string | null;
+		policyNumber?: string | null;
+		claimNumber?: string | null;
 		[key: string]: unknown;
 	};
 
@@ -43,12 +48,27 @@
 		[key: string]: unknown;
 	};
 
+	type Policy = {
+		id: string;
+		policyNumber: string;
+		insurer: string;
+	};
+
+	type Claim = {
+		id: string;
+		claimNumber: string;
+	};
+
 	let {
 		tasks,
+		policies,
+		claims,
 		members = [],
 		form
 	}: {
 		tasks: Task[];
+		policies: Policy[];
+		claims: Claim[];
 		members?: Member[];
 		form: Record<string, unknown> | null;
 	} = $props();
@@ -56,12 +76,40 @@
 	let dialogOpen = $state(false);
 	let loading = $state(false);
 	let taskPriority = $state('medium');
+	let taskType = $state('general');
 	let taskAssignee = $state('');
+	let linkedPolicyId = $state('');
+	let linkedClaimId = $state('');
 
 	function openAdd() {
 		taskPriority = 'medium';
+		taskType = 'general';
 		taskAssignee = '';
+		linkedPolicyId = '';
+		linkedClaimId = '';
 		dialogOpen = true;
+	}
+
+	function assigneeLabel(value: string): string {
+		if (value === 'unassigned') return 'Unassigned / Triage';
+		if (!value) return 'Me (default)';
+		return members.find((member) => member.userId === value)?.user?.name ?? 'Select member';
+	}
+
+	function policyLabel(value: string): string {
+		if (!value) return 'No policy linked';
+		return policies.find((policy) => policy.id === value)?.policyNumber ?? 'Select policy';
+	}
+
+	function claimLabel(value: string): string {
+		if (!value) return 'No claim linked';
+		return claims.find((claim) => claim.id === value)?.claimNumber ?? 'Select claim';
+	}
+
+	function linkedContext(task: Task) {
+		if (task.claimNumber) return `Claim ${task.claimNumber}`;
+		if (task.policyNumber) return `Policy ${task.policyNumber}`;
+		return 'Client-level';
 	}
 </script>
 
@@ -77,7 +125,7 @@
 		<EmptyState
 			icon={ClipboardList}
 			title="No tasks"
-			description="Create a task to track work for this client."
+			description="Create a client, policy, or claim-linked task to drive the next action."
 		/>
 	{:else}
 		<div class="overflow-x-auto rounded-md border">
@@ -85,36 +133,40 @@
 				<TableHeader>
 					<TableRow>
 						<TableHead>Title</TableHead>
+						<TableHead>Type</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Priority</TableHead>
+						<TableHead>Linked</TableHead>
 						<TableHead>Assignee</TableHead>
 						<TableHead>Due Date</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{#each tasks as t (t.id)}
+					{#each tasks as task (task.id)}
 						<TableRow
 							class="cursor-pointer hover:bg-muted/50"
-							onclick={() => goto(resolve(`/tasks/${t.id}`))}
-							onkeydown={(e: KeyboardEvent) => {
-								if (e.key === 'Enter') goto(resolve(`/tasks/${t.id}`));
+							onclick={() => goto(resolve(`/tasks/${task.id}`))}
+							onkeydown={(event: KeyboardEvent) => {
+								if (event.key === 'Enter') goto(resolve(`/tasks/${task.id}`));
 							}}
 							role="button"
 							tabindex={0}
 						>
-							<TableCell class="font-medium">{t.title}</TableCell>
+							<TableCell class="font-medium">{task.title}</TableCell>
 							<TableCell>
-								<TaskStatusBadge status={t.status as TaskStatus} />
+								<TaskTypeBadge taskType={task.taskType} />
 							</TableCell>
 							<TableCell>
-								<TaskPriorityBadge priority={t.priority as TaskPriority} />
+								<TaskStatusBadge status={task.status as TaskStatus} />
 							</TableCell>
-							<TableCell class="text-muted-foreground">
-								{t.assigneeName ?? '—'}
+							<TableCell>
+								<TaskPriorityBadge priority={task.priority as TaskPriority} />
 							</TableCell>
-							<TableCell class="text-muted-foreground">
-								{formatDate(t.dueDate)}
-							</TableCell>
+							<TableCell class="text-muted-foreground">{linkedContext(task)}</TableCell>
+							<TableCell class="text-muted-foreground"
+								>{task.assigneeName ?? 'Unassigned'}</TableCell
+							>
+							<TableCell class="text-muted-foreground">{formatDate(task.dueDate)}</TableCell>
 						</TableRow>
 					{/each}
 				</TableBody>
@@ -123,12 +175,11 @@
 	{/if}
 </div>
 
-<!-- Add Task Dialog -->
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Content class="sm:max-w-lg">
+	<Dialog.Content class="sm:max-w-xl">
 		<Dialog.Header>
 			<Dialog.Title>Add Task</Dialog.Title>
-			<Dialog.Description>Create a new task for this client.</Dialog.Description>
+			<Dialog.Description>Create operational work for this client.</Dialog.Description>
 		</Dialog.Header>
 
 		{#if form?.taskError}
@@ -148,7 +199,10 @@
 					if (result.type === 'success') {
 						dialogOpen = false;
 						taskPriority = 'medium';
+						taskType = 'general';
 						taskAssignee = '';
+						linkedPolicyId = '';
+						linkedClaimId = '';
 						toast.success('Task created');
 					}
 				};
@@ -165,62 +219,115 @@
 				<Textarea
 					id="taskDescription"
 					name="description"
-					placeholder="Optional details..."
+					placeholder="Operational detail, blocker, or next action..."
 					rows={3}
 				/>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
+					<Label>Task Type</Label>
+					<Select.Root
+						type="single"
+						name="taskType"
+						value={taskType}
+						onValueChange={(value) => (taskType = value)}
+					>
+						<Select.Trigger class="w-full">{taskTypeLabel(taskType)}</Select.Trigger>
+						<Select.Content>
+							{#each TASK_TYPES as candidate (candidate)}
+								<Select.Item value={candidate}>{taskTypeLabel(candidate)}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+
+				<div class="grid gap-2">
 					<Label>Priority</Label>
 					<Select.Root
 						type="single"
 						name="priority"
 						value={taskPriority}
-						onValueChange={(v) => (taskPriority = v)}
+						onValueChange={(value) => (taskPriority = value)}
 					>
 						<Select.Trigger class="w-full">
 							{taskPriority.charAt(0).toUpperCase() + taskPriority.slice(1)}
 						</Select.Trigger>
 						<Select.Content>
-							{#each TASK_PRIORITIES as p (p)}
-								<Select.Item value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
-				<div class="grid gap-2">
-					<Label for="dueDate">Due Date</Label>
-					<Input id="dueDate" name="dueDate" type="date" />
-				</div>
-			</div>
-
-			{#if members.length > 0}
-				<div class="grid gap-2">
-					<Label>Assign To</Label>
-					<Select.Root
-						type="single"
-						name="assignedToId"
-						value={taskAssignee}
-						onValueChange={(v) => (taskAssignee = v)}
-					>
-						<Select.Trigger class="w-full">
-							{#if taskAssignee}
-								{members.find((m) => m.userId === taskAssignee)?.user?.name ?? 'Select member...'}
-							{:else}
-								Me (default)
-							{/if}
-						</Select.Trigger>
-						<Select.Content>
-							{#each members as m (m.userId)}
-								<Select.Item value={m.userId}>
-									{m.user.name}
+							{#each TASK_PRIORITIES as priority (priority)}
+								<Select.Item value={priority}>
+									{priority.charAt(0).toUpperCase() + priority.slice(1)}
 								</Select.Item>
 							{/each}
 						</Select.Content>
 					</Select.Root>
 				</div>
-			{/if}
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="grid gap-2">
+					<Label>Linked Policy</Label>
+					<Select.Root
+						type="single"
+						name="policyId"
+						value={linkedPolicyId}
+						onValueChange={(value) => (linkedPolicyId = value)}
+					>
+						<Select.Trigger class="w-full">{policyLabel(linkedPolicyId)}</Select.Trigger>
+						<Select.Content>
+							{#each policies as policy (policy.id)}
+								<Select.Item value={policy.id}>
+									{policy.policyNumber} — {policy.insurer}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+
+				<div class="grid gap-2">
+					<Label>Linked Claim</Label>
+					<Select.Root
+						type="single"
+						name="claimId"
+						value={linkedClaimId}
+						onValueChange={(value) => (linkedClaimId = value)}
+					>
+						<Select.Trigger class="w-full">{claimLabel(linkedClaimId)}</Select.Trigger>
+						<Select.Content>
+							{#each claims as claim (claim.id)}
+								<Select.Item value={claim.id}>{claim.claimNumber}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="grid gap-2">
+					<Label for="dueDate">Due Date</Label>
+					<Input id="dueDate" name="dueDate" type="date" />
+				</div>
+
+				{#if members.length > 0}
+					<div class="grid gap-2">
+						<Label>Assign To</Label>
+						<Select.Root
+							type="single"
+							name="assignedToId"
+							value={taskAssignee}
+							onValueChange={(value) => (taskAssignee = value)}
+						>
+							<Select.Trigger class="w-full">{assigneeLabel(taskAssignee)}</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="unassigned">Unassigned / Triage</Select.Item>
+								{#each members as member (member.userId)}
+									<Select.Item value={member.userId}>{member.user.name}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
+				{/if}
+			</div>
 
 			<Dialog.Footer>
 				<Button variant="outline" type="button" onclick={() => (dialogOpen = false)}>Cancel</Button>

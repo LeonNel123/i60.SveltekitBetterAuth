@@ -17,7 +17,14 @@ import { saveUploadedFile, deleteFile } from '$lib/server/files';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { filterVisibleTagIds, resolveOrgMemberUserId } from '$lib/server/organization';
-import { CLAIM_STATUSES, POLICY_STATUSES, POLICY_TYPES, TASK_PRIORITIES } from '$lib/types';
+import {
+	CLAIM_STATUSES,
+	POLICY_STATUSES,
+	POLICY_TYPES,
+	TASK_PRIORITIES,
+	TASK_TYPES
+} from '$lib/types';
+import { taskTypeLabel } from '$lib/tasks';
 import { isOneOf } from '$lib/utils';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -95,9 +102,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			.orderBy(desc(claim.createdAt))
 			.limit(100),
 		db
-			.select({ task: task, assigneeName: assignee.name })
+			.select({
+				task: task,
+				assigneeName: assignee.name,
+				policyNumber: policy.policyNumber,
+				claimNumber: claim.claimNumber
+			})
 			.from(task)
 			.leftJoin(assignee, eq(task.assignedToId, assignee.id))
+			.leftJoin(policy, eq(task.policyId, policy.id))
+			.leftJoin(claim, eq(task.claimId, claim.id))
 			.where(and(eq(task.clientId, params.id), eq(task.organizationId, orgId)))
 			.orderBy(desc(task.createdAt))
 			.limit(100),
@@ -151,7 +165,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		client: { ...found.client, createdByName: found.createdByName },
 		policies,
 		claims,
-		tasks: tasks.map((r) => ({ ...r.task, assigneeName: r.assigneeName })),
+		tasks: tasks.map((r) => ({
+			...r.task,
+			assigneeName: r.assigneeName,
+			policyNumber: r.policyNumber,
+			claimNumber: r.claimNumber
+		})),
 		documents: documents.map((d) => ({ ...d, tags: docTagMap[d.id] ?? [] })),
 		notes,
 		activities,
@@ -529,21 +548,59 @@ export const actions: Actions = {
 		if (!isOneOf(priority, TASK_PRIORITIES))
 			return fail(400, { taskError: 'Invalid task priority.' });
 
+		const requestedPolicyId = (fd.get('policyId') as string)?.trim() || null;
+		const linkedPolicy = requestedPolicyId
+			? await findClientPolicy(orgId, params.id, requestedPolicyId)
+			: null;
+		if (requestedPolicyId && !linkedPolicy) {
+			return fail(400, { taskError: 'Selected policy is invalid.' });
+		}
+
+		const requestedClaimId = (fd.get('claimId') as string)?.trim() || null;
+		const linkedClaim = requestedClaimId
+			? await findClientClaim(orgId, params.id, requestedClaimId)
+			: null;
+		if (requestedClaimId && !linkedClaim) {
+			return fail(400, { taskError: 'Selected claim is invalid.' });
+		}
+
+		if (
+			linkedPolicy &&
+			linkedClaim &&
+			linkedClaim.policyId &&
+			linkedClaim.policyId !== linkedPolicy.id
+		) {
+			return fail(400, { taskError: 'Selected claim does not match the selected policy.' });
+		}
+
+		const requestedTaskType = (fd.get('taskType') as string) || 'general';
+		let taskType = requestedTaskType;
+		if (requestedTaskType === 'general' && linkedClaim) taskType = 'claim';
+		else if (requestedTaskType === 'general' && linkedPolicy) taskType = 'renewal';
+		if (!isOneOf(taskType, TASK_TYPES)) {
+			return fail(400, { taskError: 'Invalid task type.' });
+		}
+
 		const dueDate = (fd.get('dueDate') as string) || null;
+		const requestedAssignee = (fd.get('assignedToId') as string)?.trim() || '';
 		const assignedToId =
-			(await resolveOrgMemberUserId(
-				orgId,
-				(fd.get('assignedToId') as string)?.trim() || locals.user.id
-			)) ?? null;
-		if (!assignedToId) return fail(400, { taskError: 'Selected assignee is invalid.' });
+			requestedAssignee === 'unassigned'
+				? null
+				: ((await resolveOrgMemberUserId(orgId, requestedAssignee || locals.user.id)) ?? null);
+		if (requestedAssignee && requestedAssignee !== 'unassigned' && !assignedToId) {
+			return fail(400, { taskError: 'Selected assignee is invalid.' });
+		}
 
 		const [created] = await db
 			.insert(task)
 			.values({
 				organizationId: orgId,
 				clientId: params.id,
+				policyId: linkedPolicy?.id ?? linkedClaim?.policyId ?? null,
+				claimId: linkedClaim?.id ?? null,
 				title,
 				description,
+				taskType,
 				priority,
 				dueDate: dueDate ? new Date(dueDate) : null,
 				createdById: locals.user.id,
@@ -557,7 +614,7 @@ export const actions: Actions = {
 			entityType: 'task',
 			entityId: created.id,
 			action: 'created',
-			description: `Created task "${title}"`,
+			description: `Created ${taskTypeLabel(taskType).toLowerCase()} task "${title}"`,
 			performedById: locals.user.id
 		});
 		return { taskSuccess: true };

@@ -15,7 +15,9 @@
 	import OrgGuard from '$lib/components/shared/org-guard.svelte';
 	import TaskStatusBadge from '$lib/components/tasks/task-status-badge.svelte';
 	import TaskPriorityBadge from '$lib/components/tasks/task-priority-badge.svelte';
-	import { TASK_PRIORITIES } from '$lib/types';
+	import TaskTypeBadge from '$lib/components/tasks/task-type-badge.svelte';
+	import { TASK_PRIORITIES, TASK_TYPES } from '$lib/types';
+	import { taskTypeLabel } from '$lib/tasks';
 	import type { TaskStatus, TaskPriority } from '$lib/types';
 	import { formatDate, isOverdueDate } from '$lib/utils/format';
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
@@ -29,24 +31,25 @@
 
 	let editMode = $state(false);
 	let editPriority = $state('medium');
+	let editTaskType = $state('general');
 	let editLoading = $state(false);
 	let deleteDialogOpen = $state(false);
 	let deleteLoading = $state(false);
 
 	let members = $derived(page.data.members ?? []);
 	let assigneeName = $derived(
-		members.find((m: { userId: string }) => m.userId === data.task.assignedToId)?.user?.name ??
-			'Unassigned'
+		members.find((member: { userId: string }) => member.userId === data.task.assignedToId)?.user
+			?.name ?? 'Unassigned'
 	);
 
-	// Sync edit priority from data
 	$effect(() => {
 		editPriority = data.task.priority;
+		editTaskType = data.task.taskType;
 	});
 
-	function toInputDate(d: string | Date | null | undefined): string {
-		if (!d) return '';
-		const date = typeof d === 'string' ? new Date(d) : d;
+	function toInputDate(dateValue: string | Date | null | undefined): string {
+		if (!dateValue) return '';
+		const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
 		return date.toISOString().slice(0, 10);
 	}
 </script>
@@ -57,7 +60,6 @@
 
 <OrgGuard>
 	<div class="space-y-6">
-		<!-- Back link -->
 		<div>
 			<Button variant="ghost" size="sm" href={resolve('/tasks')} class="-ml-2">
 				<ArrowLeft class="mr-2 h-4 w-4" />
@@ -65,10 +67,10 @@
 			</Button>
 		</div>
 
-		<!-- Header -->
 		<PageHeader title={data.task.title}>
 			{#snippet actions()}
-				<div class="flex items-center gap-2">
+				<div class="flex flex-wrap items-center gap-2">
+					<TaskTypeBadge taskType={data.task.taskType} />
 					<TaskStatusBadge status={data.task.status as TaskStatus} />
 					<TaskPriorityBadge priority={data.task.priority as TaskPriority} />
 					{#if !editMode}
@@ -90,11 +92,10 @@
 			{/snippet}
 		</PageHeader>
 
-		<!-- Quick status change -->
 		<Card class="rounded-xl">
 			<CardContent class="flex flex-wrap items-center gap-3 py-3">
 				<span class="text-sm font-medium text-muted-foreground">Status:</span>
-				{#each ['todo', 'in_progress', 'done'] as s (s)}
+				{#each ['todo', 'in_progress', 'done'] as status (status)}
 					<form
 						method="POST"
 						action="?/updateStatus"
@@ -103,19 +104,19 @@
 								await update();
 								if (result.type === 'success') {
 									toast.success(
-										`Status updated to ${s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}`
+										`Status updated to ${status === 'todo' ? 'To Do' : status === 'in_progress' ? 'In Progress' : 'Done'}`
 									);
 								}
 							};
 						}}
 					>
-						<input type="hidden" name="status" value={s} />
+						<input type="hidden" name="status" value={status} />
 						<Button
 							type="submit"
 							size="sm"
-							variant={data.task.status === s ? 'default' : 'outline'}
+							variant={data.task.status === status ? 'default' : 'outline'}
 						>
-							{s === 'todo' ? 'To Do' : s === 'in_progress' ? 'In Progress' : 'Done'}
+							{status === 'todo' ? 'To Do' : status === 'in_progress' ? 'In Progress' : 'Done'}
 						</Button>
 					</form>
 				{/each}
@@ -125,16 +126,13 @@
 		{#if form?.error}
 			<div class="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 				<AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
-				<span>{form?.error}</span>
+				<span>{form.error}</span>
 			</div>
 		{/if}
 
-		<!-- Two-column layout -->
 		<div class="grid gap-6 lg:grid-cols-3">
-			<!-- Main content (left / 2 cols) -->
-			<div class="lg:col-span-2">
+			<div class="space-y-6 lg:col-span-2">
 				{#if editMode}
-					<!-- Edit form -->
 					<Card class="rounded-xl">
 						<CardHeader>
 							<CardTitle>Edit Task</CardTitle>
@@ -168,31 +166,49 @@
 										name="description"
 										rows={4}
 										value={data.task.description ?? ''}
-										placeholder="Optional details..."
+										placeholder="Operational notes and next action..."
 									/>
 								</div>
 
-								<div class="grid gap-4 sm:grid-cols-2">
+								<div class="grid gap-4 sm:grid-cols-3">
+									<div class="grid gap-2">
+										<Label>Task Type</Label>
+										<Select.Root
+											type="single"
+											name="taskType"
+											value={editTaskType}
+											onValueChange={(value) => (editTaskType = value)}
+										>
+											<Select.Trigger class="w-full">{taskTypeLabel(editTaskType)}</Select.Trigger>
+											<Select.Content>
+												{#each TASK_TYPES as taskType (taskType)}
+													<Select.Item value={taskType}>{taskTypeLabel(taskType)}</Select.Item>
+												{/each}
+											</Select.Content>
+										</Select.Root>
+									</div>
+
 									<div class="grid gap-2">
 										<Label>Priority</Label>
 										<Select.Root
 											type="single"
 											name="priority"
 											value={editPriority}
-											onValueChange={(v) => (editPriority = v)}
+											onValueChange={(value) => (editPriority = value)}
 										>
 											<Select.Trigger class="w-full">
 												{editPriority.charAt(0).toUpperCase() + editPriority.slice(1)}
 											</Select.Trigger>
 											<Select.Content>
-												{#each TASK_PRIORITIES as p (p)}
-													<Select.Item value={p}>
-														{p.charAt(0).toUpperCase() + p.slice(1)}
+												{#each TASK_PRIORITIES as priority (priority)}
+													<Select.Item value={priority}>
+														{priority.charAt(0).toUpperCase() + priority.slice(1)}
 													</Select.Item>
 												{/each}
 											</Select.Content>
 										</Select.Root>
 									</div>
+
 									<div class="grid gap-2">
 										<Label for="dueDate">Due Date</Label>
 										<Input
@@ -216,7 +232,6 @@
 						</CardContent>
 					</Card>
 				{:else}
-					<!-- Description view -->
 					<Card class="rounded-xl">
 						<CardHeader>
 							<CardTitle class="text-lg font-semibold">Description</CardTitle>
@@ -232,7 +247,6 @@
 				{/if}
 			</div>
 
-			<!-- Details sidebar (right / 1 col) -->
 			<div>
 				<Card class="rounded-xl">
 					<CardHeader>
@@ -240,6 +254,15 @@
 					</CardHeader>
 					<CardContent class="divide-y">
 						<div class="grid gap-1 pb-3">
+							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+								Task Type
+							</p>
+							<div>
+								<TaskTypeBadge taskType={data.task.taskType} />
+							</div>
+						</div>
+
+						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Priority
 							</p>
@@ -284,21 +307,20 @@
 									<Select.Root
 										type="single"
 										value={data.task.assignedToId ?? ''}
-										onValueChange={(v) => {
+										onValueChange={(value) => {
 											const assignForm = document.getElementById('assign-form') as HTMLFormElement;
 											const hidden = assignForm?.querySelector(
 												'input[name="assignedToId"]'
 											) as HTMLInputElement;
-											if (hidden) hidden.value = v;
+											if (hidden) hidden.value = value;
 											assignForm?.requestSubmit();
 										}}
 									>
 										<Select.Trigger class="w-full text-xs">Reassign...</Select.Trigger>
 										<Select.Content>
-											{#each members as m (m.userId)}
-												<Select.Item value={m.userId}>
-													{m.user.name}
-												</Select.Item>
+											<Select.Item value="unassigned">Unassigned / Triage</Select.Item>
+											{#each members as member (member.userId)}
+												<Select.Item value={member.userId}>{member.user.name}</Select.Item>
 											{/each}
 										</Select.Content>
 									</Select.Root>
@@ -318,9 +340,31 @@
 									{data.task.clientName}
 								</a>
 							{:else}
-								<p class="text-sm text-muted-foreground">—</p>
+								<p class="text-sm text-muted-foreground">Standalone</p>
 							{/if}
 						</div>
+
+						{#if data.task.policyId}
+							<div class="grid gap-1 py-3">
+								<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									Policy
+								</p>
+								<p class="text-sm text-muted-foreground">
+									{data.task.policyNumber ?? 'Linked policy'}
+								</p>
+							</div>
+						{/if}
+
+						{#if data.task.claimId}
+							<div class="grid gap-1 py-3">
+								<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									Claim
+								</p>
+								<p class="text-sm text-muted-foreground">
+									{data.task.claimNumber ?? 'Linked claim'}
+								</p>
+							</div>
+						{/if}
 
 						<div class="grid gap-1 py-3">
 							<p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -343,7 +387,6 @@
 		</div>
 	</div>
 
-	<!-- Delete Confirmation Dialog -->
 	<AlertDialog.Root bind:open={deleteDialogOpen}>
 		<AlertDialog.Content>
 			<AlertDialog.Header>
