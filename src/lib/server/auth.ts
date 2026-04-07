@@ -54,9 +54,10 @@ export const auth = betterAuth({
 		enabled: true,
 		minPasswordLength: 8,
 		maxPasswordLength: 128,
-		autoSignIn: true,
+		// Keep email/password users out of the app until they finish OTP verification.
+		autoSignIn: false,
 		async sendResetPassword({ user, url }) {
-			await sendEmail({
+			void sendEmail({
 				to: user.email,
 				subject: `Reset your password — ${APP_NAME}`,
 				html: `<p>Click the link below to reset your password:</p><p><a href="${url}">Reset password</a></p><p>If you didn't request this, you can safely ignore this email.</p>`,
@@ -99,7 +100,6 @@ export const auth = betterAuth({
 		autoSignInAfterVerification: true
 	},
 	plugins: [
-		sveltekitCookies(getRequestEvent),
 		organization({
 			ac,
 			roles: {
@@ -114,7 +114,7 @@ export const auth = betterAuth({
 			invitationExpiresIn: 60 * 60 * 48,
 			async sendInvitationEmail(data) {
 				const inviteUrl = `${BETTER_AUTH_URL}/accept-invitation/${data.id}`;
-				await sendEmail({
+				void sendEmail({
 					to: data.email,
 					subject: `You've been invited to join an organization — ${APP_NAME}`,
 					html: `<p>You've been invited to join an organization on ${APP_NAME}.</p><p><a href="${inviteUrl}">Accept invitation</a></p>`,
@@ -139,14 +139,15 @@ export const auth = betterAuth({
 					'sign-in': `Your sign-in code — ${APP_NAME}`,
 					'forget-password': `Your password reset code — ${APP_NAME}`
 				};
-				await sendEmail({
+				void sendEmail({
 					to: email,
 					subject: subjects[type] ?? `Your code — ${APP_NAME}`,
 					html: `<p>Your verification code is:</p><p style="font-size:32px;font-weight:bold;letter-spacing:4px">${otp}</p><p>This code expires in 5 minutes.</p>`,
 					text: `Your verification code is: ${otp}. This code expires in 5 minutes.`
 				});
 			}
-		})
+		}),
+		sveltekitCookies(getRequestEvent)
 	],
 	session: {
 		expiresIn: 60 * 60 * 24 * 7,
