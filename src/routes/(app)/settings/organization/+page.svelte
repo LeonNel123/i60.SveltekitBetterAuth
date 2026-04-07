@@ -78,6 +78,7 @@
 						method="POST"
 						action="?/activate"
 						class="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+						use:enhance
 					>
 						<div class="space-y-1">
 							<p class="font-medium">{organization.name}</p>

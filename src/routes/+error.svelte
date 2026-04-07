@@ -4,7 +4,6 @@
 	import { APP_NAME } from '$lib/config';
 	import Home from '@lucide/svelte/icons/home';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
-	import Users from '@lucide/svelte/icons/users';
 </script>
 
 <svelte:head>
@@ -31,10 +30,6 @@
 		<Button href="/dashboard" variant="default">
 			<LayoutDashboard class="mr-2 h-4 w-4" />
 			Go to Dashboard
-		</Button>
-		<Button href="/clients" variant="outline">
-			<Users class="mr-2 h-4 w-4" />
-			Go to Clients
 		</Button>
 		<Button href="/" variant="outline">
 			<Home class="mr-2 h-4 w-4" />

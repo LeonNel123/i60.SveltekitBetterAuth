@@ -7,7 +7,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 
 	if (locals.user) {
 		if (!locals.user.emailVerified) {
-			if (url.pathname === '/verify-email') {
+			if (url.pathname === '/verify-email' || url.pathname === '/two-factor') {
 				return;
 			}
 

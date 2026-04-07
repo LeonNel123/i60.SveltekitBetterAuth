@@ -68,7 +68,7 @@ export const auth = betterAuth({
 			id
 		}),
 		async sendResetPassword({ user, url }) {
-			void sendEmail({
+			await sendEmail({
 				to: user.email,
 				subject: `Reset your password — ${APP_NAME}`,
 				html: `<p>Click the link below to reset your password:</p><p><a href="${url}">Reset password</a></p><p>If you didn't request this, you can safely ignore this email.</p>`,
@@ -131,7 +131,7 @@ export const auth = betterAuth({
 			invitationExpiresIn: 60 * 60 * 48,
 			async sendInvitationEmail(data) {
 				const inviteUrl = `${BETTER_AUTH_URL}/accept-invitation/${data.id}`;
-				void sendEmail({
+				await sendEmail({
 					to: data.email,
 					subject: `You've been invited to join an organization — ${APP_NAME}`,
 					html: `<p>You've been invited to join an organization on ${APP_NAME}.</p><p><a href="${inviteUrl}">Accept invitation</a></p>`,
@@ -156,7 +156,7 @@ export const auth = betterAuth({
 					'sign-in': `Your sign-in code — ${APP_NAME}`,
 					'forget-password': `Your password reset code — ${APP_NAME}`
 				};
-				void sendEmail({
+				await sendEmail({
 					to: email,
 					subject: subjects[type] ?? `Your code — ${APP_NAME}`,
 					html: `<p>Your verification code is:</p><p style="font-size:32px;font-weight:bold;letter-spacing:4px">${otp}</p><p>This code expires in 5 minutes.</p>`,
