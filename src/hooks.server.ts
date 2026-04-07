@@ -1,4 +1,5 @@
 import { auth } from '$lib/server/auth';
+import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building } from '$app/environment';
 import { redirect, json } from '@sveltejs/kit';
@@ -26,6 +27,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = session?.session ?? null;
 	event.locals.user = session?.user ?? null;
 
+	const currentPath = getSafeRedirectPath(`${event.url.pathname}${event.url.search}`);
+	const isProtectedRoute =
+		event.route.id?.startsWith('/(app)') || event.route.id === '/accept-invitation/[id]';
+
+	if (isProtectedRoute && (!event.locals.user || !event.locals.session)) {
+		throw redirect(303, `/login?next=${encodeURIComponent(currentPath)}`);
+	}
+
 	// Block banned users from all routes except /banned and sign-out
 	if (event.locals.user?.banned) {
 		if (event.url.pathname.startsWith('/api/auth')) {
@@ -50,7 +59,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return json({ error: 'Email verification required' }, { status: 403 });
 		}
 
-		throw redirect(303, `/verify-email?email=${encodeURIComponent(event.locals.user.email)}`);
+		throw redirect(
+			303,
+			`/verify-email?email=${encodeURIComponent(event.locals.user.email)}&next=${encodeURIComponent(currentPath)}`
+		);
 	}
 
 	return svelteKitHandler({ event, resolve, auth, building });

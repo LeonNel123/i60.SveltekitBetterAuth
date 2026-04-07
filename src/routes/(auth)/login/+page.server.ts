@@ -1,3 +1,4 @@
+import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 import { auth } from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID, GITHUB_CLIENT_ID, MICROSOFT_CLIENT_ID } from '$env/static/private';
@@ -12,10 +13,11 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, url }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
+		const next = getSafeRedirectPath(url.searchParams.get('next'));
 
 		if (!email || !password) {
 			return fail(400, { email, error: 'Email and password are required' });
@@ -29,7 +31,7 @@ export const actions: Actions = {
 
 			// 2FA redirect: when twoFactor plugin is active, a 2FA-required response has no token
 			if (result && 'twoFactorRedirect' in result) {
-				throw redirect(303, '/two-factor');
+				throw redirect(303, `/two-factor?next=${encodeURIComponent(next)}`);
 			}
 		} catch (e) {
 			// Re-throw SvelteKit redirects
@@ -44,6 +46,6 @@ export const actions: Actions = {
 			return fail(400, { email, error: 'Invalid email or password' });
 		}
 
-		throw redirect(303, '/dashboard');
+		throw redirect(303, next);
 	}
 };

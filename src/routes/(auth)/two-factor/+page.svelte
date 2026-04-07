@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { APP_NAME } from '$lib/config';
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
+	import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -19,6 +21,7 @@
 	let error = $state('');
 	let submitting = $state(false);
 	let useBackupCode = $state(false);
+	let next = $derived(getSafeRedirectPath(page.url.searchParams.get('next')));
 
 	async function handleVerify(e: SubmitEvent) {
 		e.preventDefault();
@@ -34,7 +37,7 @@
 		if (result.error) {
 			error = result.error.message ?? 'Invalid code. Please try again.';
 		} else {
-			await goto('/dashboard', { invalidateAll: true });
+			await goto(next, { invalidateAll: true });
 		}
 	}
 </script>
@@ -92,7 +95,10 @@
 		>
 			{useBackupCode ? 'Use authenticator app instead' : 'Use a backup code instead'}
 		</button>
-		<a href="/login" class="text-sm text-muted-foreground hover:underline">
+		<a
+			href={next === '/dashboard' ? '/login' : `/login?next=${encodeURIComponent(next)}`}
+			class="text-sm text-muted-foreground hover:underline"
+		>
 			Cancel and return to sign in
 		</a>
 	</CardFooter>

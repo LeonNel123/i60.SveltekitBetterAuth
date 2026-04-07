@@ -56,6 +56,17 @@ export const auth = betterAuth({
 		maxPasswordLength: 128,
 		// Keep email/password users out of the app until they finish OTP verification.
 		autoSignIn: false,
+		// Required when email enumeration protection is active and plugins extend the user table.
+		customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
+			...coreFields,
+			role: 'user',
+			banned: false,
+			banReason: null,
+			banExpires: null,
+			twoFactorEnabled: false,
+			...additionalFields,
+			id
+		}),
 		async sendResetPassword({ user, url }) {
 			void sendEmail({
 				to: user.email,

@@ -4,6 +4,7 @@
 	import { authClient } from '$lib/auth-client';
 	import { APP_NAME } from '$lib/config';
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
+	import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import {
@@ -16,6 +17,7 @@
 	} from '$lib/components/ui/card';
 
 	let email = $derived(page.url.searchParams.get('email') ?? '');
+	let next = $derived(getSafeRedirectPath(page.url.searchParams.get('next')));
 	let otp = $state('');
 	let error = $state('');
 	let submitting = $state(false);
@@ -23,6 +25,10 @@
 	let resent = $state(false);
 
 	async function verify() {
+		if (!email) {
+			error = 'Missing email address. Return to sign in and try again.';
+			return;
+		}
 		if (!otp || otp.length < 6) {
 			error = 'Please enter the 6-digit code';
 			return;
@@ -37,11 +43,15 @@
 		if (err) {
 			error = err.message ?? 'Invalid or expired code';
 		} else {
-			goto('/dashboard');
+			await goto(next, { invalidateAll: true });
 		}
 	}
 
 	async function resendCode() {
+		if (!email) {
+			error = 'Missing email address. Return to sign in and try again.';
+			return;
+		}
 		resending = true;
 		resent = false;
 		error = '';
@@ -111,6 +121,12 @@
 				{resending ? 'Sending...' : 'Resend code'}
 			</button>
 		</p>
-		<Button href="/login" variant="outline" class="w-full">Back to sign in</Button>
+		<Button
+			href={next === '/dashboard' ? '/login' : `/login?next=${encodeURIComponent(next)}`}
+			variant="outline"
+			class="w-full"
+		>
+			Back to sign in
+		</Button>
 	</CardFooter>
 </Card>

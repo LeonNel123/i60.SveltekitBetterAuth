@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { authClient } from '$lib/auth-client';
+	import { getSafeRedirectPath } from '$lib/utils/safe-redirect';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -20,10 +21,12 @@
 	let { form, data }: PageProps = $props();
 	let submitting = $state(false);
 	let socialLoading = $state('');
+	let next = $derived(getSafeRedirectPath(page.url.searchParams.get('next')));
+	let nextQuery = $derived(page.url.searchParams.get('next'));
 
 	async function socialSignIn(provider: 'google' | 'github' | 'microsoft') {
 		socialLoading = provider;
-		await authClient.signIn.social({ provider, callbackURL: '/dashboard' });
+		await authClient.signIn.social({ provider, callbackURL: next });
 		socialLoading = '';
 	}
 </script>
@@ -139,7 +142,12 @@
 	<CardFooter class="justify-center">
 		<p class="text-sm text-muted-foreground">
 			Don't have an account?
-			<a href="/register" class="text-primary hover:underline">Sign up</a>
+			<a
+				href={nextQuery ? `/register?next=${encodeURIComponent(nextQuery)}` : '/register'}
+				class="text-primary hover:underline"
+			>
+				Sign up
+			</a>
 		</p>
 	</CardFooter>
 </Card>
