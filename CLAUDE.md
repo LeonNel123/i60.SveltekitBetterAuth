@@ -32,12 +32,12 @@ All env vars using `$env/static/private` MUST exist in production (even if empty
 | `NODE_ENV`                   | `production`                                                      |
 | `EMAIL_PROVIDER`             | `resend`, `sendgrid`, or `smtp`                                   |
 | `EMAIL_FROM`                 | e.g. `App Name <noreply@example.com>`                             |
-| `SENDGRID_API_KEY`           | Set real value or `none` as placeholder                           |
-| `RESEND_API_KEY`             | Set real value or `none` as placeholder                           |
-| `SMTP_HOST/PORT/USER/PASS`   | Set real values or `none`/`0`/`none`/`none` as placeholders       |
-| `GOOGLE_CLIENT_ID/SECRET`    | Set real values to enable OAuth, or `none` as placeholders        |
-| `GITHUB_CLIENT_ID/SECRET`    | Set real values to enable OAuth, or `none` as placeholders        |
-| `MICROSOFT_CLIENT_ID/SECRET` | Set real values to enable OAuth, or `none` as placeholders        |
+| `SENDGRID_API_KEY`           | Set real value, or leave empty/`none`                             |
+| `RESEND_API_KEY`             | Set real value, or leave empty/`none`                             |
+| `SMTP_HOST/PORT/USER/PASS`   | Set real values, or leave empty                                   |
+| `GOOGLE_CLIENT_ID/SECRET`    | Set real values to enable OAuth, or leave empty to hide buttons   |
+| `GITHUB_CLIENT_ID/SECRET`    | Set real values to enable OAuth, or leave empty to hide buttons   |
+| `MICROSOFT_CLIENT_ID/SECRET` | Set real values to enable OAuth, or leave empty to hide buttons   |
 
 **Important:** `BETTER_AUTH_URL` and `ORIGIN` must be hardcoded URLs — Better Auth validates the URL at build time.
 

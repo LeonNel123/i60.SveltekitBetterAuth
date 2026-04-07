@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1775020034717,
-      "tag": "0000_lively_texas_twister",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1775027328513,
-      "tag": "0001_solid_joystick",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1775107493702,
-      "tag": "0002_lucky_mercury",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1775558885738,
-      "tag": "0003_talented_rictor",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1775566160957,
-      "tag": "0004_overjoyed_shatterstar",
+      "when": 1775581267934,
+      "tag": "0000_typical_the_stranger",
       "breakpoints": true
     }
   ]

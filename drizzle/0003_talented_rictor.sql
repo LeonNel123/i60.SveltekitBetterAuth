@@ -1,1 +1,0 @@
-ALTER TABLE "task" ADD COLUMN "task_type" text DEFAULT 'general' NOT NULL;

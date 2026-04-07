@@ -14,7 +14,7 @@ A production-ready B2B SaaS starter built with SvelteKit 2, Svelte 5, Better Aut
 - **Email Providers** — Pluggable: Resend, SendGrid, SMTP, or console (dev)
 - **Security** — Rate limiting, banned user enforcement, cookie-cached sessions, progressive enhancement
 - **UI** — shadcn-svelte components, sidebar layout, dark/light mode toggle with system detection
-- **Dashboard** — Sidebar navigation, header with user menu, live org stats
+- **Dashboard** — Sidebar navigation, header with user menu, getting-started guide
 
 ## Quick Start
 
