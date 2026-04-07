@@ -13,8 +13,8 @@ These are the **exact versions** this template uses. Generate code for THESE ver
 | Package                | Version  | Role                                                  |
 | ---------------------- | -------- | ----------------------------------------------------- |
 | svelte                 | ^5.54.0  | UI framework (runes mode)                             |
-| @sveltejs/kit          | ^2.50.2  | App framework (file-based routing)                    |
-| better-auth            | ^1.5.6   | Authentication (server + client)                      |
+| @sveltejs/kit          | ^2.56.1  | App framework (file-based routing)                    |
+| better-auth            | ^1.6.0   | Authentication (server + client)                      |
 | drizzle-orm            | ^0.45.2  | Type-safe ORM                                         |
 | drizzle-kit            | ^0.31.10 | Migration tooling                                     |
 | postgres               | ^3.4.8   | PostgreSQL driver (postgres.js)                       |
@@ -42,7 +42,7 @@ Single SvelteKit 2 monolith with Node adapter. No separate API server.
 | ------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `(marketing)`            | Public pages — landing                                                                  | No                                               |
 | `(auth)`                 | Auth flows — login, register, forgot-password, reset-password, verify-email, two-factor | No (redirects to `/dashboard` if logged in)      |
-| `(app)`                  | App pages — dashboard, settings                                                         | Yes (redirects to `/login` if not authenticated) |
+| `(app)`                  | App pages — dashboard, clients, tasks, documents, settings                              | Yes (redirects to `/login` if not authenticated) |
 | `accept-invitation/[id]` | Org invitation accept/reject                                                            | Yes (standalone)                                 |
 | `banned`                 | Suspended account page                                                                  | No guard                                         |
 
@@ -66,6 +66,14 @@ hooks.server.ts          → populates event.locals.session / event.locals.user
 | `src/lib/server/auth.ts`                        | Better Auth server config — plugins, roles, access control, rate limits, email handlers | Adding auth plugins, changing roles/permissions, adjusting rate limits |
 | `src/lib/auth-client.ts`                        | Better Auth client — plugins must mirror server                                         | Adding client-side auth plugins                                        |
 | `src/lib/server/email.ts`                       | Email abstraction — `sendEmail()` routes to configured provider                         | Adding email providers or changing email logic                         |
+| `src/lib/server/organization.ts`                | Org helpers — slug normalization, access context, orphan claiming, member resolution     | Adding org-scoped logic or multi-tenant features                       |
+| `src/lib/server/task-boards.ts`                 | Task board SQL filters — `taskBoardWhere()` builds board-specific queries               | Adding or modifying task board filter logic                            |
+| `src/lib/server/activity.ts`                    | Activity logging — `logActivity()` for audit trail                                      | Adding new mutation types or changing activity metadata                 |
+| `src/lib/server/files.ts`                       | File storage — `saveUploadedFile()`, `deleteFile()` in `data/uploads/[orgId]/`          | Changing upload storage or adding file processing                      |
+| `src/lib/server/seed-tags.ts`                   | System tag seeding — auto-seeds 10 document tags on startup                             | Adding or renaming system tags                                         |
+| `src/lib/tasks.ts`                              | Task board definitions — 6 boards with labels, descriptions, helpers                    | Adding new boards or changing board metadata                           |
+| `src/lib/types.ts`                              | CRM type constants — statuses, priorities, task types, entity types, system tags         | Adding new enum values                                                 |
+| `src/lib/utils/format.ts`                       | Format utilities — dates, currency, time ago, file size, status labels/variants          | Adding display formatting helpers                                      |
 | `src/lib/server/db/schema.ts`                   | Drizzle schema — all database tables                                                    | Adding business domain tables                                          |
 | `src/lib/server/db/index.ts`                    | Drizzle client instance (`db`)                                                          | Rarely — only if changing connection config                            |
 | `src/hooks.server.ts`                           | Session population, banned user enforcement, Better Auth handler                        | Adding global middleware logic                                         |
@@ -480,6 +488,50 @@ These tables are managed by Better Auth. Do NOT modify their structure — add y
 | `invitation`   | id, organizationId, email, role, status, expiresAt, inviterId         |
 | `two_factor`   | id, userId, secret, backupCodes                                       |
 
+### CRM Business Tables
+
+| Table          | Key Columns                                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `client`       | id, organizationId, type, name, email, phone, idNumber, registrationNumber, address, createdById                       |
+| `policy`       | id, organizationId, clientId, policyNumber, insurer, type, status, startDate, endDate, premium, isActivePrimary        |
+| `claim`        | id, organizationId, clientId, policyId, claimNumber, status, description, dateOfLoss, amountClaimed, amountSettled     |
+| `task`         | id, organizationId, title, description, taskType, status, priority, dueDate, assignedToId, clientId, policyId, claimId, completedAt |
+| `task_watcher` | id, taskId, userId — many-to-many for task watchers/subscribers                                                        |
+| `document`     | id, organizationId, name, fileName, mimeType, size, storagePath, clientId, policyId, claimId, taskId, uploadedById     |
+| `tag`          | id, organizationId, name, isSystem — system tags seeded on startup, custom tags per org                                |
+| `document_tag` | documentId, tagId — composite PK junction table                                                                         |
+| `note`         | id, organizationId, clientId, content, createdById                                                                     |
+| `activity`     | id, organizationId, clientId, entityType, entityId, action, description, metadata (JSONB), performedById               |
+
+---
+
+## Task Board System
+
+The dashboard and tasks page use an operational board system to organize work. Boards are defined in `src/lib/tasks.ts` and SQL filters are in `src/lib/server/task-boards.ts`.
+
+### Board Definitions
+
+| Board Key          | Label              | Filter Logic                                         |
+| ------------------ | ------------------ | ---------------------------------------------------- |
+| `my-queue`         | My Queue           | `assignedToId = currentUser`                         |
+| `team-ops`         | Team Ops           | All open tasks (no additional filter)                |
+| `renewals`         | Renewals           | `taskType = 'renewal'` OR `policyId IS NOT NULL`     |
+| `claims`           | Claims             | `taskType = 'claim'` OR `claimId IS NOT NULL`        |
+| `outstanding-docs` | Outstanding Docs   | `taskType IN ('document', 'compliance')`             |
+| `triage`           | Unassigned / Triage| `assignedToId IS NULL`                               |
+
+All boards automatically filter to open tasks only (`status != 'done'`) within the active organization.
+
+### Task Types
+
+`general`, `renewal`, `claim`, `document`, `compliance`, `internal` — defined in `src/lib/types.ts`.
+
+### Usage
+
+- Dashboard: board stats cards, active board switcher
+- Tasks page: `?board=my-queue` query param for board filtering
+- Server: `taskBoardWhere(orgId, board, userId)` returns a Drizzle SQL condition
+
 ---
 
 ## Tailwind CSS v4
@@ -610,7 +662,7 @@ Common components to add: `accordion`, `alert`, `alert-dialog`, `checkbox`, `col
 
 ### Available Components in This Template
 
-avatar, badge, button, card, dialog, dropdown-menu, input, label, separator, sheet, sidebar (full system), skeleton, table, tooltip
+alert-dialog, avatar, badge, button, calendar, card, checkbox, dialog, dropdown-menu, input, label, popover, scroll-area, select, separator, sheet, sidebar (full system), skeleton, sonner, switch, table, tabs, textarea, tooltip
 
 ### Layout Components
 

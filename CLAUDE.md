@@ -77,8 +77,12 @@ All env vars using `$env/static/private` MUST exist on Railway (even if empty) o
 - All CRM data scoped to `locals.session?.activeOrganizationId`
 - Org members loaded in `(app)/+layout.server.ts` — available as `data.members` on all app pages
 - `APP_NAME` in `src/lib/config.ts` — all UI/email references use this
-- Shared format utilities in `src/lib/utils/format.ts` — `formatDate`, `formatCurrency`, `timeAgo`, `formatFileSize`
-- CRM type constants in `src/lib/types.ts` — status enums, tag definitions
+- Shared format utilities in `src/lib/utils/format.ts` — `formatDate`, `formatCurrency`, `timeAgo`, `formatFileSize`, `currentGreeting`, `daysUntilDate`, `isOverdueDate`, `policyTypeLabel`, `policyStatusLabel/Variant`, `claimStatusLabel/Variant`
+- CRM type constants in `src/lib/types.ts` — status enums, task types, tag definitions
+- Task board definitions in `src/lib/tasks.ts` — 6 operational boards with filtering helpers
+- Task board server filtering in `src/lib/server/task-boards.ts` — `taskBoardWhere()` builds board-specific queries
+- Organization helpers in `src/lib/server/organization.ts` — `normalizeOrganizationSlug()`, `getOrganizationAccessContext()`, `claimOrphanOrganizationForUser()`, `resolveOrgMemberUserId()`, `filterVisibleTagIds()`
+- System tag seeding in `src/lib/server/seed-tags.ts` — auto-seeds 10 system tags on startup
 - Activity logging via `src/lib/server/activity.ts` — call `logActivity()` for all mutations
 - File uploads stored in `data/uploads/[orgId]/` via `src/lib/server/files.ts`
 - shadcn-svelte components in `src/lib/components/ui/`
@@ -89,14 +93,32 @@ All env vars using `$env/static/private` MUST exist on Railway (even if empty) o
 
 ## CRM Routes
 
-- `/dashboard` — Command Centre (KPI stats, task queue, overdue, renewals, activity feed)
+- `/dashboard` — Command Centre (KPI stats, task board switcher, workload chart, overdue alerts, 30-day renewals, activity feed)
 - `/clients` — Client list with search and pagination
 - `/clients/new` — Create client
 - `/clients/[id]` — Client detail (tabs: policies, claims, tasks, documents, notes, activity)
 - `/clients/[id]/edit` — Edit client (includes delete)
-- `/tasks` — Task list with filters (all/mine/overdue) and search
+- `/tasks` — Task list with board filtering (`?board=`), task type/priority filters, and search
 - `/tasks/[id]` — Task detail with status updates, assignment, edit, delete
 - `/documents` — Document browser with search and tag filtering
+
+### Task Boards
+
+6 operational boards filter tasks by role, type, and assignment:
+
+| Board | Key | Filter Logic |
+|-------|-----|-------------|
+| My Queue | `my-queue` | Assigned to current user |
+| Team Ops | `team-ops` | All open tasks org-wide |
+| Renewals | `renewals` | Task type = renewal OR linked to policy |
+| Claims | `claims` | Task type = claim OR linked to claim |
+| Outstanding Docs | `outstanding-docs` | Task type = document or compliance |
+| Triage | `triage` | Unassigned tasks needing allocation |
+
+### API Routes
+
+- `/api/auth/*` — Better Auth handler (mounted in `hooks.server.ts`)
+- `/api/documents/[id]` — GET: download document file (streams from `data/uploads/`)
 
 ## Auth Routes
 
