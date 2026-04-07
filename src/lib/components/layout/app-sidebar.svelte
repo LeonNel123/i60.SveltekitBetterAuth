@@ -6,9 +6,11 @@
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import UserCog from '@lucide/svelte/icons/user-cog';
 	import Shield from '@lucide/svelte/icons/shield';
+	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
 	import {
 		Sidebar,
 		SidebarContent,
+		SidebarFooter,
 		SidebarGroup,
 		SidebarGroupContent,
 		SidebarGroupLabel,
@@ -16,8 +18,11 @@
 		SidebarMenu,
 		SidebarMenuButton,
 		SidebarMenuItem,
-		SidebarSeparator
+		SidebarSeparator,
+		useSidebar
 	} from '$lib/components/ui/sidebar';
+
+	const sidebar = useSidebar();
 
 	const mainNav = [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }];
 
@@ -29,9 +34,9 @@
 	];
 </script>
 
-<Sidebar>
+<Sidebar collapsible="icon">
 	<SidebarHeader class="px-4 py-3">
-		<span class="text-lg font-bold tracking-tight">{APP_NAME}</span>
+		<span class="truncate text-lg font-bold tracking-tight">{APP_NAME}</span>
 	</SidebarHeader>
 	<SidebarContent>
 		<SidebarGroup>
@@ -82,4 +87,18 @@
 			</SidebarGroupContent>
 		</SidebarGroup>
 	</SidebarContent>
+	<SidebarFooter>
+		<SidebarMenu>
+			<SidebarMenuItem>
+				<SidebarMenuButton onclick={() => sidebar.toggle()}>
+					<ChevronsLeft
+						class="h-4 w-4 transition-transform duration-200 {sidebar.state === 'collapsed'
+							? 'rotate-180'
+							: ''}"
+					/>
+					<span>Collapse</span>
+				</SidebarMenuButton>
+			</SidebarMenuItem>
+		</SidebarMenu>
+	</SidebarFooter>
 </Sidebar>
