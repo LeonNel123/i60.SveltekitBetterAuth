@@ -2,9 +2,6 @@
 	import { page } from '$app/state';
 	import { APP_NAME } from '$lib/config';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
-	import Users from '@lucide/svelte/icons/users';
-	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
-	import FileText from '@lucide/svelte/icons/file-text';
 	import User from '@lucide/svelte/icons/user';
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import UserCog from '@lucide/svelte/icons/user-cog';
@@ -22,12 +19,7 @@
 		SidebarSeparator
 	} from '$lib/components/ui/sidebar';
 
-	const mainNav = [
-		{ href: '/dashboard', label: 'Command Centre', icon: LayoutDashboard },
-		{ href: '/clients', label: 'Clients', icon: Users },
-		{ href: '/tasks', label: 'Tasks', icon: ClipboardList },
-		{ href: '/documents', label: 'Documents', icon: FileText }
-	];
+	const mainNav = [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }];
 
 	const settingsNav = [
 		{ href: '/settings/profile', label: 'Profile', icon: User },

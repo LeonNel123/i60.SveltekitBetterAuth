@@ -1,8 +1,8 @@
-import { and, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { auth, type Session } from './auth';
 import { db } from './db';
-import { member, organization, tag } from './db/schema';
+import { member, organization } from './db/schema';
 
 type ListedOrganization = Awaited<ReturnType<typeof auth.api.listOrganizations>>[number];
 
@@ -126,17 +126,3 @@ export async function resolveOrgMemberUserId(
 	return orgMember?.userId ?? null;
 }
 
-export async function filterVisibleTagIds(
-	orgId: string,
-	requestedTagIds: string[]
-): Promise<string[]> {
-	const tagIds = Array.from(new Set(requestedTagIds.map((id) => id.trim()).filter(Boolean)));
-	if (tagIds.length === 0) return [];
-
-	const visibleTags = await db
-		.select({ id: tag.id })
-		.from(tag)
-		.where(and(inArray(tag.id, tagIds), or(eq(tag.organizationId, orgId), eq(tag.isSystem, true))));
-
-	return visibleTags.map(({ id }) => id);
-}

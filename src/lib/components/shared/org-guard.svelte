@@ -27,7 +27,7 @@
 				</div>
 				<CardTitle>Organisation Required</CardTitle>
 				<CardDescription
-					>Create or join an organisation to start managing clients, policies, and tasks.</CardDescription
+					>Create or join an organisation to get started.</CardDescription
 				>
 			</CardHeader>
 			<CardContent>
