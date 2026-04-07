@@ -7,6 +7,7 @@
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import UserCog from '@lucide/svelte/icons/user-cog';
 	import Shield from '@lucide/svelte/icons/shield';
+	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import type { PageProps } from './$types';
 	import { currentGreeting } from '$lib/utils/format';
 
@@ -14,10 +15,30 @@
 	const greeting = currentGreeting();
 
 	const quickLinks = [
-		{ href: '/settings/profile', label: 'Profile', description: 'Update your personal details', icon: User },
-		{ href: '/settings/organization', label: 'Organisation', description: 'Manage your organisation settings', icon: Building2 },
-		{ href: '/settings/members', label: 'Members', description: 'Invite and manage team members', icon: UserCog },
-		{ href: '/settings/security', label: 'Security', description: 'Password and two-factor authentication', icon: Shield }
+		{
+			href: '/settings/profile',
+			label: 'Profile',
+			description: 'Update your personal details',
+			icon: User
+		},
+		{
+			href: '/settings/organization',
+			label: 'Organisation',
+			description: 'Manage your organisation',
+			icon: Building2
+		},
+		{
+			href: '/settings/members',
+			label: 'Members',
+			description: 'Invite and manage your team',
+			icon: UserCog
+		},
+		{
+			href: '/settings/security',
+			label: 'Security',
+			description: 'Password and 2FA settings',
+			icon: Shield
+		}
 	];
 </script>
 
@@ -26,29 +47,31 @@
 </svelte:head>
 
 <OrgGuard>
-	<div class="space-y-6">
+	<div class="space-y-8">
 		<div>
 			<h1 class="text-2xl font-semibold tracking-tight">Dashboard</h1>
 			<p class="mt-1 text-sm text-muted-foreground">
-				{greeting}, {data.userName}. Welcome to {APP_NAME}.
+				{greeting}, {data.userName}.
 			</p>
 		</div>
 
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			{#each quickLinks as link (link.href)}
-				<Card class="rounded-xl transition-colors hover:bg-accent/50">
-					<a href={link.href} class="block p-6">
-						<CardHeader class="flex flex-row items-center gap-3 p-0 pb-2">
-							<div class="rounded-md bg-primary/10 p-2">
-								<link.icon class="h-4 w-4 text-primary" />
-							</div>
-							<CardTitle class="text-sm font-semibold">{link.label}</CardTitle>
-						</CardHeader>
-						<CardContent class="p-0">
-							<p class="text-xs text-muted-foreground">{link.description}</p>
-						</CardContent>
-					</a>
-				</Card>
+				<a
+					href={link.href}
+					class="group rounded-xl border bg-card p-5 transition-all duration-200 hover:border-primary/20 hover:shadow-sm"
+				>
+					<div class="mb-3 inline-flex rounded-lg bg-primary/10 p-2">
+						<link.icon class="h-4 w-4 text-primary" />
+					</div>
+					<p class="text-sm font-semibold">{link.label}</p>
+					<p class="mt-1 text-xs text-muted-foreground">{link.description}</p>
+					<div
+						class="mt-3 flex items-center text-xs font-medium text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+					>
+						Open <ArrowRight class="ml-1 h-3 w-3" />
+					</div>
+				</a>
 			{/each}
 		</div>
 
@@ -57,10 +80,21 @@
 				<CardTitle class="text-lg font-semibold">Getting Started</CardTitle>
 			</CardHeader>
 			<CardContent class="space-y-3 text-sm text-muted-foreground">
-				<p>This is a SvelteKit + Better Auth template with organisation management, role-based access, and two-factor authentication built in.</p>
-				<p>Start building your application by adding routes under <code class="rounded bg-muted px-1.5 py-0.5 text-xs">src/routes/(app)/</code> and extending the database schema in <code class="rounded bg-muted px-1.5 py-0.5 text-xs">src/lib/server/db/schema.ts</code>.</p>
+				<p>
+					This is a SvelteKit + Better Auth template with organisation management, role-based
+					access, and two-factor authentication built in.
+				</p>
+				<p>
+					Add routes under <code class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium"
+						>src/routes/(app)/</code
+					>
+					and extend the schema in
+					<code class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium"
+						>src/lib/server/db/schema.ts</code
+					>.
+				</p>
 				<div class="pt-2">
-					<Button variant="outline" href={'/settings/organization'}>
+					<Button variant="outline" size="sm" href="/settings/organization">
 						Set up your organisation
 					</Button>
 				</div>

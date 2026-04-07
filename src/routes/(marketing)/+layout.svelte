@@ -8,16 +8,16 @@
 </script>
 
 <div class="flex min-h-screen flex-col">
-	<header class="border-b">
-		<div class="container mx-auto flex h-16 items-center justify-between px-4">
-			<a href="/" class="text-xl font-bold">{APP_NAME}</a>
-			<nav class="flex items-center gap-2">
+	<header class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
+		<div class="container mx-auto flex h-14 items-center justify-between px-4">
+			<a href="/" class="text-base font-bold tracking-tight">{APP_NAME}</a>
+			<nav class="flex items-center gap-1.5">
 				<ThemeToggle />
 				{#if data.user}
-					<Button href="/dashboard" variant="default">Dashboard</Button>
+					<Button href="/dashboard" size="sm">Dashboard</Button>
 				{:else}
-					<Button href="/login" variant="ghost">Sign in</Button>
-					<Button href="/register">Get started</Button>
+					<Button href="/login" variant="ghost" size="sm">Sign in</Button>
+					<Button href="/register" size="sm">Get started</Button>
 				{/if}
 			</nav>
 		</div>
@@ -27,14 +27,18 @@
 		{@render children()}
 	</main>
 
-	<footer class="border-t py-6">
+	<footer class="border-t py-8">
 		<div class="container mx-auto flex flex-col items-center gap-2 px-4">
 			<p class="text-sm text-muted-foreground">
 				&copy; {new Date().getFullYear()}
-				{APP_NAME}. All rights reserved.
+				{APP_NAME}
 			</p>
-			<p class="text-xs text-muted-foreground/60">
-				Built with <a href="https://i60.co" target="_blank" rel="noopener" class="hover:underline"
+			<p class="text-xs text-muted-foreground/50">
+				Built with <a
+					href="https://i60.co"
+					target="_blank"
+					rel="noopener"
+					class="underline decoration-muted-foreground/30 underline-offset-2 hover:decoration-muted-foreground/60"
 					>i60.co</a
 				> SvelteKit template
 			</p>
