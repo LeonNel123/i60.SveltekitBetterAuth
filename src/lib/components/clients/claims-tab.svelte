@@ -172,6 +172,9 @@
 			<Dialog.Title>{editingClaim ? 'Edit Claim' : 'Add Claim'}</Dialog.Title>
 			<Dialog.Description>
 				{editingClaim ? 'Update this claim.' : 'File a new claim for this client.'}
+				<span class="mt-1 block">
+					Open and in-progress claims automatically maintain a linked claims-board task.
+				</span>
 			</Dialog.Description>
 		</Dialog.Header>
 

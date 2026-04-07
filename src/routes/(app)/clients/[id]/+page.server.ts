@@ -14,6 +14,13 @@ import {
 import { alias } from 'drizzle-orm/pg-core';
 import { logActivity } from '$lib/server/activity';
 import { saveUploadedFile, deleteFile } from '$lib/server/files';
+import {
+	buildClaimWorkflowKey,
+	buildRenewalWorkflowKey,
+	completeWorkflowTask,
+	syncClaimTask,
+	syncRenewalTask
+} from '$lib/server/task-workflows';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { filterVisibleTagIds, resolveOrgMemberUserId } from '$lib/server/organization';
@@ -59,6 +66,15 @@ async function findClientNote(orgId: string, clientId: string, noteId: string) {
 		.where(and(eq(note.id, noteId), eq(note.clientId, clientId), eq(note.organizationId, orgId)));
 
 	return existingNote;
+}
+
+function noteToTaskTitle(content: string): string {
+	const firstLine =
+		content
+			.split('\n')
+			.map((line) => line.trim())
+			.find(Boolean) ?? 'Follow up on note';
+	return firstLine.length > 80 ? `${firstLine.slice(0, 77)}...` : firstLine;
 }
 
 async function findClientDocument(orgId: string, clientId: string, documentId: string) {
@@ -260,6 +276,46 @@ export const actions: Actions = {
 		return { noteSuccess: true };
 	},
 
+	promoteNote: async ({ request, locals, params }) => {
+		const orgId = locals.session?.activeOrganizationId;
+		if (!orgId || !locals.user) return fail(403, { noteError: 'Not authorised.' });
+
+		const fd = await request.formData();
+		const noteId = fd.get('noteId') as string;
+		if (!noteId) return fail(400, { noteError: 'Note ID is required.' });
+
+		const existingNote = await findClientNote(orgId, params.id, noteId);
+		if (!existingNote) return fail(404, { noteError: 'Note not found.' });
+
+		const title = noteToTaskTitle(existingNote.content);
+		const [createdTask] = await db
+			.insert(task)
+			.values({
+				organizationId: orgId,
+				clientId: params.id,
+				title,
+				description: existingNote.content,
+				taskType: 'general',
+				priority: 'medium',
+				createdById: locals.user.id,
+				assignedToId: locals.user.id
+			})
+			.returning({ id: task.id });
+
+		await logActivity({
+			organizationId: orgId,
+			clientId: params.id,
+			entityType: 'task',
+			entityId: createdTask.id,
+			action: 'created',
+			description: `Promoted note to task "${title}"`,
+			performedById: locals.user.id,
+			metadata: { noteId }
+		});
+
+		return { noteSuccess: true, promotedTaskId: createdTask.id };
+	},
+
 	addPolicy: async ({ request, locals, params }) => {
 		const orgId = locals.session?.activeOrganizationId;
 		if (!orgId || !locals.user) return fail(403, { policyError: 'Not authorised.' });
@@ -304,6 +360,17 @@ export const actions: Actions = {
 			entityId: created.id,
 			action: 'created',
 			description: `Added policy ${policyNumber} (${insurer})`,
+			performedById: locals.user.id
+		});
+
+		await syncRenewalTask({
+			orgId,
+			clientId: params.id,
+			policyId: created.id,
+			policyNumber,
+			insurer,
+			policyStatus: status,
+			endDate,
 			performedById: locals.user.id
 		});
 		return { policySuccess: true };
@@ -365,6 +432,17 @@ export const actions: Actions = {
 			description: `Updated policy ${policyNumber} (${insurer})`,
 			performedById: locals.user.id
 		});
+
+		await syncRenewalTask({
+			orgId,
+			clientId: params.id,
+			policyId,
+			policyNumber,
+			insurer,
+			policyStatus: status,
+			endDate,
+			performedById: locals.user.id
+		});
 		return { policySuccess: true };
 	},
 
@@ -395,6 +473,14 @@ export const actions: Actions = {
 			entityId: policyId,
 			action: 'deleted',
 			description: `Deleted policy ${existing.policyNumber} (${existing.insurer})`,
+			performedById: locals.user.id
+		});
+
+		await completeWorkflowTask({
+			orgId,
+			workflowKey: buildRenewalWorkflowKey(policyId),
+			clientId: params.id,
+			description: `System completed renewal task for deleted policy ${existing.policyNumber}`,
 			performedById: locals.user.id
 		});
 		return { policySuccess: true };
@@ -446,6 +532,17 @@ export const actions: Actions = {
 			entityId: created.id,
 			action: 'created',
 			description: `Opened claim ${claimNumber}`,
+			performedById: locals.user.id
+		});
+
+		await syncClaimTask({
+			orgId,
+			clientId: params.id,
+			claimId: created.id,
+			claimNumber,
+			policyId: linkedPolicy?.id ?? null,
+			claimStatus: status,
+			description,
 			performedById: locals.user.id
 		});
 		return { claimSuccess: true };
@@ -505,6 +602,17 @@ export const actions: Actions = {
 			description: `Updated claim ${claimNumber}`,
 			performedById: locals.user.id
 		});
+
+		await syncClaimTask({
+			orgId,
+			clientId: params.id,
+			claimId,
+			claimNumber,
+			policyId: linkedPolicy?.id ?? null,
+			claimStatus: status,
+			description,
+			performedById: locals.user.id
+		});
 		return { claimSuccess: true };
 	},
 
@@ -531,6 +639,14 @@ export const actions: Actions = {
 			entityId: claimId,
 			action: 'deleted',
 			description: `Deleted claim ${existing.claimNumber}`,
+			performedById: locals.user.id
+		});
+
+		await completeWorkflowTask({
+			orgId,
+			workflowKey: buildClaimWorkflowKey(claimId),
+			clientId: params.id,
+			description: `System completed claim task for deleted claim ${existing.claimNumber}`,
 			performedById: locals.user.id
 		});
 		return { claimSuccess: true };

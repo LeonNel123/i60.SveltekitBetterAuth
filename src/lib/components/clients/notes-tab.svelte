@@ -9,6 +9,7 @@
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import StickyNote from '@lucide/svelte/icons/sticky-note';
+	import ClipboardList from '@lucide/svelte/icons/clipboard-list';
 
 	type Note = {
 		id: string;
@@ -120,6 +121,29 @@
 							<div class="flex items-start justify-between gap-2">
 								<p class="flex-1 whitespace-pre-wrap text-sm leading-relaxed">{n.content}</p>
 								<div class="flex shrink-0 items-center gap-1">
+									<form
+										method="POST"
+										action="?/promoteNote"
+										use:enhance={() => {
+											return async ({ result, update }) => {
+												await update();
+												if (result.type === 'success') {
+													toast.success('Note promoted to task');
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="noteId" value={n.id} />
+										<Button
+											type="submit"
+											variant="ghost"
+											size="icon"
+											class="h-7 w-7 text-muted-foreground hover:text-foreground"
+											title="Promote note to task"
+										>
+											<ClipboardList class="h-3.5 w-3.5" />
+										</Button>
+									</form>
 									<Button
 										variant="ghost"
 										size="icon"

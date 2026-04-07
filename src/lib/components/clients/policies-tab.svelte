@@ -180,6 +180,12 @@
 				{editingPolicy
 					? 'Update this insurance policy.'
 					: 'Add a new insurance policy for this client.'}
+				{#if !editingPolicy}
+					<span class="mt-1 block">
+						Renewal work will appear in the renewal board automatically when the policy nears
+						expiry.
+					</span>
+				{/if}
 			</Dialog.Description>
 		</Dialog.Header>
 

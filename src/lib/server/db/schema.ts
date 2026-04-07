@@ -197,6 +197,7 @@ export const task = pgTable('task', {
 	title: text('title').notNull(),
 	description: text('description'),
 	taskType: text('task_type').notNull().default('general'),
+	workflowKey: text('workflow_key'),
 	status: text('status').notNull().default('todo'),
 	priority: text('priority').notNull().default('medium'),
 	dueDate: timestamp('due_date'),
